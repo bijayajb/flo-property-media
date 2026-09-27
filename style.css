@@ -434,9 +434,9 @@ h2 em{
   display:flex;
   align-items:center;
 
-  gap:30px;
+  gap:38px;
 
-  margin-top:40px;
+  margin-top:58px;
 }
 
 .button{
@@ -478,7 +478,20 @@ h2 em{
 
   border-bottom:1px solid rgba(255,255,255,.5);
 
-  padding-bottom:7px;
+  padding-bottom:8px;
+
+  margin-top:6px;
+
+  transition:
+    color .3s ease,
+    border-color .3s ease,
+    letter-spacing .3s ease;
+}
+
+.text-link:hover{
+  color:#fff;
+  border-color:#fff;
+  letter-spacing:1.9px;
 }
 
 .hero-bottom{
@@ -1563,7 +1576,7 @@ h2 em{
 
   font-weight:400;
 
-  letter-spacing:1.2px;
+  letter-spacing:1.5px;
 
   text-transform:uppercase;
 
@@ -1579,7 +1592,7 @@ h2 em{
 .faq-item summary:hover{
   color:#777;
 
-  letter-spacing:1.5px;
+  letter-spacing:1.8px;
 }
 
 .faq-item summary::-webkit-details-marker{
@@ -1624,13 +1637,20 @@ h2 em{
 .faq-item p{
   max-width:760px;
 
-  padding:0 45px 26px 0;
+  padding:0 45px 28px 0;
+
+  font-family:var(--sans);
+
+  font-size:13px;
+  font-weight:400;
+
+  letter-spacing:.35px;
+
+  line-height:1.8;
 
   color:#666;
 
-  line-height:1.75;
-
-  font-size:14px;
+  text-transform:none;
 }
 
 
@@ -2147,7 +2167,11 @@ footer>a{
 
     align-items:flex-start;
 
-    gap:22px;
+    gap:30px;
+  }
+
+  .text-link{
+    margin-top:4px;
   }
 
   .hero-bottom{
