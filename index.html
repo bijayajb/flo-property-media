@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FLO Property Media</title>
+
+    <meta name="description"
+          content="FLO Property Media — professional property photography, video, drone, floorplans and 3D walkthroughs.">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111;
+            background: #f7f6f3;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 6%;
+            background: rgba(247,246,243,0.92);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 4px;
+        }
+
+        nav a {
+            color: #111;
+            text-decoration: none;
+            margin-left: 30px;
+            font-size: 14px;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 140px 6% 80px;
+            background:
+                linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.25)),
+                url("https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=2000&q=85")
+                center/cover;
+            color: white;
+        }
+
+        .hero-content {
+            max-width: 750px;
+        }
+
+        .hero p {
+            font-size: 14px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: clamp(48px, 8vw, 100px);
+            line-height: .95;
+            font-weight: 500;
+            margin-bottom: 30px;
+        }
+
+        .hero-description {
+            max-width: 520px;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 35px;
+            padding: 15px 28px;
+            background: white;
+            color: #111;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        section {
+            padding: 110px 6%;
+        }
+
+        .section-label {
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            opacity: .6;
+        }
+
+        .intro {
+            max-width: 850px;
+        }
+
+        .intro h2 {
+            font-size: clamp(35px, 5vw, 65px);
+            line-height: 1.05;
+            font-weight: 400;
+        }
+
+        .services {
+            background: #111;
+            color: white;
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1px;
+            margin-top: 60px;
+            background: #444;
+        }
+
+        .service {
+            background: #111;
+            padding: 50px 35px;
+            min-height: 220px;
+        }
+
+        .service h3 {
+            font-size: 28px;
+            font-weight: 400;
+            margin-bottom: 15px;
+        }
+
+        .service p {
+            color: #bbb;
+            line-height: 1.6;
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 50px;
+        }
+
+        .portfolio-item {
+            height: 500px;
+            overflow: hidden;
+        }
+
+        .portfolio-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .5s ease;
+        }
+
+        .portfolio-item:hover img {
+            transform: scale(1.04);
+        }
+
+        .contact {
+            background: #deddd8;
+            text-align: center;
+        }
+
+        .contact h2 {
+            font-size: clamp(40px, 6vw, 80px);
+            font-weight: 400;
+            margin-bottom: 25px;
+        }
+
+        .contact p {
+            font-size: 18px;
+            margin-bottom: 35px;
+        }
+
+        footer {
+            background: #111;
+            color: white;
+            padding: 35px 6%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        @media (max-width: 700px) {
+
+            nav {
+                padding: 20px;
+            }
+
+            nav div:last-child {
+                display: none;
+            }
+
+            .hero {
+                padding: 120px 25px 60px;
+            }
+
+            section {
+                padding: 80px 25px;
+            }
+
+            .service-grid,
+            .portfolio-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .portfolio-item {
+                height: 400px;
+            }
+
+            footer {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav>
+    <div class="logo">FLO</div>
+
+    <div>
+        <a href="#services">Services</a>
+        <a href="#portfolio">Portfolio</a>
+        <a href="#contact">Contact</a>
+    </div>
+</nav>
+
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <p>FLO Property Media</p>
+
+        <h1>
+            Property,<br>
+            presented<br>
+            beautifully.
+        </h1>
+
+        <div class="hero-description">
+            Professional photography, cinematic video, drone,
+            floorplans and 3D property experiences.
+        </div>
+
+        <a class="button" href="#contact">
+            Enquire Now
+        </a>
+
+    </div>
+
+</section>
+
+
+<section>
+
+    <div class="section-label">01 — About</div>
+
+    <div class="intro">
+
+        <h2>
+            We create visual experiences
+            that make properties stand out.
+        </h2>
+
+    </div>
+
+</section>
+
+
+<section class="services" id="services">
+
+    <div class="section-label">02 — Services</div>
+
+    <h2>What we do</h2>
+
+    <div class="service-grid">
+
+        <div class="service">
+            <h3>Photography</h3>
+            <p>
+                High-quality real estate photography
+                designed to showcase every space.
+            </p>
+        </div>
+
+        <div class="service">
+            <h3>Video</h3>
+            <p>
+                Cinematic property videos and social
+                media content that brings listings to life.
+            </p>
+        </div>
+
+        <div class="service">
+            <h3>Drone</h3>
+            <p>
+                Aerial photography and video that
+                captures the property and its surroundings.
+            </p>
+        </div>
+
+        <div class="service">
+            <h3>Floorplans</h3>
+            <p>
+                Clean and professional 2D and 3D
+                floorplans for property marketing.
+            </p>
+        </div>
+
+        <div class="service">
+            <h3>3D Walkthroughs</h3>
+            <p>
+                Immersive digital experiences allowing
+                potential buyers to explore properties remotely.
+            </p>
+        </div>
+
+        <div class="service">
+            <h3>Editing</h3>
+            <p>
+                Professional photo and video editing
+                tailored to your property's marketing style.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<section id="portfolio">
+
+    <div class="section-label">03 — Selected Work</div>
+
+    <h2>Portfolio</h2>
+
+    <div class="portfolio-grid">
+
+        <div class="portfolio-item">
+            <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=85">
+        </div>
+
+        <div class="portfolio-item">
+            <img src="https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=85">
+        </div>
+
+        <div class="portfolio-item">
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85">
+        </div>
+
+        <div class="portfolio-item">
+            <img src="https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1200&q=85">
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="contact" id="contact">
+
+    <div class="section-label">04 — Contact</div>
+
+    <h2>Let's work together.</h2>
+
+    <p>
+        Have a property ready to showcase?
+        Get in touch with FLO Property Media.
+    </p>
+
+    <a class="button" href="mailto:hello@flopropertymedia.com">
+        Get in Touch
+    </a>
+
+</section>
+
+
+<footer>
+
+    <div>© 2026 FLO Property Media</div>
+
+    <div>Melbourne, Australia</div>
+
+</footer>
+
+</body>
+</html>
