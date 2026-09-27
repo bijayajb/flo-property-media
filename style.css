@@ -206,8 +206,64 @@ footer{min-height:170px;padding:45px 8vw;background:#090909;color:#fff;display:f
 .footer-middle{display:flex;flex-direction:column;gap:8px;font-size:8px;letter-spacing:2px;color:#777}
 footer>a{font-size:9px;letter-spacing:2px;border-bottom:1px solid #555;padding-bottom:5px}
 
-/* NAV SCROLL */
-.nav.nav-hidden{transform:translateY(-100%)}
+/* =========================================================
+   NAVIGATION — ALWAYS VISIBLE
+   ========================================================= */
+
+.nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 86px;
+
+    padding: 0 5vw;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    z-index: 1000;
+
+    color: #fff;
+
+    transition:
+        background .35s ease,
+        backdrop-filter .35s ease,
+        box-shadow .35s ease;
+}
+
+/* Logo always stays visible */
+.logo {
+    display: flex;
+    align-items: center;
+
+    width: 125px;
+
+    flex-shrink: 0;
+
+    z-index: 1003;
+}
+
+.logo img {
+    width: 125px;
+    height: auto;
+
+    display: block;
+
+    object-fit: contain;
+}
+
+/* Slight glass effect after scrolling */
+.nav.scrolled {
+    background: rgba(8, 8, 8, .72);
+
+    backdrop-filter: blur(14px);
+
+    box-shadow:
+        0 1px 0 rgba(255,255,255,.08);
+}
 
 /* REVEAL / GLOW */
 .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
@@ -236,4 +292,94 @@ footer>a{font-size:9px;letter-spacing:2px;border-bottom:1px solid #555;padding-b
   .booking-form{padding:25px}.form-row{grid-template-columns:1fr;gap:0}
   .final-cta{min-height:500px}.final-cta-content{padding:25px}.final-cta-content h2{letter-spacing:-3px}
   footer{padding:40px 25px;flex-direction:column;align-items:flex-start;gap:30px}
+}
+
+/* =========================================================
+   FLO CONTENT + GLOW POLISH
+   ========================================================= */
+
+.hero-content {
+    position: relative;
+    z-index: 5;
+
+    opacity: 1 !important;
+    visibility: visible !important;
+
+    transform: none !important;
+}
+
+.hero h1,
+.hero .eyebrow,
+.hero-content > p,
+.hero-actions {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+
+/* Keep all important content visible */
+
+.intro-content,
+.service-card,
+.package,
+.project,
+.turnaround-table,
+.faq-list,
+.booking-intro,
+.booking-form,
+.final-cta-content {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+/* Premium subtle glow */
+
+.package.featured {
+    box-shadow:
+        0 0 35px rgba(217,183,122,.06),
+        0 25px 80px rgba(0,0,0,.15);
+}
+
+
+.booking-form {
+    box-shadow:
+        0 20px 70px rgba(0,0,0,.08);
+}
+
+
+.turnaround-table {
+    box-shadow:
+        0 0 45px rgba(217,183,122,.06),
+        0 25px 80px rgba(0,0,0,.35);
+}
+
+
+/* FAQ */
+
+.faq-item {
+    transition:
+        background .3s ease,
+        padding .3s ease;
+}
+
+.faq-item:hover {
+    background: rgba(0,0,0,.025);
+}
+
+
+/* Mobile logo */
+
+@media (max-width: 650px) {
+
+    .nav {
+        height: 70px;
+        padding: 0 25px;
+    }
+
+    .logo,
+    .logo img {
+        width: 105px;
+    }
+
 }
