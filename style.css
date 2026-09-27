@@ -2375,9 +2375,7 @@ footer>a{
   }
 }
 
-/* =========================================================
-   SERVICE LINKS — SAME AS EXPLORE SERVICES
-   ========================================================= */
+/* SERVICE LINKS — MATCH SECTION LINK EXACTLY */
 
 .service-card a {
   position: static !important;
@@ -2386,11 +2384,11 @@ footer>a{
 
   margin-top: 38px !important;
 
+  /* EXACT SAME TYPOGRAPHY AS .section-link */
   font-family: var(--sans) !important;
   font-size: 9px !important;
   font-weight: 400 !important;
   line-height: normal !important;
-
   text-transform: uppercase !important;
   letter-spacing: 1.7px !important;
 
