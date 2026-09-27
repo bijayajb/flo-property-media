@@ -2410,3 +2410,36 @@ footer>a{
   letter-spacing: 1.9px !important;
   transform: translateX(3px);
 }
+
+.service-card a {
+  position: static !important;
+  display: inline-block !important;
+
+  margin-top: 38px !important;
+
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 9px !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+
+  text-transform: uppercase !important;
+  letter-spacing: 1.7px !important;
+
+  color: #fff !important;
+
+  border-bottom: 1px solid rgba(255,255,255,.55) !important;
+  padding-bottom: 7px !important;
+
+  transition:
+    color .3s ease,
+    border-color .3s ease,
+    letter-spacing .3s ease,
+    transform .3s ease;
+}
+
+.service-card a:hover {
+  color: #fff !important;
+  border-color: #fff !important;
+  letter-spacing: 1.9px !important;
+  transform: translateX(3px);
+}
