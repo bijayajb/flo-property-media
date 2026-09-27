@@ -1,867 +1,350 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>FLO Property Media | Melbourne</title>
-
-    <meta name="description"
-          content="FLO Property Media — premium property photography, videography, drone, floorplans and 3D property media across Melbourne.">
-
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLO Property Media | Melbourne</title>
+<meta name="description" content="FLO Property Media — premium property photography, videography, drone, floorplans and social media content across Melbourne.">
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<!-- ================= NAVIGATION ================= -->
-
-<header class="nav">
-
-    <a href="#" class="logo">
+<header class="nav" id="siteNav">
+  <a href="#" class="logo" aria-label="FLO Property Media home">
     <img src="assets/logo.png" alt="FLO Property Media">
-    </a>
+  </a>
 
-    <nav class="desktop-nav">
+  <nav class="desktop-nav" aria-label="Main navigation">
     <a href="#services">Services</a>
     <a href="#packages">Packages</a>
     <a href="#work">Work</a>
+    <a href="#turnaround">Turnaround</a>
+    <a href="#faq">FAQ</a>
     <a href="#contact">Contact</a>
-</nav>
+  </nav>
 
-<a href="#contact" class="nav-button">
-    Get a Quote
-</a>
+  <a href="#contact" class="nav-button">Get a Quote</a>
 
-<button class="menu-toggle" id="menuToggle" aria-label="Open menu">
-    <span></span>
-    <span></span>
-    <span></span>
-</button>
+  <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
 
-<div class="mobile-menu" id="mobileMenu">
-
+  <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
     <a href="#services">Services</a>
     <a href="#packages">Packages</a>
     <a href="#work">Work</a>
+    <a href="#turnaround">Turnaround</a>
+    <a href="#faq">FAQ</a>
     <a href="#contact">Contact</a>
-
-    <a href="#contact" class="mobile-menu-cta">
-        Get a Quote →
-    </a>
-
-</div>
-
+    <a href="#contact" class="mobile-menu-cta">Get a Quote →</a>
+  </div>
 </header>
 
-
-<!-- ================= HERO ================= -->
-
 <main>
-
 <section class="hero">
-
-    <div class="hero-image"></div>
-
-    <div class="hero-overlay"></div>
-
-    <div class="hero-content">
-
-        <div class="eyebrow">
-            PROPERTY MEDIA · MELBOURNE
-        </div>
-
-        <h1>
-            Property,<br>
-            <em>beautifully</em><br>
-            presented.
-        </h1>
-
-        <p>
-            Photography, film, drone and floorplans
-            crafted to make every property stand out.
-        </p>
-
-        <div class="hero-actions">
-
-            <a href="#packages" class="button button-light">
-                Explore Packages
-            </a>
-
-            <a href="#work" class="text-link">
-                View our work →
-            </a>
-
-        </div>
-
+  <div class="hero-image"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content reveal">
+    <div class="eyebrow">PROPERTY MEDIA · MELBOURNE</div>
+    <h1>Property,<br><em>beautifully</em><br>presented.</h1>
+    <p>Photography, film, drone and floorplans crafted to make every property stand out.</p>
+    <div class="hero-actions">
+      <a href="#packages" class="button button-light">Explore Packages</a>
+      <a href="#work" class="text-link">View our work →</a>
     </div>
-
-    <div class="hero-bottom">
-
-        <span>SCROLL TO EXPLORE</span>
-
-        <span class="scroll-line"></span>
-
-        <span>01 / 05</span>
-
-    </div>
-
+  </div>
+  <div class="hero-bottom">
+    <span>SCROLL TO EXPLORE</span>
+    <span class="scroll-line"></span>
+    <span>01 / 05</span>
+  </div>
 </section>
 
-
-<!-- ================= INTRO ================= -->
-
-<section class="intro section">
-
-    <div class="section-number">
-        01
-    </div>
-
-    <div class="intro-content">
-
-        <div class="eyebrow dark">
-            WHAT WE DO
-        </div>
-
-        <h2>
-            We turn properties<br>
-            into <em>experiences.</em>
-        </h2>
-
-        <p>
-            From beautifully composed photography to cinematic
-            property films, aerial imagery and detailed floorplans,
-            FLO creates the visual content that helps properties
-            make a lasting first impression.
-        </p>
-
-    </div>
-
+<section class="intro section reveal">
+  <div class="section-number">01</div>
+  <div class="intro-content">
+    <div class="eyebrow dark">WHAT WE DO</div>
+    <h2>We turn properties<br>into <em>experiences.</em></h2>
+    <p>From beautifully composed photography to cinematic property films, aerial imagery and detailed floorplans, FLO creates the visual content that helps properties make a lasting first impression.</p>
+  </div>
 </section>
-
-
-<!-- ================= SERVICES ================= -->
 
 <section class="services section" id="services">
-
-    <div class="section-header">
-
-        <div>
-            <div class="eyebrow dark">
-                OUR SERVICES
-            </div>
-
-            <h2>
-                Everything your<br>
-                property needs.
-            </h2>
-        </div>
-
-        <span class="section-number">
-            02
-        </span>
-
+  <div class="section-header reveal">
+    <div>
+      <div class="eyebrow">OUR SERVICES</div>
+      <h2>Everything your<br>property needs.</h2>
+      <a href="#turnaround" class="section-link">Explore services →</a>
     </div>
+    <span class="section-number">02</span>
+  </div>
 
+  <div class="service-grid">
+    <article class="service-card reveal">
+      <span class="service-number">01</span>
+      <div class="service-icon" aria-hidden="true">
+        <svg viewBox="0 0 48 48"><rect x="9" y="12" width="30" height="24" rx="3"/><circle cx="24" cy="24" r="7"/><circle cx="24" cy="24" r="2"/><path d="M16 12l3-5h10l3 5"/></svg>
+      </div>
+      <h3>Photography</h3>
+      <p>HDR property photography designed to showcase architecture, interiors and detail.</p>
+      <a href="#packages">Explore service →</a>
+    </article>
 
-    <div class="service-grid">
+    <article class="service-card reveal">
+      <span class="service-number">02</span>
+      <div class="service-icon" aria-hidden="true">
+        <svg viewBox="0 0 48 48"><rect x="7" y="12" width="34" height="24" rx="3"/><path d="M20 18l11 6-11 6z"/></svg>
+      </div>
+      <h3>Videography</h3>
+      <p>Property walkthroughs, cinematic films and vertical social content designed to capture attention.</p>
+      <a href="#packages">Explore service →</a>
+    </article>
 
-        <article class="service-card">
+    <article class="service-card reveal">
+      <span class="service-number">03</span>
+      <div class="service-icon drone-svg" aria-hidden="true">
+        <svg viewBox="0 0 56 40"><circle cx="12" cy="9" r="6"/><circle cx="44" cy="9" r="6"/><circle cx="12" cy="31" r="6"/><circle cx="44" cy="31" r="6"/><rect x="20" y="14" width="16" height="12" rx="3"/><path d="M18 14L12 9M38 14l6-5M18 26l-6 5M38 26l6 5"/></svg>
+      </div>
+      <h3>Drone</h3>
+      <p>Aerial photography and videography that reveals the property and its surroundings.</p>
+      <a href="#packages">Explore service →</a>
+    </article>
 
-            <span class="service-number">01</span>
-
-            <div class="service-icon">✦</div>
-
-            <h3>
-                Photography
-            </h3>
-
-            <p>
-                HDR property photography designed
-                to showcase architecture, interiors
-                and detail.
-            </p>
-
-            <a href="#packages">
-                Explore service →
-            </a>
-
-        </article>
-
-
-        <article class="service-card">
-
-            <span class="service-number">02</span>
-
-            <div class="service-icon">◉</div>
-
-            <h3>
-                Videography
-            </h3>
-
-            <p>
-                Cinematic property films and vertical
-                social content designed to capture
-                attention.
-            </p>
-
-            <a href="#packages">
-                Explore service →
-            </a>
-
-        </article>
-
-
-        <article class="service-card">
-
-            <span class="service-number">03</span>
-
-            <div class="service-icon">✈</div>
-
-            <h3>
-                Drone
-            </h3>
-
-            <p>
-                Aerial photography and videography
-                that reveals the property and its
-                surroundings.
-            </p>
-
-            <a href="#packages">
-                Explore service →
-            </a>
-
-        </article>
-
-
-        <article class="service-card">
-
-            <span class="service-number">04</span>
-
-            <div class="service-icon">□</div>
-
-            <h3>
-                Floorplans
-            </h3>
-
-            <p>
-                Clean and professional 2D and 3D
-                floorplans that help buyers understand
-                the space.
-            </p>
-
-            <a href="#contact">
-                Request floorplan →
-            </a>
-
-        </article>
-
-    </div>
-
+    <article class="service-card reveal">
+      <span class="service-number">04</span>
+      <div class="service-icon" aria-hidden="true">
+        <svg viewBox="0 0 48 48"><path d="M8 36V18l16-10 16 10v18z"/><path d="M8 18l16 10 16-10M24 28v8"/></svg>
+      </div>
+      <h3>Floorplans</h3>
+      <p>Clean and professional 2D and 3D floorplans that help buyers understand the space.</p>
+      <a href="#contact">Request floorplan →</a>
+    </article>
+  </div>
 </section>
-
-
-<!-- ================= FEATURE ================= -->
 
 <section class="feature">
-
-    <div class="feature-image"></div>
-
-    <div class="feature-content">
-
-        <div class="eyebrow">
-            THE FLO APPROACH
-        </div>
-
-        <h2>
-            Details matter.
-            <em>First impressions matter more.</em>
-        </h2>
-
-        <p>
-            Every image, frame and detail is created with
-            one purpose — presenting your property at its
-            absolute best.
-        </p>
-
-        <a href="#contact" class="button button-light">
-            Work with FLO
-        </a>
-
-    </div>
-
+  <div class="feature-image"></div>
+  <div class="feature-content reveal">
+    <div class="eyebrow">THE FLO APPROACH</div>
+    <h2>Details matter.<br><em>First impressions matter more.</em></h2>
+    <p>Every image, frame and detail is created with one purpose — presenting your property at its absolute best.</p>
+    <a href="#contact" class="button button-light">Work with FLO</a>
+  </div>
 </section>
-
-
-<!-- ================= PACKAGES ================= -->
 
 <section class="packages section" id="packages">
-
-    <div class="section-header">
-
-        <div>
-
-            <div class="eyebrow dark">
-                PACKAGES
-            </div>
-
-            <h2>
-                Choose your<br>
-                <em>media package.</em>
-            </h2>
-
-        </div>
-
-        <span class="section-number">
-            03
-        </span>
-
+  <div class="section-header reveal">
+    <div>
+      <div class="eyebrow dark">PACKAGES</div>
+      <h2>Choose your<br><em>media package.</em></h2>
     </div>
+    <span class="section-number">03</span>
+  </div>
 
+  <div class="package-grid">
+    <article class="package reveal">
+      <div class="package-top"><span>PACKAGE 01</span><h3>Photography</h3></div>
+      <div class="price"><sup>$</sup>150<small>+ GST</small></div>
+      <ul>
+        <li>20 × HDR edited property photos</li>
+        <li>Drone photography</li>
+      </ul>
+      <a href="#contact" class="package-button" data-package="Photography · $150 + GST">Select package</a>
+    </article>
 
-    <div class="package-grid">
+    <article class="package featured reveal">
+      <div class="package-badge">MOST POPULAR</div>
+      <div class="package-top"><span>PACKAGE 02</span><h3>Mixed Media</h3></div>
+      <div class="price"><sup>$</sup>450<small>+ GST</small></div>
+      <ul>
+        <li>25 × HDR edited property photos</li>
+        <li>Drone photography &amp; videography</li>
+        <li>1 × vertical property showcase</li>
+      </ul>
+      <a href="#contact" class="package-button" data-package="Mixed Media · $450 + GST">Select package</a>
+    </article>
 
-
-        <!-- PACKAGE 1 -->
-
-        <article class="package">
-
-            <div class="package-top">
-
-                <span>
-                    PACKAGE 01
-                </span>
-
-                <h3>
-                    Photography
-                </h3>
-
-            </div>
-
-            <div class="price">
-                <sup>$</sup>150
-                <small>+ GST</small>
-            </div>
-
-            <ul>
-
-                <li>
-                    20 × HDR edited property photos
-                </li>
-
-                <li>
-                    Drone photography
-                </li>
-
-            </ul>
-
-            <a href="#contact" class="package-button">
-                Select package
-            </a>
-
-        </article>
-
-
-        <!-- PACKAGE 2 -->
-
-        <article class="package featured">
-
-            <div class="package-badge">
-                MOST POPULAR
-            </div>
-
-            <div class="package-top">
-
-                <span>
-                    PACKAGE 02
-                </span>
-
-                <h3>
-                    Mixed Media
-                </h3>
-
-            </div>
-
-            <div class="price">
-                <sup>$</sup>450
-                <small>+ GST</small>
-            </div>
-
-            <ul>
-
-                <li>
-                    25 × HDR edited property photos
-                </li>
-
-                <li>
-                    Drone photography & videography
-                </li>
-
-                <li>
-                    1 × vertical property showcase
-                </li>
-
-            </ul>
-
-            <a href="#contact" class="package-button">
-                Select package
-            </a>
-
-        </article>
-
-
-        <!-- PACKAGE 3 -->
-
-        <article class="package">
-
-            <div class="package-top">
-
-                <span>
-                    PACKAGE 03
-                </span>
-
-                <h3>
-                    Premium Media
-                </h3>
-
-            </div>
-
-            <div class="price">
-                <sup>$</sup>700
-                <small>+ GST</small>
-            </div>
-
-            <ul>
-
-                <li>
-                    30 × HDR edited property photos
-                </li>
-
-                <li>
-                    Drone photography & videography
-                </li>
-
-                <li>
-                    1 × vertical property showcase
-                </li>
-
-                <li>
-                    1 × landscape cinematic property showcase
-                </li>
-
-                <li>
-                    1 × agent branding walkthrough video
-                </li>
-
-            </ul>
-
-            <a href="#contact" class="package-button">
-                Select package
-            </a>
-
-        </article>
-
-    </div>
-
+    <article class="package reveal">
+      <div class="package-top"><span>PACKAGE 03</span><h3>Premium Media</h3></div>
+      <div class="price"><sup>$</sup>700<small>+ GST</small></div>
+      <ul>
+        <li>30 × HDR edited property photos</li>
+        <li>Drone photography &amp; videography</li>
+        <li>1 × vertical property showcase</li>
+        <li>1 × landscape cinematic property showcase</li>
+        <li>1 × agent branding walkthrough video</li>
+      </ul>
+      <a href="#contact" class="package-button" data-package="Premium Media · $700 + GST">Select package</a>
+    </article>
+  </div>
 </section>
-
-
-<!-- ================= WORK ================= -->
 
 <section class="work section" id="work">
-
-    <div class="section-header">
-
-        <div>
-
-            <div class="eyebrow dark">
-                RECENT PROJECTS
-            </div>
-
-            <h2>
-                A glimpse of<br>
-                <em>our work.</em>
-            </h2>
-
-        </div>
-
-        <span class="section-number">
-            04
-        </span>
-
+  <div class="section-header reveal">
+    <div>
+      <div class="eyebrow dark">RECENT PROJECTS</div>
+      <h2>A glimpse of<br><em>our work.</em></h2>
     </div>
+    <span class="section-number">04</span>
+  </div>
 
-
-    <div class="project-grid">
-
-        <article class="project project-large">
-
-            <div class="project-image image-one"></div>
-
-            <div class="project-info">
-
-                <span>
-                    MELBOURNE · RESIDENTIAL
-                </span>
-
-                <h3>
-                    Project One
-                </h3>
-
-            </div>
-
-        </article>
-
-
-        <article class="project">
-
-            <div class="project-image image-two"></div>
-
-            <div class="project-info">
-
-                <span>
-                    VICTORIA · RESIDENTIAL
-                </span>
-
-                <h3>
-                    Project Two
-                </h3>
-
-            </div>
-
-        </article>
-
-
-        <article class="project">
-
-            <div class="project-image image-three"></div>
-
-            <div class="project-info">
-
-                <span>
-                    MELBOURNE · PROPERTY
-                </span>
-
-                <h3>
-                    Project Three
-                </h3>
-
-            </div>
-
-        </article>
-
-
-        <article class="project project-wide">
-
-            <div class="project-image image-four"></div>
-
-            <div class="project-info">
-
-                <span>
-                    VICTORIA · ARCHITECTURE
-                </span>
-
-                <h3>
-                    Project Four
-                </h3>
-
-            </div>
-
-        </article>
-
-    </div>
-
+  <div class="project-grid">
+    <article class="project project-large reveal"><div class="project-image image-one"></div><div class="project-info"><span>MELBOURNE · RESIDENTIAL</span><h3>Project One</h3></div></article>
+    <article class="project reveal"><div class="project-image image-two"></div><div class="project-info"><span>VICTORIA · RESIDENTIAL</span><h3>Project Two</h3></div></article>
+    <article class="project reveal"><div class="project-image image-three"></div><div class="project-info"><span>MELBOURNE · PROPERTY</span><h3>Project Three</h3></div></article>
+    <article class="project project-wide reveal"><div class="project-image image-four"></div><div class="project-info"><span>VICTORIA · ARCHITECTURE</span><h3>Project Four</h3></div></article>
+  </div>
 </section>
 
+<section class="turnaround section" id="turnaround">
+  <div class="turnaround-heading reveal">
+    <div class="eyebrow dark">TURNAROUND</div>
+    <h2>Fast, reliable <em>delivery.</em></h2>
+    <p>We understand the pace of real estate. Here's a guide to our typical turnaround times for each service.</p>
+  </div>
+  <div class="turnaround-table glow-card reveal">
+    <div class="turnaround-row table-head"><span>Service</span><span>Typical turnaround</span></div>
+    <div class="turnaround-row"><span>📸 HDR property photos</span><strong>6–24 hours</strong></div>
+    <div class="turnaround-row"><span>🏠 2D floor plan</span><strong>~24 hours</strong></div>
+    <div class="turnaround-row"><span>🗺️ 3D floor plan</span><strong>~24–48 hours</strong></div>
+    <div class="turnaround-row"><span>🚁 Drone photos</span><strong>~24 hours</strong></div>
+    <div class="turnaround-row"><span>🎥 Property walkthrough video</span><strong>36–48 hours</strong></div>
+    <div class="turnaround-row"><span>🎬 Cinematic/high-end video</span><strong>2–3 days</strong></div>
+    <div class="turnaround-row"><span>📱 Instagram/Reel</span><strong>2–4 days</strong></div>
+    <div class="turnaround-row"><span>🌅 Twilight/day-to-dusk</span><strong>24–48 hours</strong></div>
+  </div>
+</section>
 
-<!-- ================= BOOKING ================= -->
+<section class="faq section" id="faq">
+  <div class="section-header reveal">
+    <div>
+      <div class="eyebrow dark">FAQ</div>
+      <h2>Your questions, <em>answered.</em></h2>
+      <p class="faq-intro">Here are some of the most common questions we get from real estate agents. If you can't find what you're looking for, feel free to get in touch.</p>
+    </div>
+    <span class="section-number">05</span>
+  </div>
+
+  <div class="faq-list">
+    <details class="faq-item reveal"><summary>How do I book a property shoot?</summary><p>Simply fill out our booking form or get in touch with us directly. We’ll confirm the date, time, property details and services required.</p></details>
+    <details class="faq-item reveal"><summary>How quickly will I receive my photos and videos?</summary><p>Our standard turnaround is 24–48 hours, depending on the services booked. Larger or more complex projects may require additional time.</p></details>
+    <details class="faq-item reveal"><summary>Do you offer drone photography and video?</summary><p>Yes. Drone photography and aerial video are available as part of selected packages or as an add-on, subject to weather and CASA requirements.</p></details>
+    <details class="faq-item reveal"><summary>Do you provide 2D and 3D floor plans?</summary><p>Yes. We offer 2D and 3D floor plans as additional services.</p></details>
+    <details class="faq-item reveal"><summary>Do you offer day-to-dusk editing?</summary><p>Yes. Selected exterior images can be transformed into realistic day-to-dusk images to create a warm evening presentation.</p></details>
+    <details class="faq-item reveal"><summary>What happens if the weather is bad?</summary><p>For outdoor photography and drone services, we may recommend rescheduling if weather conditions affect safety or image quality. We’ll work with you to arrange another suitable time.</p></details>
+    <details class="faq-item reveal"><summary>Can I request specific photos or shots?</summary><p>Absolutely. If there are particular features, rooms, angles or details you want highlighted, let us know before or during the shoot.</p></details>
+    <details class="faq-item reveal"><summary>How will I receive my photos and videos?</summary><p>Your completed media will be delivered digitally through an online gallery/download link.</p></details>
+    <details class="faq-item reveal"><summary>Do I need to prepare the property before the shoot?</summary><p>Yes. We recommend decluttering, cleaning surfaces, opening curtains/blinds and turning on lights before we arrive. A prepared property photographs significantly better.</p></details>
+    <details class="faq-item reveal"><summary>Can you photograph occupied properties?</summary><p>Yes. We can work around occupants, pets and existing schedules. We recommend having the property ready before the scheduled arrival time.</p></details>
+    <details class="faq-item reveal"><summary>Can I use the photos and videos for social media?</summary><p>Yes. Your delivered media can be used for marketing the property across relevant digital platforms, subject to the agreed usage terms.</p></details>
+    <details class="faq-item reveal"><summary>What payment methods do you accept?</summary><p>We accept the payment methods listed on our booking page. Payment requirements will be confirmed when your booking is confirmed.</p></details>
+    <details class="faq-item reveal"><summary>Do you offer custom packages?</summary><p>Yes. If you need a combination of photography, video, drone, floor plans or social media content that isn’t included in our standard packages, contact us and we can create a custom package for your property.</p></details>
+  </div>
+</section>
 
 <section class="booking section" id="contact">
+  <div class="booking-intro reveal">
+    <div class="eyebrow dark">GET IN TOUCH</div>
+    <h2>Let's create something <em>beautiful.</em></h2>
+    <p>Tell us about your property and the media you need. We'll get back to you with availability and next steps.</p>
+    <div class="contact-details">
+      <div><span>INSTAGRAM</span><a href="https://instagram.com/flopropertymedia" target="_blank" rel="noopener">@flopropertymedia</a></div>
+      <div><span>EMAIL</span><a href="mailto:flopropertymedia@gmail.com">flopropertymedia@gmail.com</a></div>
+      <div><span>PHONE</span><a href="tel:+61489199315">0489 199 315</a></div>
+      <div><span>SERVICE AREA</span><strong>Melbourne, Australia · 25 km radius</strong></div>
+    </div>
+  </div>
 
-    <div class="booking-intro">
+  <form class="booking-form glow-card reveal" id="bookingForm" action="https://formsubmit.co/flopropertymedia@gmail.com" method="POST">
+    <input type="hidden" name="_subject" value="New FLO Property Media booking enquiry">
+    <input type="hidden" name="_template" value="table">
+    <input type="hidden" name="_captcha" value="false">
+    <input type="hidden" name="_next" value="https://bijayajb.github.io/flo-property-media/#contact">
+    <input type="hidden" name="service_area_status" id="serviceAreaStatus" value="Pending address check">
+    <input type="hidden" name="estimated_travel_surcharge" id="travelSurcharge" value="$0">
 
-        <div class="eyebrow dark">
-            GET IN TOUCH
-        </div>
-
-        <h2>
-            Let's create something
-            <em>beautiful.</em>
-        </h2>
-
-        <p>
-            Tell us about your property and the media
-            you need. We'll get back to you with
-            availability and next steps.
-        </p>
-
-
-        <div class="contact-details">
-
-            <div>
-                <span>INSTAGRAM</span>
-                <a href="https://instagram.com/flopropertymedia"
-                   target="_blank">
-                    @flopropertymedia
-                </a>
-            </div>
-
-            <div>
-                <span>EMAIL</span>
-                <a href="mailto:flopropertymedia@gmail.com">
-                    flopropertymedia@gmail.com
-                </a>
-            </div>
-
-            <div>
-                <span>PHONE</span>
-                <a href="tel:+61489199315">
-                    0489 199 315
-                </a>
-            </div>
-
-        </div>
-
+    <div class="form-row">
+      <div class="form-group"><label for="name">NAME *</label><input id="name" name="name" type="text" placeholder="Your full name" required></div>
+      <div class="form-group"><label for="email">EMAIL *</label><input id="email" name="email" type="email" placeholder="you@email.com" required></div>
     </div>
 
-
-    <!-- FORM -->
-
-    <form class="booking-form">
-
-        <div class="form-row">
-
-            <div class="form-group">
-
-                <label>
-                    NAME *
-                </label>
-
-                <input
-                    type="text"
-                    placeholder="Your full name"
-                    required>
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label>
-                    EMAIL *
-                </label>
-
-                <input
-                    type="email"
-                    placeholder="you@email.com"
-                    required>
-
-            </div>
-
-        </div>
-
-
-        <div class="form-row">
-
-            <div class="form-group">
-
-                <label>
-                    MOBILE *
-                </label>
-
-                <input
-                    type="tel"
-                    placeholder="04XX XXX XXX"
-                    required>
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label>
-                    PROPERTY ADDRESS *
-                </label>
-
-                <input
-                    type="text"
-                    placeholder="Property address"
-                    required>
-
-            </div>
-
-        </div>
-
-
-        <div class="form-group">
-
-            <label>
-                SERVICES
-            </label>
-
-            <div class="service-options">
-
-                <label class="option">
-                    <input type="checkbox">
-                    <span>Photography</span>
-                </label>
-
-                <label class="option">
-                    <input type="checkbox">
-                    <span>Video</span>
-                </label>
-
-                <label class="option">
-                    <input type="checkbox">
-                    <span>Drone</span>
-                </label>
-
-                <label class="option">
-                    <input type="checkbox">
-                    <span>2D Floorplan</span>
-                </label>
-
-                <label class="option">
-                    <input type="checkbox">
-                    <span>3D Floorplan</span>
-                </label>
-
-            </div>
-
-        </div>
-
-
-        <div class="form-row">
-
-            <div class="form-group">
-
-                <label>
-                    PREFERRED DATE
-                </label>
-
-                <input
-                    type="date">
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label>
-                    PREFERRED TIME
-                </label>
-
-                <select>
-
-                    <option value="">
-                        Select a time
-                    </option>
-
-                    <option>
-                        Morning · 8am–11am
-                    </option>
-
-                    <option>
-                        Midday · 11am–2pm
-                    </option>
-
-                    <option>
-                        Afternoon · 2pm–5pm
-                    </option>
-
-                </select>
-
-            </div>
-
-        </div>
-
-
-        <div class="form-group">
-
-            <label>
-                PACKAGE
-            </label>
-
-            <select>
-
-                <option>
-                    I'm not sure yet
-                </option>
-
-                <option>
-                    Photography · $150 + GST
-                </option>
-
-                <option>
-                    Mixed Media · $450 + GST
-                </option>
-
-                <option>
-                    Premium Media · $700 + GST
-                </option>
-
-            </select>
-
-        </div>
-
-
-        <div class="form-group">
-
-            <label>
-                MESSAGE
-            </label>
-
-            <textarea
-                rows="5"
-                placeholder="Tell us about your property..."></textarea>
-
-        </div>
-
-
-        <button
-            type="submit"
-            class="submit-button">
-
-            Request a Quote →
-
-        </button>
-
-    </form>
-
+    <div class="form-row">
+      <div class="form-group"><label for="mobile">MOBILE *</label><input id="mobile" name="mobile" type="tel" placeholder="04XX XXX XXX" required></div>
+      <div class="form-group"><label for="address">PROPERTY ADDRESS *</label><input id="address" name="property_address" type="text" placeholder="12 Smith St, Richmond VIC" required></div>
+    </div>
+
+    <div class="address-note" id="addressNote">Melbourne, Australia bookings only. Addresses beyond 25 km may incur a $1 travel surcharge.</div>
+
+    <div class="form-group">
+      <label>SERVICES</label>
+      <div class="service-options">
+        <label class="option"><input name="services" value="Photography" type="checkbox"><span>Photography</span></label>
+        <label class="option"><input name="services" value="Video" type="checkbox"><span>Video</span></label>
+        <label class="option"><input name="services" value="Drone" type="checkbox"><span>Drone</span></label>
+        <label class="option"><input name="services" value="2D Floorplan" type="checkbox"><span>2D Floorplan</span></label>
+        <label class="option"><input name="services" value="3D Floorplan" type="checkbox"><span>3D Floorplan</span></label>
+        <label class="option"><input name="services" value="Instagram/Reel" type="checkbox"><span>Instagram / Reel</span></label>
+        <label class="option"><input name="services" value="Twilight" type="checkbox"><span>Twilight</span></label>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group"><label for="date">PREFERRED DATE *</label><input id="date" name="preferred_date" type="date" required></div>
+      <div class="form-group"><label for="time">PREFERRED TIME *</label>
+        <select id="time" name="preferred_time" required>
+          <option value="">Select a time</option>
+          <option>Morning · 8am–11am</option>
+          <option>Midday · 11am–2pm</option>
+          <option>Afternoon · 2pm–5pm</option>
+          <option>Evening · 5pm–7pm</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group"><label for="package">PACKAGE</label>
+      <select id="package" name="package">
+        <option value="I'm not sure yet">I'm not sure yet</option>
+        <option value="Photography · $150 + GST">Photography · $150 + GST</option>
+        <option value="Mixed Media · $450 + GST">Mixed Media · $450 + GST</option>
+        <option value="Premium Media · $700 + GST">Premium Media · $700 + GST</option>
+        <option value="Custom package">Custom package</option>
+      </select>
+    </div>
+
+    <div class="form-group"><label for="payment">PAYMENT METHOD</label>
+      <select id="payment" name="payment_method">
+        <option value="">Select a payment method</option>
+        <option>Bank transfer</option>
+        <option>Card</option>
+        <option>Other / discuss with FLO</option>
+      </select>
+    </div>
+
+    <div class="form-group"><label for="message">MESSAGE</label><textarea id="message" name="message" rows="5" placeholder="Tell us about your property..."></textarea></div>
+
+    <div class="form-status" id="formStatus" role="status"></div>
+    <button type="submit" class="submit-button">Request a Quote →</button>
+    <p class="form-footnote">By submitting, your enquiry will be sent to FLO Property Media for confirmation.</p>
+  </form>
 </section>
 
-
-<!-- ================= FOOTER ================= -->
+<section class="final-cta">
+  <div class="final-cta-overlay"></div>
+  <div class="final-cta-content reveal">
+    <div class="eyebrow">READY TO BOOK?</div>
+    <h2>Let's bring your property to <em>life.</em></h2>
+    <p>Fill out our booking form and we’ll be in touch to confirm your shoot date, services and property details.</p>
+    <a href="#contact" class="button button-light">Get a Quote →</a>
+  </div>
+</section>
 
 <footer>
-
-    <div class="footer-logo">
-        FLO<span>.</span>
-    </div>
-
-    <div class="footer-middle">
-
-        <span>
-            PROPERTY MEDIA
-        </span>
-
-        <span>
-            MELBOURNE, AUSTRALIA
-        </span>
-
-    </div>
-
-    <a href="#contact">
-        GET IN TOUCH →
-    </a>
-
+  <div class="footer-logo"><img src="assets/logo.png" alt="FLO Media"></div>
+  <div class="footer-middle"><span>PROPERTY MEDIA</span><span>MELBOURNE, AUSTRALIA</span></div>
+  <a href="#contact">GET IN TOUCH →</a>
 </footer>
-
-
 </main>
 
 <script src="script.js"></script>
-
 </body>
 </html>
