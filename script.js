@@ -1,0 +1,742 @@
+/* =========================================================
+   FLO PROPERTY MEDIA
+   SAFE WEBSITE JAVASCRIPT
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+
+    /* =====================================================
+       MOBILE MENU
+       ===================================================== */
+
+    const menuToggle = document.getElementById("menuToggle");
+    const mobileMenu = document.getElementById("mobileMenu");
+
+    if (menuToggle && mobileMenu) {
+
+        menuToggle.addEventListener("click", function () {
+
+            const isOpen =
+                mobileMenu.classList.toggle("open");
+
+            menuToggle.classList.toggle(
+                "active",
+                isOpen
+            );
+
+            menuToggle.setAttribute(
+                "aria-label",
+                isOpen ? "Close menu" : "Open menu"
+            );
+
+        });
+
+
+        const mobileLinks =
+            mobileMenu.querySelectorAll("a");
+
+        mobileLinks.forEach(function (link) {
+
+            link.addEventListener("click", function () {
+
+                mobileMenu.classList.remove("open");
+
+                menuToggle.classList.remove("active");
+
+                menuToggle.setAttribute(
+                    "aria-label",
+                    "Open menu"
+                );
+
+            });
+
+        });
+
+    }
+
+
+    /* =====================================================
+       CLOSE MENU WITH ESCAPE
+       ===================================================== */
+
+    document.addEventListener("keydown", function (event) {
+
+        if (event.key !== "Escape") {
+            return;
+        }
+
+        if (mobileMenu) {
+            mobileMenu.classList.remove("open");
+        }
+
+        if (menuToggle) {
+            menuToggle.classList.remove("active");
+
+            menuToggle.setAttribute(
+                "aria-label",
+                "Open menu"
+            );
+        }
+
+    });
+
+
+    /* =====================================================
+       NAVIGATION HIDE / SHOW
+       ===================================================== */
+
+    const nav =
+        document.querySelector(".nav");
+
+    let previousScroll =
+        window.scrollY;
+
+
+    window.addEventListener(
+        "scroll",
+        function () {
+
+            if (!nav) {
+                return;
+            }
+
+            const currentScroll =
+                window.scrollY;
+
+
+            if (currentScroll <= 30) {
+
+                nav.classList.remove(
+                    "nav-hidden"
+                );
+
+            }
+            else if (
+                currentScroll >
+                previousScroll + 8
+            ) {
+
+                nav.classList.add(
+                    "nav-hidden"
+                );
+
+            }
+            else if (
+                currentScroll <
+                previousScroll - 8
+            ) {
+
+                nav.classList.remove(
+                    "nav-hidden"
+                );
+
+            }
+
+
+            previousScroll =
+                currentScroll;
+
+        },
+        {
+            passive: true
+        }
+    );
+
+
+    /* =====================================================
+       SMOOTH SCROLL
+       ===================================================== */
+
+    document
+        .querySelectorAll('a[href^="#"]')
+        .forEach(function (link) {
+
+            link.addEventListener(
+                "click",
+                function (event) {
+
+                    const targetID =
+                        link.getAttribute("href");
+
+
+                    if (
+                        !targetID ||
+                        targetID === "#"
+                    ) {
+                        return;
+                    }
+
+
+                    const target =
+                        document.querySelector(
+                            targetID
+                        );
+
+
+                    if (!target) {
+                        return;
+                    }
+
+
+                    event.preventDefault();
+
+
+                    const navHeight =
+                        nav
+                            ? nav.offsetHeight
+                            : 0;
+
+
+                    const position =
+                        target.getBoundingClientRect()
+                            .top
+                        +
+                        window.scrollY
+                        -
+                        navHeight
+                        -
+                        15;
+
+
+                    window.scrollTo({
+
+                        top:
+                            Math.max(
+                                position,
+                                0
+                            ),
+
+                        behavior:
+                            "smooth"
+
+                    });
+
+                }
+            );
+
+        });
+
+
+    /* =====================================================
+       FAQ ACCORDION
+       ===================================================== */
+
+    const faqItems =
+        document.querySelectorAll(
+            ".faq-item"
+        );
+
+
+    faqItems.forEach(function (item) {
+
+        const question =
+            item.querySelector(
+                ".faq-question"
+            );
+
+
+        if (!question) {
+            return;
+        }
+
+
+        question.addEventListener(
+            "click",
+            function () {
+
+                const wasOpen =
+                    item.classList.contains(
+                        "open"
+                    );
+
+
+                faqItems.forEach(
+                    function (otherItem) {
+
+                        otherItem.classList.remove(
+                            "open"
+                        );
+
+
+                        const otherQuestion =
+                            otherItem.querySelector(
+                                ".faq-question"
+                            );
+
+
+                        if (otherQuestion) {
+
+                            otherQuestion.setAttribute(
+                                "aria-expanded",
+                                "false"
+                            );
+
+                        }
+
+                    }
+                );
+
+
+                if (!wasOpen) {
+
+                    item.classList.add(
+                        "open"
+                    );
+
+
+                    question.setAttribute(
+                        "aria-expanded",
+                        "true"
+                    );
+
+                }
+
+            }
+        );
+
+    });
+
+
+    /* =====================================================
+       FUTURE DATE ONLY
+       ===================================================== */
+
+    const dateInput =
+        document.querySelector(
+            'input[name="preferred_date"]'
+        );
+
+
+    if (dateInput) {
+
+        const today =
+            new Date();
+
+
+        const tomorrow =
+            new Date(
+
+                today.getFullYear(),
+
+                today.getMonth(),
+
+                today.getDate() + 1
+
+            );
+
+
+        const year =
+            tomorrow.getFullYear();
+
+
+        const month =
+            String(
+                tomorrow.getMonth() + 1
+            ).padStart(2, "0");
+
+
+        const day =
+            String(
+                tomorrow.getDate()
+            ).padStart(2, "0");
+
+
+        dateInput.min =
+            `${year}-${month}-${day}`;
+
+
+        dateInput.addEventListener(
+            "change",
+            function () {
+
+                if (!dateInput.value) {
+                    return;
+                }
+
+
+                const selected =
+                    new Date(
+                        dateInput.value
+                        + "T00:00:00"
+                    );
+
+
+                const todayOnly =
+                    new Date(
+
+                        today.getFullYear(),
+
+                        today.getMonth(),
+
+                        today.getDate()
+
+                    );
+
+
+                if (selected <= todayOnly) {
+
+                    dateInput.value = "";
+
+                    alert(
+                        "Please select a future date."
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       PACKAGE SELECTION
+       ===================================================== */
+
+    const packageSelect =
+        document.querySelector(
+            'select[name="package"]'
+        );
+
+
+    const packageButtons =
+        document.querySelectorAll(
+            ".package-button[data-package]"
+        );
+
+
+    packageButtons.forEach(
+        function (button) {
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    const packageName =
+                        button.dataset.package;
+
+
+                    if (
+                        packageSelect &&
+                        packageName
+                    ) {
+
+                        packageSelect.value =
+                            packageName;
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       BOOKING FORM VALIDATION
+       ===================================================== */
+
+    const form =
+        document.querySelector(
+            ".booking-form"
+        );
+
+
+    if (form) {
+
+        form.addEventListener(
+            "submit",
+            function (event) {
+
+                let valid = true;
+
+
+                const requiredFields =
+                    form.querySelectorAll(
+                        "[required]"
+                    );
+
+
+                requiredFields.forEach(
+                    function (field) {
+
+                        field.classList.remove(
+                            "field-error"
+                        );
+
+
+                        if (
+                            !field.value.trim()
+                        ) {
+
+                            field.classList.add(
+                                "field-error"
+                            );
+
+                            valid = false;
+
+                        }
+
+                    }
+                );
+
+
+                if (!valid) {
+
+                    event.preventDefault();
+
+
+                    alert(
+                        "Please complete all required fields."
+                    );
+
+
+                    return;
+
+                }
+
+
+                /* Future-date check */
+
+                if (
+                    dateInput &&
+                    dateInput.value
+                ) {
+
+                    const selected =
+                        new Date(
+                            dateInput.value
+                            + "T00:00:00"
+                        );
+
+
+                    const today =
+                        new Date();
+
+
+                    today.setHours(
+                        0,
+                        0,
+                        0,
+                        0
+                    );
+
+
+                    if (
+                        selected <= today
+                    ) {
+
+                        event.preventDefault();
+
+
+                        alert(
+                            "Please select a future booking date."
+                        );
+
+
+                        dateInput.focus();
+
+                        return;
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       ADDRESS SERVICE AREA NOTICE
+       ===================================================== */
+
+    const addressInput =
+        document.querySelector(
+            'input[name="property_address"]'
+        );
+
+
+    const travelNotice =
+        document.querySelector(
+            "#travelNotice"
+        );
+
+
+    if (
+        addressInput &&
+        travelNotice
+    ) {
+
+        addressInput.addEventListener(
+            "input",
+            function () {
+
+                const address =
+                    addressInput.value.trim();
+
+
+                if (!address) {
+
+                    travelNotice.classList.remove(
+                        "show"
+                    );
+
+                    return;
+
+                }
+
+
+                travelNotice.classList.add(
+                    "show"
+                );
+
+
+                travelNotice.textContent =
+                    "Melbourne service area. Properties beyond 25 km may incur a $1 travel surcharge.";
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       SUBTLE CARD GLOW
+       ===================================================== */
+
+    const glowCards =
+        document.querySelectorAll(
+            ".service-card, .package, .project-image, .booking-form"
+        );
+
+
+    if (
+        window.matchMedia(
+            "(pointer: fine)"
+        ).matches
+    ) {
+
+        glowCards.forEach(
+            function (card) {
+
+                card.addEventListener(
+                    "pointermove",
+                    function (event) {
+
+                        const rect =
+                            card.getBoundingClientRect();
+
+
+                        const x =
+                            (
+                                (event.clientX -
+                                rect.left)
+                                /
+                                rect.width
+                            ) * 100;
+
+
+                        const y =
+                            (
+                                (event.clientY -
+                                rect.top)
+                                /
+                                rect.height
+                            ) * 100;
+
+
+                        card.style.setProperty(
+                            "--mouse-x",
+                            `${x}%`
+                        );
+
+
+                        card.style.setProperty(
+                            "--mouse-y",
+                            `${y}%`
+                        );
+
+                    }
+                );
+
+
+                card.addEventListener(
+                    "pointerleave",
+                    function () {
+
+                        card.style.removeProperty(
+                            "--mouse-x"
+                        );
+
+
+                        card.style.removeProperty(
+                            "--mouse-y"
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       HERO PARALLAX
+       ===================================================== */
+
+    const heroImage =
+        document.querySelector(
+            ".hero-image"
+        );
+
+
+    if (
+        heroImage &&
+        window.matchMedia(
+            "(prefers-reduced-motion: no-preference)"
+        ).matches
+    ) {
+
+        window.addEventListener(
+            "scroll",
+            function () {
+
+                const scroll =
+                    window.scrollY;
+
+
+                if (
+                    scroll <
+                    window.innerHeight
+                ) {
+
+                    heroImage.style.transform =
+                        `scale(1.04) translateY(${scroll * 0.06}px)`;
+
+                }
+
+            },
+            {
+                passive: true
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       IMPORTANT:
+       NO AUTOMATIC .REVEAL CLASS IS ADDED HERE.
+       
+       This prevents your website text from disappearing
+       if an animation script fails.
+       ===================================================== */
+
+
+});
