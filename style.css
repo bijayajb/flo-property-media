@@ -742,8 +742,12 @@ h2 em{
 .service-card a{
   position:absolute;
 
-  bottom:50px;
+  bottom:48px;
   left:45px;
+
+  display:inline-block;
+
+  font-family:var(--sans);
 
   font-size:9px;
 
@@ -753,14 +757,23 @@ h2 em{
 
   border-bottom:1px solid #555;
 
-  padding-bottom:7px;
+  padding-bottom:8px;
 
-  transition:.3s;
+  transition:
+    color .3s ease,
+    border-color .3s ease,
+    letter-spacing .3s ease,
+    transform .3s ease;
 }
 
 .service-card a:hover{
   color:#fff;
+
   border-color:#fff;
+
+  letter-spacing:1.8px;
+
+  transform:translateX(3px);
 }
 
 
@@ -2212,7 +2225,7 @@ footer>a{
   .service-card a{
     left:25px;
 
-    bottom:45px;
+    bottom:42px;
   }
 
   .feature{
