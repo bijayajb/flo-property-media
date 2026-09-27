@@ -2410,3 +2410,8 @@ footer>a{
   letter-spacing: 1.9px !important;
   transform: translateX(3px);
 }
+
+.service-card a.section-link {
+  position: static !important;
+  margin-top: 40px !important;
+}
