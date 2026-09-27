@@ -742,8 +742,8 @@ h2 em{
 .service-card a{
   position:absolute;
 
-  bottom:48px;
   left:45px;
+  bottom:22px;
 
   display:inline-block;
 
@@ -2225,7 +2225,7 @@ footer>a{
   .service-card a{
     left:25px;
 
-    bottom:42px;
+    bottom:20px;
   }
 
   .feature{
