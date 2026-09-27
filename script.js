@@ -83,67 +83,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =====================================================
-       NAVIGATION HIDE / SHOW
-       ===================================================== */
+   NAVIGATION — STAYS VISIBLE
+   ===================================================== */
 
-    const nav =
-        document.querySelector(".nav");
+const nav = document.querySelector(".nav");
 
-    let previousScroll =
-        window.scrollY;
+window.addEventListener(
+    "scroll",
+    function () {
 
+        if (!nav) return;
 
-    window.addEventListener(
-        "scroll",
-        function () {
+        if (window.scrollY > 40) {
 
-            if (!nav) {
-                return;
-            }
+            nav.classList.add("scrolled");
 
-            const currentScroll =
-                window.scrollY;
+        } else {
 
+            nav.classList.remove("scrolled");
 
-            if (currentScroll <= 30) {
-
-                nav.classList.remove(
-                    "nav-hidden"
-                );
-
-            }
-            else if (
-                currentScroll >
-                previousScroll + 8
-            ) {
-
-                nav.classList.add(
-                    "nav-hidden"
-                );
-
-            }
-            else if (
-                currentScroll <
-                previousScroll - 8
-            ) {
-
-                nav.classList.remove(
-                    "nav-hidden"
-                );
-
-            }
-
-
-            previousScroll =
-                currentScroll;
-
-        },
-        {
-            passive: true
         }
-    );
 
-
+    },
+    {
+        passive: true
+    }
+);
     /* =====================================================
        SMOOTH SCROLL
        ===================================================== */
