@@ -634,6 +634,76 @@ button {
   font-size: 11px;
 }
 
+/* =========================
+   BOOKING ROWS
+========================= */
+
+.booking-row {
+  display: grid;
+
+  grid-template-columns:
+    1.4fr
+    1.5fr
+    1fr
+    1.2fr
+    1fr;
+
+  align-items: center;
+
+  padding: 20px 25px;
+
+  border-top: 1px solid rgba(255,255,255,.06);
+
+  color: #cfcfc9;
+
+  font-size: 11px;
+
+  transition:
+    background .2s ease,
+    color .2s ease;
+}
+
+.booking-row:hover {
+  background: rgba(217,183,122,.035);
+  color: var(--white);
+}
+
+.booking-row > span {
+  min-width: 0;
+
+  padding-right: 15px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* STATUS */
+
+.status-badge {
+  display: inline-flex;
+
+  align-items: center;
+
+  padding: 6px 10px;
+
+  border: 1px solid rgba(217,183,122,.22);
+
+  background: rgba(217,183,122,.06);
+
+  color: var(--gold);
+
+  font-size: 8px;
+
+  font-weight: 500;
+
+  letter-spacing: 1px;
+
+  text-transform: uppercase;
+}
 
 /* =========================
    CARDS
