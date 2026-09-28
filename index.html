@@ -1332,10 +1332,11 @@
     <!-- BOOKING FORM -->
 
     <form
-        class="booking-form"
-        action="https://formsubmit.co/flopropertymedia@gmail.com"
-        method="POST"
-    >
+    class="booking-form"
+    id="bookingForm"
+    action="https://formsubmit.co/flopropertymedia@gmail.com"
+    method="POST"
+>
 
 
         <input
@@ -1784,3 +1785,197 @@
 </body>
 
 </html>
+
+<script type="module">
+
+    import {
+        initializeApp
+    } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
+    import {
+        getFirestore,
+        collection,
+        addDoc,
+        serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+
+    // =====================================================
+    // FIREBASE
+    // =====================================================
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBQCqtKKHXUdBrSvKvQFN1hHct119Yp-Yo",
+        authDomain: "flo-property-media-fbbf4.firebaseapp.com",
+        projectId: "flo-property-media-fbbf4",
+        storageBucket: "flo-property-media-fbbf4.firebasestorage.app",
+        messagingSenderId: "779116796984",
+        appId: "1:779116796984:web:23a54ccbbee15491611acd",
+        measurementId: "G-52R9RP4JWM"
+    };
+
+
+    const app = initializeApp(firebaseConfig);
+
+    const db = getFirestore(app);
+
+
+    // =====================================================
+    // BOOKING FORM
+    // =====================================================
+
+    const bookingForm =
+        document.getElementById("bookingForm");
+
+
+    if (bookingForm) {
+
+        bookingForm.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+
+                const submitButton =
+                    bookingForm.querySelector(
+                        'button[type="submit"]'
+                    );
+
+
+                const originalText =
+                    submitButton
+                        ? submitButton.innerHTML
+                        : "";
+
+
+                if (submitButton) {
+
+                    submitButton.disabled = true;
+
+                    submitButton.innerHTML =
+                        "Sending request…";
+                }
+
+
+                try {
+
+                    const formData =
+                        new FormData(bookingForm);
+
+
+                    // Collect selected services
+
+                    const services =
+                        Array.from(
+                            bookingForm.querySelectorAll(
+                                'input[name="services[]"]:checked'
+                            )
+                        ).map(
+                            checkbox => checkbox.value
+                        );
+
+
+                    // Create booking in Firestore
+
+                    await addDoc(
+                        collection(db, "bookings"),
+                        {
+
+                            name:
+                                formData.get("name") || "",
+
+                            email:
+                                formData.get("email") || "",
+
+                            mobile:
+                                formData.get("mobile") || "",
+
+                            propertyAddress:
+                                formData.get(
+                                    "property_address"
+                                ) || "",
+
+                            services:
+                                services,
+
+                            preferredDate:
+                                formData.get(
+                                    "preferred_date"
+                                ) || "",
+
+                            preferredTime:
+                                formData.get(
+                                    "preferred_time"
+                                ) || "",
+
+                            package:
+                                formData.get(
+                                    "package"
+                                ) || "",
+
+                            paymentMethod:
+                                formData.get(
+                                    "payment_method"
+                                ) || "",
+
+                            message:
+                                formData.get(
+                                    "message"
+                                ) || "",
+
+                            status:
+                                "New",
+
+                            source:
+                                "Website booking form",
+
+                            createdAt:
+                                serverTimestamp()
+
+                        }
+                    );
+
+
+                    /*
+                     * Firebase saved successfully.
+                     *
+                     * Now submit the same form to FormSubmit
+                     * so you continue receiving the email.
+                     *
+                     * form.submit() bypasses this submit event,
+                     * preventing an infinite loop.
+                     */
+
+                    bookingForm.submit();
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Booking submission error:",
+                        error
+                    );
+
+
+                    if (submitButton) {
+
+                        submitButton.disabled = false;
+
+                        submitButton.innerHTML =
+                            originalText;
+                    }
+
+
+                    alert(
+                        "We couldn't submit your enquiry right now. Please try again or contact FLO directly."
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+</script>
