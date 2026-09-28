@@ -1346,38 +1346,183 @@ body.modal-open {
 }
 
 
-/* MOBILE */
+/* ======================================================
+   MOBILE BOOKINGS
+====================================================== */
 
 @media (max-width: 650px) {
 
-  .booking-modal {
-    padding: 12px;
+  /* Hide desktop table headings */
+  .table-header {
+    display: none;
   }
 
 
-  .booking-modal-card {
-    padding: 25px 20px;
-
-    max-height: 94vh;
+  /* Remove horizontal overflow */
+  .table-panel {
+    width: 100%;
+    overflow: hidden;
   }
 
 
-  .booking-details {
-    grid-template-columns: 1fr;
+  #bookingsList {
+    width: 100%;
+    min-height: 0;
   }
 
 
-  .booking-detail:nth-child(odd),
-  .booking-detail:nth-child(even) {
-    padding-left: 0;
-    padding-right: 0;
+  /* Booking becomes a card */
+  .booking-row {
+    display: grid;
 
-    border-left: 0;
+    grid-template-columns: 1fr auto;
+
+    grid-template-areas:
+      "client status"
+      "property status"
+      "details arrow";
+
+    width: 100%;
+
+    min-height: 0;
+
+    padding: 20px;
+
+    box-sizing: border-box;
+
+    border-top: 1px solid rgba(255,255,255,.07);
+
+    background: #111;
+
+    text-align: left;
+
+    gap: 7px 15px;
   }
 
 
-  .booking-actions {
-    grid-template-columns: 1fr;
+  .booking-row:first-child {
+    border-top: 0;
+  }
+
+
+  /* Client */
+  .booking-row > span:nth-child(1) {
+    grid-area: client;
+
+    padding: 0;
+
+    font-size: 12px;
+
+    font-weight: 500;
+
+    color: #f5f5f2;
+  }
+
+
+  /* Property */
+  .booking-row > span:nth-child(2) {
+    grid-area: property;
+
+    padding: 0;
+
+    font-size: 10px;
+
+    color: #777;
+  }
+
+
+  /* Date */
+  .booking-row > span:nth-child(3) {
+    grid-area: details;
+
+    padding: 0;
+
+    font-size: 10px;
+
+    color: #aaa;
+  }
+
+
+  /* Package */
+  .booking-row > span:nth-child(4) {
+    position: absolute;
+
+    left: 145px;
+
+    margin-top: 28px;
+
+    max-width: 130px;
+
+    padding: 0;
+
+    font-size: 10px;
+
+    color: #aaa;
+  }
+
+
+  /* Status */
+  .booking-row > span:nth-child(5) {
+    grid-area: status;
+
+    padding: 0;
+
+    align-self: start;
+
+    justify-self: end;
+  }
+
+
+  .booking-row .status-badge {
+    min-width: auto;
+
+    padding: 6px 9px;
+
+    font-size: 7px;
+  }
+
+
+  /* Add a subtle arrow */
+  .booking-row::after {
+    content: "→";
+
+    grid-area: arrow;
+
+    justify-self: end;
+
+    align-self: end;
+
+    color: var(--gold);
+
+    font-size: 14px;
+
+    opacity: .7;
+  }
+
+
+  .booking-row:hover {
+    background: #151515;
+  }
+
+
+  /* Mobile page spacing */
+
+  .section-header {
+    margin-bottom: 25px;
+  }
+
+
+  .section-header h1 {
+    font-size: 48px;
+  }
+
+
+  .section-header p {
+    max-width: 330px;
+
+    font-size: 11px;
+
+    line-height: 1.6;
   }
 
 }
