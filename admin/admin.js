@@ -14,7 +14,10 @@ import {
   getDocs,
   query,
   orderBy,
-  limit
+  limit,
+  doc,
+  updateDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 
@@ -315,14 +318,6 @@ async function getCollectionCount(collectionName) {
 
 
 // ======================================================
-// LOAD DASHBOARD
-// ======================================================
-
-async function loadDashboard() {
-
-  console.log("Loading FLO admin dashboard...");
-
-  // ======================================================
 // BOOKING MANAGEMENT STATE
 // ======================================================
 
@@ -331,8 +326,13 @@ let activeBooking = null;
 
 
 // ======================================================
-// BOOKINGS
+// LOAD DASHBOARD
 // ======================================================
+
+async function loadDashboard() {
+
+  console.log("Loading FLO admin dashboard...");
+
   // -----------------------------------------
   // BOOKINGS
   // -----------------------------------------
