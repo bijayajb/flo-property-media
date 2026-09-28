@@ -320,36 +320,27 @@ async function getCollectionCount(collectionName) {
 
 async function loadDashboard() {
 
+  console.log("Loading FLO admin dashboard...");
+
+  // -----------------------------------------
+  // BOOKINGS
+  // -----------------------------------------
+
   try {
 
-    const [
-      bookings,
-      clients,
-      projects,
-      quotes
-    ] = await Promise.all([
-
-      getDocs(
+    const bookingsSnapshot =
+      await getDocs(
         collection(db, "bookings")
-      ),
+      );
 
-      getDocs(
-        collection(db, "clients")
-      ),
-
-      getDocs(
-        collection(db, "projects")
-      ),
-
-      getDocs(
-        collection(db, "quotes")
-      )
-
-    ]);
+    console.log(
+      "Bookings loaded:",
+      bookingsSnapshot.size
+    );
 
 
     const bookingData =
-      bookings.docs.map(doc => ({
+      bookingsSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
@@ -382,36 +373,127 @@ async function loadDashboard() {
       confirmedBookings.length;
 
 
-    document.getElementById(
-      "projectsCount"
-    ).textContent =
-      projects.size;
+    renderBookings(bookingData);
+
+    renderRecentBookings(bookingData);
+
+
+  } catch (error) {
+
+    console.error(
+      "BOOKINGS ERROR:",
+      error
+    );
+
+    const bookingsList =
+      document.getElementById("bookingsList");
+
+    if (bookingsList) {
+      bookingsList.innerHTML =
+        "Unable to load bookings.";
+    }
+
+  }
+
+
+  // -----------------------------------------
+  // CLIENTS
+  // -----------------------------------------
+
+  try {
+
+    const clientsSnapshot =
+      await getDocs(
+        collection(db, "clients")
+      );
 
 
     document.getElementById(
       "clientsCount"
     ).textContent =
-      clients.size;
+      clientsSnapshot.size;
 
 
-    renderBookings(bookingData);
+    renderClients(clientsSnapshot);
 
-    renderRecentBookings(bookingData);
-
-    renderClients(clients);
-
-    renderProjects(projects);
-
-    renderQuotes(quotes);
 
   } catch (error) {
 
     console.error(
-      "Dashboard error:",
+      "CLIENTS ERROR:",
+      error
+    );
+
+    document.getElementById(
+      "clientsCount"
+    ).textContent = "0";
+
+  }
+
+
+  // -----------------------------------------
+  // PROJECTS
+  // -----------------------------------------
+
+  try {
+
+    const projectsSnapshot =
+      await getDocs(
+        collection(db, "projects")
+      );
+
+
+    document.getElementById(
+      "projectsCount"
+    ).textContent =
+      projectsSnapshot.size;
+
+
+    renderProjects(projectsSnapshot);
+
+
+  } catch (error) {
+
+    console.error(
+      "PROJECTS ERROR:",
+      error
+    );
+
+    document.getElementById(
+      "projectsCount"
+    ).textContent = "0";
+
+  }
+
+
+  // -----------------------------------------
+  // QUOTES
+  // -----------------------------------------
+
+  try {
+
+    const quotesSnapshot =
+      await getDocs(
+        collection(db, "quotes")
+      );
+
+
+    renderQuotes(quotesSnapshot);
+
+
+  } catch (error) {
+
+    console.error(
+      "QUOTES ERROR:",
       error
     );
 
   }
+
+
+  console.log(
+    "FLO admin dashboard finished loading."
+  );
 
 }
 
