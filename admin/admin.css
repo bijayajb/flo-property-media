@@ -442,13 +442,15 @@ button {
 .stat-card {
   position: relative;
 
-  padding: 30px;
+  min-height: 155px;
+
+  padding: 25px 28px;
 
   border: 1px solid var(--line);
 
   background:
     radial-gradient(
-      circle at 80% 0%,
+      circle at 85% 0%,
       rgba(217,183,122,.08),
       transparent 45%
     ),
@@ -456,8 +458,17 @@ button {
 
   box-shadow:
     0 0 35px rgba(217,183,122,.035);
+
+  transition:
+    transform .25s ease,
+    border-color .25s ease;
 }
 
+.stat-card:hover {
+  transform: translateY(-2px);
+
+  border-color: rgba(217,183,122,.30);
+}
 .stat-label {
   display: block;
 
@@ -472,9 +483,15 @@ button {
 .stat-card strong {
   display: block;
 
+  margin-top: 5px;
+
   font-family: var(--serif);
-  font-size: 42px;
+
+  font-size: 46px;
+
   font-weight: 400;
+
+  line-height: 1;
 }
 
 .stat-card small {
@@ -499,7 +516,7 @@ button {
 }
 
 .panel {
-  min-height: 300px;
+  min-height: 0;
 
   padding: 30px;
 
@@ -541,8 +558,8 @@ button {
 }
 
 .empty-state {
-  height: 210px;
-
+  min-height: 210px;
+  
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -728,6 +745,93 @@ button {
 
   text-transform: uppercase;
 }
+
+/* =========================
+   RECENT BOOKINGS
+========================= */
+
+.recent-booking {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 18px 0;
+
+  border-bottom: 1px solid rgba(255,255,255,.07);
+
+  text-align: left;
+
+  transition:
+    padding .2s ease,
+    background .2s ease;
+}
+
+.recent-booking:last-child {
+  border-bottom: 0;
+}
+
+.recent-booking:hover {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+
+.recent-booking strong {
+  display: block;
+
+  color: var(--white);
+
+  font-size: 12px;
+
+  font-weight: 500;
+
+  letter-spacing: .1px;
+}
+
+
+.recent-booking small {
+  display: block;
+
+  margin-top: 6px;
+
+  color: #666;
+
+  font-size: 9px;
+
+  letter-spacing: .4px;
+}
+
+
+/* Date styling */
+
+.recent-booking small::before {
+  content: "BOOKING · ";
+
+  color: var(--gold);
+
+  font-size: 7px;
+
+  letter-spacing: 1px;
+}
+
+
+/* Recent bookings container */
+
+#recentBookings {
+  height: auto;
+
+  min-height: 210px;
+
+  display: block;
+
+  padding-top: 4px;
+
+  color: var(--white);
+}
+
 /* =========================
    CARDS
 ========================= */
