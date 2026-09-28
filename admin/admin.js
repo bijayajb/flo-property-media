@@ -505,15 +505,18 @@ async function loadDashboard() {
 function renderBookings(bookings) {
 
   const container =
-    document.getElementById(
-      "bookingsList"
-    );
+    document.getElementById("bookingsList");
+
+  currentBookings = bookings;
 
 
   if (!bookings.length) {
 
-    container.textContent =
-      "No bookings yet.";
+    container.innerHTML = `
+      <div class="booking-empty">
+        No bookings yet.
+      </div>
+    `;
 
     return;
   }
@@ -549,27 +552,857 @@ function renderBookings(bookings) {
 
 
         return `
-          <div class="booking-row">
-
-            <span>${escapeHTML(client)}</span>
-
-            <span>${escapeHTML(property)}</span>
-
-            <span>${escapeHTML(date)}</span>
-
-            <span>${escapeHTML(packageName)}</span>
+          <button
+            type="button"
+            class="booking-row"
+            data-booking-id="${booking.id}"
+          >
 
             <span>
-              <b class="status-badge">
+              ${escapeHTML(client)}
+            </span>
+
+            <span>
+              ${escapeHTML(property)}
+            </span>
+
+            <span>
+              ${escapeHTML(date)}
+            </span>
+
+            <span>
+              ${escapeHTML(packageName)}
+            </span>
+
+            <span>
+              <b class="status-badge status-${status
+                .toLowerCase()
+                .replaceAll(" ", "-")}">
                 ${escapeHTML(status)}
               </b>
             </span>
 
-          </div>
+          </button>
         `;
 
       })
       .join("");
+
+
+  container
+    .querySelectorAll(".booking-row")
+    .forEach(row => {
+
+      row.addEventListener("click", () => {
+
+        const bookingId =
+          row.dataset.bookingId;
+
+        openBookingModal(bookingId);
+
+      });
+
+    });
+
+}
+
+// ======================================================
+// BOOKING MODAL
+// ======================================================
+
+function openBookingModal(bookingId) {
+
+  activeBooking =
+    currentBookings.find(
+      booking => booking.id === bookingId
+    );
+
+
+  if (!activeBooking) {
+    return;
+  }
+
+
+  let modal =
+    document.getElementById("bookingModal");
+
+
+  if (!modal) {
+
+    createBookingModal();
+
+    modal =
+      document.getElementById("bookingModal");
+
+  }
+
+
+  populateBookingModal();
+
+  modal.classList.remove("hidden");
+
+  document.body.classList.add("modal-open");
+}
+
+
+function createBookingModal() {
+
+  const modal =
+    document.createElement("div");
+
+  modal.id = "bookingModal";
+
+  modal.className = "booking-modal hidden";
+
+
+  modal.innerHTML = `
+
+    <div class="booking-modal-overlay"
+         data-close-booking-modal></div>
+
+
+    <div class="booking-modal-card">
+
+      <button
+        type="button"
+        class="booking-modal-close"
+        data-close-booking-modal
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+
+      <div class="booking-modal-header">
+
+        <span class="panel-eyebrow">
+          BOOKING
+        </span>
+
+        <h2 id="bookingModalName">
+          Booking
+        </h2>
+
+        <div id="bookingModalStatus"></div>
+
+      </div>
+
+
+      <div class="booking-details">
+
+
+        <div class="booking-detail">
+
+          <span>PROPERTY</span>
+
+          <strong id="bookingModalProperty">
+            —
+          </strong>
+
+        </div>
+
+
+        <div class="booking-detail">
+
+          <span>EMAIL</span>
+
+          <strong id="bookingModalEmail">
+            —
+          </strong>
+
+        </div>
+
+
+        <div class="booking-detail">
+
+          <span>MOBILE</span>
+
+          <strong id="bookingModalMobile">
+            —
+          </strong>
+
+        </div>
+
+
+        <div class="booking-detail">
+
+          <span>REQUESTED DATE</span>
+
+          <strong id="bookingModalDate">
+            —
+          </strong>
+
+        </div>
+
+
+        <div class="booking-detail">
+
+          <span>PREFERRED TIME</span>
+
+          <strong id="bookingModalTime">
+            —
+          </strong>
+
+        </div>
+
+
+        <div class="booking-detail">
+
+          <span>PACKAGE</span>
+
+          <strong id="bookingModalPackage">
+            —
+          </strong>
+
+        </div>
+
+
+        <div class="booking-detail">
+
+          <span>PAYMENT</span>
+
+          <strong id="bookingModalPayment">
+            —
+          </strong>
+
+        </div>
+
+
+        <div class="booking-detail booking-detail-full">
+
+          <span>SERVICES</span>
+
+          <div id="bookingModalServices">
+            —
+          </div>
+
+        </div>
+
+
+        <div class="booking-detail booking-detail-full">
+
+          <span>CLIENT MESSAGE</span>
+
+          <p id="bookingModalMessage">
+            —
+          </p>
+
+        </div>
+
+
+      </div>
+
+
+      <div class="booking-actions">
+
+        <button
+          type="button"
+          class="booking-action booking-action-primary"
+          id="acceptBookingButton"
+        >
+          Accept booking
+        </button>
+
+
+        <button
+          type="button"
+          class="booking-action"
+          id="proposeDateButton"
+        >
+          Propose different date
+        </button>
+
+
+        <button
+          type="button"
+          class="booking-action booking-action-danger"
+          id="declineBookingButton"
+        >
+          Decline / booked out
+        </button>
+
+      </div>
+
+
+      <div
+        id="bookingActionMessage"
+        class="booking-action-message"
+      ></div>
+
+
+    </div>
+
+  `;
+
+
+  document.body.appendChild(modal);
+
+
+  modal
+    .querySelectorAll("[data-close-booking-modal]")
+    .forEach(element => {
+
+      element.addEventListener(
+        "click",
+        closeBookingModal
+      );
+
+    });
+
+
+  document
+    .getElementById("acceptBookingButton")
+    .addEventListener(
+      "click",
+      acceptBooking
+    );
+
+
+  document
+    .getElementById("proposeDateButton")
+    .addEventListener(
+      "click",
+      proposeBookingDate
+    );
+
+
+  document
+    .getElementById("declineBookingButton")
+    .addEventListener(
+      "click",
+      declineBooking
+    );
+
+}
+
+
+function populateBookingModal() {
+
+  const booking =
+    activeBooking;
+
+
+  document.getElementById(
+    "bookingModalName"
+  ).textContent =
+    booking.name ||
+    booking.clientName ||
+    "Booking";
+
+
+  document.getElementById(
+    "bookingModalProperty"
+  ).textContent =
+    booking.propertyAddress ||
+    booking.address ||
+    "—";
+
+
+  document.getElementById(
+    "bookingModalEmail"
+  ).textContent =
+    booking.email ||
+    "—";
+
+
+  document.getElementById(
+    "bookingModalMobile"
+  ).textContent =
+    booking.mobile ||
+    "—";
+
+
+  document.getElementById(
+    "bookingModalDate"
+  ).textContent =
+    booking.preferredDate ||
+    booking.date ||
+    "—";
+
+
+  document.getElementById(
+    "bookingModalTime"
+  ).textContent =
+    booking.preferredTime ||
+    "—";
+
+
+  document.getElementById(
+    "bookingModalPackage"
+  ).textContent =
+    booking.package ||
+    booking.packageName ||
+    "—";
+
+
+  document.getElementById(
+    "bookingModalPayment"
+  ).textContent =
+    booking.paymentMethod ||
+    "—";
+
+
+  const services =
+    Array.isArray(booking.services)
+      ? booking.services
+      : [];
+
+
+  document.getElementById(
+    "bookingModalServices"
+  ).innerHTML =
+    services.length
+      ? services
+          .map(service => `
+            <span class="service-tag">
+              ${escapeHTML(service)}
+            </span>
+          `)
+          .join("")
+      : "—";
+
+
+  document.getElementById(
+    "bookingModalMessage"
+  ).textContent =
+    booking.message ||
+    "No message provided.";
+
+
+  const status =
+    booking.status ||
+    "New";
+
+
+  document.getElementById(
+    "bookingModalStatus"
+  ).innerHTML = `
+    <span class="status-badge status-${status
+      .toLowerCase()
+      .replaceAll(" ", "-")}">
+      ${escapeHTML(status)}
+    </span>
+  `;
+
+
+  const message =
+    document.getElementById(
+      "bookingActionMessage"
+    );
+
+  message.textContent = "";
+
+
+  // Disable actions where appropriate
+
+  const acceptButton =
+    document.getElementById(
+      "acceptBookingButton"
+    );
+
+  const proposeButton =
+    document.getElementById(
+      "proposeDateButton"
+    );
+
+  const declineButton =
+    document.getElementById(
+      "declineBookingButton"
+    );
+
+
+  acceptButton.disabled =
+    status === "Confirmed" ||
+    status === "Declined";
+
+
+  proposeButton.disabled =
+    status === "Confirmed" ||
+    status === "Declined";
+
+
+  declineButton.disabled =
+    status === "Declined";
+
+}
+
+
+function closeBookingModal() {
+
+  const modal =
+    document.getElementById(
+      "bookingModal"
+    );
+
+
+  if (modal) {
+    modal.classList.add("hidden");
+  }
+
+
+  document.body.classList.remove(
+    "modal-open"
+  );
+
+  activeBooking = null;
+}
+
+
+// ======================================================
+// ACCEPT BOOKING
+// ======================================================
+
+async function acceptBooking() {
+
+  if (!activeBooking) {
+    return;
+  }
+
+
+  const confirmed =
+    confirm(
+      "Accept this booking?"
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  const button =
+    document.getElementById(
+      "acceptBookingButton"
+    );
+
+
+  button.disabled = true;
+
+  button.textContent =
+    "Accepting…";
+
+
+  try {
+
+    await updateDoc(
+      doc(
+        db,
+        "bookings",
+        activeBooking.id
+      ),
+      {
+        status: "Confirmed",
+        confirmedAt: serverTimestamp()
+      }
+    );
+
+
+    activeBooking.status =
+      "Confirmed";
+
+
+    renderBookings(currentBookings);
+
+    renderRecentBookings(currentBookings);
+
+    populateBookingModal();
+
+
+    showBookingActionMessage(
+      "Booking confirmed successfully."
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Accept booking error:",
+      error
+    );
+
+
+    showBookingActionMessage(
+      "Unable to accept this booking.",
+      true
+    );
+
+
+    button.disabled = false;
+
+    button.textContent =
+      "Accept booking";
+
+  }
+
+}
+
+
+// ======================================================
+// PROPOSE DIFFERENT DATE
+// ======================================================
+
+async function proposeBookingDate() {
+
+  if (!activeBooking) {
+    return;
+  }
+
+
+  const date =
+    prompt(
+      "Enter the proposed date (YYYY-MM-DD):",
+      activeBooking.preferredDate || ""
+    );
+
+
+  if (!date) {
+    return;
+  }
+
+
+  const time =
+    prompt(
+      "Enter the proposed time:",
+      activeBooking.preferredTime || ""
+    );
+
+
+  if (!time) {
+    return;
+  }
+
+
+  const message =
+    prompt(
+      "Message to the client:",
+      "We are unavailable on your requested date. We would like to propose this alternative."
+    );
+
+
+  if (message === null) {
+    return;
+  }
+
+
+  try {
+
+    await updateDoc(
+      doc(
+        db,
+        "bookings",
+        activeBooking.id
+      ),
+      {
+        status: "Date Proposed",
+
+        proposedDate: date,
+
+        proposedTime: time,
+
+        proposalMessage: message,
+
+        proposedAt: serverTimestamp()
+      }
+    );
+
+
+    activeBooking.status =
+      "Date Proposed";
+
+    activeBooking.proposedDate =
+      date;
+
+    activeBooking.proposedTime =
+      time;
+
+    activeBooking.proposalMessage =
+      message;
+
+
+    renderBookings(currentBookings);
+
+    renderRecentBookings(currentBookings);
+
+    populateBookingModal();
+
+
+    showBookingActionMessage(
+      "Alternative date saved successfully."
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Propose date error:",
+      error
+    );
+
+
+    showBookingActionMessage(
+      "Unable to save the proposed date.",
+      true
+    );
+
+  }
+
+}
+
+
+// ======================================================
+// DECLINE BOOKING
+// ======================================================
+
+async function declineBooking() {
+
+  if (!activeBooking) {
+    return;
+  }
+
+
+  const reason =
+    prompt(
+      "Why are you declining this booking?",
+      "Fully booked"
+    );
+
+
+  if (!reason) {
+    return;
+  }
+
+
+  const message =
+    prompt(
+      "Message to the client:",
+      "Unfortunately, we are unable to accommodate this booking on the requested date."
+    );
+
+
+  if (message === null) {
+    return;
+  }
+
+
+  const confirmed =
+    confirm(
+      "Decline this booking?"
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  const button =
+    document.getElementById(
+      "declineBookingButton"
+    );
+
+
+  button.disabled = true;
+
+  button.textContent =
+    "Declining…";
+
+
+  try {
+
+    await updateDoc(
+      doc(
+        db,
+        "bookings",
+        activeBooking.id
+      ),
+      {
+        status: "Declined",
+
+        declineReason: reason,
+
+        declineMessage: message,
+
+        declinedAt: serverTimestamp()
+      }
+    );
+
+
+    activeBooking.status =
+      "Declined";
+
+
+    activeBooking.declineReason =
+      reason;
+
+
+    activeBooking.declineMessage =
+      message;
+
+
+    renderBookings(currentBookings);
+
+    renderRecentBookings(currentBookings);
+
+    populateBookingModal();
+
+
+    showBookingActionMessage(
+      "Booking declined."
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Decline booking error:",
+      error
+    );
+
+
+    showBookingActionMessage(
+      "Unable to decline this booking.",
+      true
+    );
+
+
+    button.disabled = false;
+
+    button.textContent =
+      "Decline / booked out";
+
+  }
+
+}
+
+
+// ======================================================
+// ACTION MESSAGE
+// ======================================================
+
+function showBookingActionMessage(
+  message,
+  isError = false
+) {
+
+  const element =
+    document.getElementById(
+      "bookingActionMessage"
+    );
+
+
+  if (!element) {
+    return;
+  }
+
+
+  element.textContent =
+    message;
+
+
+  element.classList.toggle(
+    "error",
+    isError
+  );
 
 }
 
