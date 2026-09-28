@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>FLO Property Media — Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./admin.css">
+</head>
+
+<body>
+
+  <!-- LOGIN -->
+  <main id="loginScreen" class="login-screen">
+
+    <div class="login-card">
+
+      <div class="login-logo">
+        <img src="../assets/logo.png" alt="FLO Property Media">
+      </div>
+
+      <div class="login-eyebrow">
+        ADMIN PORTAL
+      </div>
+
+      <h1>
+        Welcome back.
+      </h1>
+
+      <p>
+        Manage your FLO Property Media business from one place.
+      </p>
+
+      <button id="googleLogin" class="google-button">
+        <span class="google-icon">G</span>
+        <span>Continue with Google</span>
+      </button>
+
+      <p id="loginError" class="login-error"></p>
+
+      <div class="login-footer">
+        FLO PROPERTY MEDIA
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <!-- ADMIN DASHBOARD -->
+  <div id="dashboard" class="dashboard hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <div class="sidebar-brand">
+        <img src="../assets/logo.png" alt="FLO Property Media">
+        <span>ADMIN</span>
+      </div>
+
+      <nav class="sidebar-nav">
+
+        <button class="nav-item active" data-section="overview">
+          <span>01</span>
+          Overview
+        </button>
+
+        <button class="nav-item" data-section="bookings">
+          <span>02</span>
+          Bookings
+        </button>
+
+        <button class="nav-item" data-section="clients">
+          <span>03</span>
+          Clients
+        </button>
+
+        <button class="nav-item" data-section="projects">
+          <span>04</span>
+          Projects
+        </button>
+
+        <button class="nav-item" data-section="quotes">
+          <span>05</span>
+          Quotes
+        </button>
+
+      </nav>
+
+      <div class="sidebar-bottom">
+
+        <div class="admin-user">
+          <div id="userInitial" class="user-avatar">F</div>
+
+          <div>
+            <strong id="userName">FLO Admin</strong>
+            <small id="userEmail"></small>
+          </div>
+        </div>
+
+        <button id="logoutButton" class="logout-button">
+          Log out
+        </button>
+
+      </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+      <!-- TOP BAR -->
+      <header class="topbar">
+
+        <div>
+          <div class="topbar-eyebrow">
+            FLO PROPERTY MEDIA
+          </div>
+
+          <h2 id="pageTitle">
+            Overview
+          </h2>
+        </div>
+
+        <a
+          href="https://flopropertymedia.com"
+          target="_blank"
+          rel="noopener"
+          class="view-site"
+        >
+          View website ↗
+        </a>
+
+      </header>
+
+
+      <!-- OVERVIEW -->
+      <section id="overviewSection" class="content-section">
+
+        <div class="welcome-block">
+          <p class="section-eyebrow">DASHBOARD</p>
+          <h1>Good to see you.</h1>
+          <p>
+            Here's what's happening with FLO Property Media.
+          </p>
+        </div>
+
+
+        <div class="stats-grid">
+
+          <div class="stat-card">
+            <span class="stat-label">NEW BOOKINGS</span>
+            <strong id="newBookingsCount">0</strong>
+            <small>Awaiting attention</small>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-label">UPCOMING</span>
+            <strong id="upcomingCount">0</strong>
+            <small>Confirmed bookings</small>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-label">PROJECTS</span>
+            <strong id="projectsCount">0</strong>
+            <small>Active projects</small>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-label">CLIENTS</span>
+            <strong id="clientsCount">0</strong>
+            <small>Total clients</small>
+          </div>
+
+        </div>
+
+
+        <div class="dashboard-grid">
+
+          <div class="panel">
+
+            <div class="panel-heading">
+              <div>
+                <span class="panel-eyebrow">RECENT</span>
+                <h3>Latest bookings</h3>
+              </div>
+
+              <button class="text-button" data-section-link="bookings">
+                View all →
+              </button>
+            </div>
+
+            <div id="recentBookings" class="empty-state">
+              <span>—</span>
+              <p>No bookings yet.</p>
+            </div>
+
+          </div>
+
+
+          <div class="panel">
+
+            <div class="panel-heading">
+              <div>
+                <span class="panel-eyebrow">QUICK ACTION</span>
+                <h3>Business overview</h3>
+              </div>
+            </div>
+
+            <div class="quick-list">
+
+              <button data-section-link="bookings">
+                <span>Bookings</span>
+                <span>→</span>
+              </button>
+
+              <button data-section-link="clients">
+                <span>Clients</span>
+                <span>→</span>
+              </button>
+
+              <button data-section-link="projects">
+                <span>Projects</span>
+                <span>→</span>
+              </button>
+
+              <button data-section-link="quotes">
+                <span>Quotes</span>
+                <span>→</span>
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- BOOKINGS -->
+      <section id="bookingsSection" class="content-section hidden">
+
+        <div class="section-header">
+          <div>
+            <p class="section-eyebrow">CLIENT MANAGEMENT</p>
+            <h1>Bookings</h1>
+            <p>Manage upcoming and completed property media bookings.</p>
+          </div>
+        </div>
+
+        <div class="table-panel">
+
+          <div class="table-header">
+            <span>CLIENT</span>
+            <span>PROPERTY</span>
+            <span>DATE</span>
+            <span>PACKAGE</span>
+            <span>STATUS</span>
+          </div>
+
+          <div id="bookingsList" class="table-empty">
+            No bookings yet.
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- CLIENTS -->
+      <section id="clientsSection" class="content-section hidden">
+
+        <div class="section-header">
+          <div>
+            <p class="section-eyebrow">CLIENT DATABASE</p>
+            <h1>Clients</h1>
+            <p>Keep track of your property agents and clients.</p>
+          </div>
+        </div>
+
+        <div id="clientsGrid" class="cards-grid">
+          <div class="large-empty">
+            No clients yet.
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- PROJECTS -->
+      <section id="projectsSection" class="content-section hidden">
+
+        <div class="section-header">
+          <div>
+            <p class="section-eyebrow">PRODUCTION</p>
+            <h1>Projects</h1>
+            <p>Track photography, video, drone and floorplan projects.</p>
+          </div>
+        </div>
+
+        <div id="projectsGrid" class="cards-grid">
+          <div class="large-empty">
+            No projects yet.
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- QUOTES -->
+      <section id="quotesSection" class="content-section hidden">
+
+        <div class="section-header">
+          <div>
+            <p class="section-eyebrow">SALES</p>
+            <h1>Quotes</h1>
+            <p>Manage custom quotes and client enquiries.</p>
+          </div>
+        </div>
+
+        <div id="quotesGrid" class="cards-grid">
+          <div class="large-empty">
+            No quotes yet.
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <!-- FIREBASE -->
+  <script type="module" src="./admin.js"></script>
+
+</body>
+</html>
