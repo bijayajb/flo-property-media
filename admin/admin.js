@@ -1149,51 +1149,42 @@ async function acceptBooking() {
     return;
   }
 
-  const confirmed =
-    confirm(
-      "Accept this booking?"
+  // Prevent duplicate confirmation emails
+  if (activeBooking.confirmedEmailSentAt) {
+    showBookingActionMessage(
+      "This booking has already been confirmed and the customer has already been notified.",
+      "info"
     );
+    return;
+  }
+
+  const confirmed =
+    confirm("Confirm this booking and notify the customer?");
 
   if (!confirmed) {
     return;
   }
 
   const button =
-    document.getElementById(
-      "acceptBookingButton"
-    );
+    document.querySelector("#bookingConfirmBtn");
 
-  button.disabled = true;
-
-  button.textContent =
-    "Accepting…";
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Confirming...";
+  }
 
   try {
 
-    // -----------------------------------------
-    // 1. Confirm booking in Firestore
-    // -----------------------------------------
-
+    // Update booking status
     await updateDoc(
-      doc(
-        db,
-        "bookings",
-        activeBooking.id
-      ),
+      doc(db, "bookings", activeBooking.id),
       {
         status: "Confirmed",
         confirmedAt: serverTimestamp()
       }
     );
 
-    activeBooking.status =
-      "Confirmed";
-
-
-    // -----------------------------------------
-    // 2. Send confirmation email
-    // -----------------------------------------
-
+    // Send customer email
     await sendCustomerBookingEmail(
       activeBooking,
       {
@@ -1201,22 +1192,27 @@ async function acceptBooking() {
       }
     );
 
-
-    // -----------------------------------------
-    // 3. Refresh admin interface
-    // -----------------------------------------
-
-    renderBookings(currentBookings);
-
-    renderRecentBookings(currentBookings);
-
-    populateBookingModal();
-
-
-    showBookingActionMessage(
-      "Booking confirmed and customer notified."
+    // Mark confirmation email as sent
+    await updateDoc(
+      doc(db, "bookings", activeBooking.id),
+      {
+        confirmedEmailSentAt: serverTimestamp()
+      }
     );
 
+    // Update local booking object
+    activeBooking.status = "Confirmed";
+    activeBooking.confirmedEmailSentAt = true;
+
+    // Refresh dashboard
+    await loadDashboard();
+
+    closeBookingModal();
+
+    showBookingActionMessage(
+      "Booking confirmed and customer notified.",
+      "success"
+    );
 
   } catch (error) {
 
@@ -1225,20 +1221,18 @@ async function acceptBooking() {
       error
     );
 
-
     showBookingActionMessage(
-      "Booking was updated, but the customer email could not be sent. Check the console.",
-      true
+      "Booking was updated, but the customer email could not be sent. Please try again.",
+      "error"
     );
 
+  } finally {
 
-    button.disabled = false;
-
-    button.textContent =
-      "Accept booking";
-
+    if (button) {
+      button.disabled = false;
+      button.textContent = "Accept Booking";
+    }
   }
-
 }
 
 
@@ -1252,10 +1246,18 @@ async function proposeBookingDate() {
     return;
   }
 
+  // Prevent duplicate proposal emails
+  if (activeBooking.proposedEmailSentAt) {
+    showBookingActionMessage(
+      "An alternative date has already been proposed and the customer has already been notified.",
+      "info"
+    );
+    return;
+  }
+
   const date =
     prompt(
-      "Enter the proposed date (YYYY-MM-DD):",
-      activeBooking.preferredDate || ""
+      "Enter the proposed date (e.g. 15/10/2026):"
     );
 
   if (!date) {
@@ -1264,8 +1266,7 @@ async function proposeBookingDate() {
 
   const time =
     prompt(
-      "Enter the proposed time:",
-      activeBooking.preferredTime || ""
+      "Enter the proposed time (e.g. 2:00 PM):"
     );
 
   if (!time) {
@@ -1274,17 +1275,12 @@ async function proposeBookingDate() {
 
   const message =
     prompt(
-      "Message to the client:",
-      "We are unavailable on your requested date. We would like to propose this alternative."
-    );
-
-  if (message === null) {
-    return;
-  }
+      "Add a message for the customer (optional):"
+    ) || "";
 
   const confirmed =
     confirm(
-      `Propose ${date} at ${time} to this client?`
+      `Propose ${date} at ${time} to the customer?`
     );
 
   if (!confirmed) {
@@ -1292,109 +1288,82 @@ async function proposeBookingDate() {
   }
 
   const button =
-    document.getElementById(
-      "proposeDateButton"
-    );
+    document.querySelector("#bookingProposeBtn");
 
-  button.disabled = true;
-
-  button.textContent =
-    "Sending…";
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Sending...";
+  }
 
   try {
 
-    // -----------------------------------------
-    // 1. Save proposed date in Firestore
-    // -----------------------------------------
-
+    // Save proposed date to Firestore
     await updateDoc(
-      doc(
-        db,
-        "bookings",
-        activeBooking.id
-      ),
+      doc(db, "bookings", activeBooking.id),
       {
         status: "Date Proposed",
-
         proposedDate: date,
-
         proposedTime: time,
-
         proposalMessage: message,
-
         proposedAt: serverTimestamp()
       }
     );
 
-
-    activeBooking.status =
-      "Date Proposed";
-
-    activeBooking.proposedDate =
-      date;
-
-    activeBooking.proposedTime =
-      time;
-
-    activeBooking.proposalMessage =
-      message;
-
-
-    // -----------------------------------------
-    // 2. Send email to customer
-    // -----------------------------------------
-
+    // Send customer email
     await sendCustomerBookingEmail(
       activeBooking,
       {
         status: "Date Proposed",
-
         proposedDate: date,
-
         proposedTime: time,
-
         proposalMessage: message
       }
     );
 
-
-    // -----------------------------------------
-    // 3. Refresh admin interface
-    // -----------------------------------------
-
-    renderBookings(currentBookings);
-
-    renderRecentBookings(currentBookings);
-
-    populateBookingModal();
-
-
-    showBookingActionMessage(
-      "Alternative date saved and customer notified."
+    // Mark proposal email as sent
+    await updateDoc(
+      doc(db, "bookings", activeBooking.id),
+      {
+        proposedEmailSentAt: serverTimestamp()
+      }
     );
 
+    // Update local booking object
+    activeBooking.status = "Date Proposed";
+    activeBooking.proposedDate = date;
+    activeBooking.proposedTime = time;
+    activeBooking.proposalMessage = message;
+    activeBooking.proposedEmailSentAt = true;
+
+    // Refresh dashboard
+    await loadDashboard();
+
+    closeBookingModal();
+
+    showBookingActionMessage(
+      "Alternative date saved and customer notified.",
+      "success"
+    );
 
   } catch (error) {
 
     console.error(
-      "Propose date error:",
+      "Propose booking error:",
       error
     );
 
-
     showBookingActionMessage(
-      "Date was saved, but the customer email could not be sent. Check the console.",
-      true
+      "The alternative date was saved, but the customer email could not be sent. Please try again.",
+      "error"
     );
 
+  } finally {
 
-    button.disabled = false;
-
-    button.textContent =
-      "Propose different date";
-
+    if (button) {
+      button.disabled = false;
+      button.textContent = "Propose New Date";
+    }
   }
-
 }
 
 
@@ -1408,10 +1377,18 @@ async function declineBooking() {
     return;
   }
 
+  // Prevent duplicate decline emails
+  if (activeBooking.declinedEmailSentAt) {
+    showBookingActionMessage(
+      "This booking has already been declined and the customer has already been notified.",
+      "info"
+    );
+    return;
+  }
+
   const reason =
     prompt(
-      "Why are you declining this booking?",
-      "Fully booked"
+      "Why is this booking being declined?"
     );
 
   if (!reason) {
@@ -1420,13 +1397,8 @@ async function declineBooking() {
 
   const message =
     prompt(
-      "Message to the client:",
-      "Unfortunately, we are unable to accommodate this booking on the requested date."
-    );
-
-  if (message === null) {
-    return;
-  }
+      "Add a message for the customer (optional):"
+    ) || "";
 
   const confirmed =
     confirm(
@@ -1438,80 +1410,59 @@ async function declineBooking() {
   }
 
   const button =
-    document.getElementById(
-      "declineBookingButton"
-    );
+    document.querySelector("#bookingDeclineBtn");
 
-  button.disabled = true;
-
-  button.textContent =
-    "Declining…";
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Declining...";
+  }
 
   try {
 
-    // -----------------------------------------
-    // 1. Save decline in Firestore
-    // -----------------------------------------
-
+    // Update booking status
     await updateDoc(
-      doc(
-        db,
-        "bookings",
-        activeBooking.id
-      ),
+      doc(db, "bookings", activeBooking.id),
       {
         status: "Declined",
-
         declineReason: reason,
-
         declineMessage: message,
-
         declinedAt: serverTimestamp()
       }
     );
 
-
-    activeBooking.status =
-      "Declined";
-
-    activeBooking.declineReason =
-      reason;
-
-    activeBooking.declineMessage =
-      message;
-
-
-    // -----------------------------------------
-    // 2. Send email to customer
-    // -----------------------------------------
-
+    // Send customer email
     await sendCustomerBookingEmail(
       activeBooking,
       {
         status: "Declined",
-
         declineReason: reason,
-
         declineMessage: message
       }
     );
 
-
-    // -----------------------------------------
-    // 3. Refresh admin interface
-    // -----------------------------------------
-
-    renderBookings(currentBookings);
-
-    renderRecentBookings(currentBookings);
-
-    populateBookingModal();
-
-
-    showBookingActionMessage(
-      "Booking declined and customer notified."
+    // Mark decline email as sent
+    await updateDoc(
+      doc(db, "bookings", activeBooking.id),
+      {
+        declinedEmailSentAt: serverTimestamp()
+      }
     );
 
+    // Update local booking object
+    activeBooking.status = "Declined";
+    activeBooking.declineReason = reason;
+    activeBooking.declineMessage = message;
+    activeBooking.declinedEmailSentAt = true;
+
+    // Refresh dashboard
+    await loadDashboard();
+
+    closeBookingModal();
+
+    showBookingActionMessage(
+      "Booking declined and customer notified.",
+      "success"
+    );
 
   } catch (error) {
 
@@ -1520,20 +1471,18 @@ async function declineBooking() {
       error
     );
 
-
     showBookingActionMessage(
-      "Booking was updated, but the customer email could not be sent. Check the console.",
-      true
+      "Booking was updated, but the customer email could not be sent. Please try again.",
+      "error"
     );
 
+  } finally {
 
-    button.disabled = false;
-
-    button.textContent =
-      "Decline / booked out";
-
+    if (button) {
+      button.disabled = false;
+      button.textContent = "Decline Booking";
+    }
   }
-
 }
 
 
