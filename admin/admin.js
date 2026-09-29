@@ -1149,31 +1149,30 @@ async function acceptBooking() {
     return;
   }
 
-
   const confirmed =
     confirm(
       "Accept this booking?"
     );
 
-
   if (!confirmed) {
     return;
   }
-
 
   const button =
     document.getElementById(
       "acceptBookingButton"
     );
 
-
   button.disabled = true;
 
   button.textContent =
     "Accepting…";
 
-
   try {
+
+    // -----------------------------------------
+    // 1. Confirm booking in Firestore
+    // -----------------------------------------
 
     await updateDoc(
       doc(
@@ -1187,10 +1186,25 @@ async function acceptBooking() {
       }
     );
 
-
     activeBooking.status =
       "Confirmed";
 
+
+    // -----------------------------------------
+    // 2. Send confirmation email
+    // -----------------------------------------
+
+    await sendCustomerBookingEmail(
+      activeBooking,
+      {
+        status: "Confirmed"
+      }
+    );
+
+
+    // -----------------------------------------
+    // 3. Refresh admin interface
+    // -----------------------------------------
 
     renderBookings(currentBookings);
 
@@ -1200,7 +1214,7 @@ async function acceptBooking() {
 
 
     showBookingActionMessage(
-      "Booking confirmed successfully."
+      "Booking confirmed and customer notified."
     );
 
 
@@ -1213,7 +1227,7 @@ async function acceptBooking() {
 
 
     showBookingActionMessage(
-      "Unable to accept this booking.",
+      "Booking was updated, but the customer email could not be sent. Check the console.",
       true
     );
 
