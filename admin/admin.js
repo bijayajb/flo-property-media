@@ -55,6 +55,86 @@ const googleProvider = new GoogleAuthProvider();
 
 const ADMIN_EMAIL = "flopropertymedia@gmail.com";
 
+// ======================================================
+// CUSTOMER EMAIL — CLOUDFLARE WORKER
+// ======================================================
+
+const BOOKING_EMAIL_WORKER =
+  "https://flo-booking-email.flopropertymedia.workers.dev";
+
+
+async function sendCustomerBookingEmail(booking, statusData) {
+
+  const user = auth.currentUser;
+
+  if (!user) {
+    throw new Error("Admin authentication required.");
+  }
+
+  const idToken =
+    await user.getIdToken();
+
+  const response =
+    await fetch(
+      BOOKING_EMAIL_WORKER,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        },
+
+        body: JSON.stringify({
+          customerName:
+            booking.name ||
+            booking.clientName ||
+            "",
+
+          customerEmail:
+            booking.email ||
+            "",
+
+          propertyAddress:
+            booking.propertyAddress ||
+            booking.address ||
+            "",
+
+          preferredDate:
+            booking.preferredDate ||
+            booking.date ||
+            "",
+
+          preferredTime:
+            booking.preferredTime ||
+            "",
+
+          packageName:
+            booking.package ||
+            booking.packageName ||
+            "",
+
+          message:
+            booking.message ||
+            "",
+
+          ...statusData
+        })
+      }
+    );
+
+  const result =
+    await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      "Customer email could not be sent."
+    );
+  }
+
+  return result;
+}
 
 // ======================================================
 // DOM ELEMENTS
