@@ -1273,10 +1273,72 @@ async function proposeBookingDate() {
     return;
   }
 
-  const message =
+  const messageOptions = [
+  {
+    name: "Requested time unavailable",
+    text: "Unfortunately, we’re unavailable at the requested time. We’d be happy to accommodate your booking on the alternative date and time below."
+  },
+  {
+    name: "Scheduling adjustment",
+    text: "We’ve had a scheduling adjustment and would like to offer you the alternative date and time below."
+  },
+  {
+    name: "Earlier appointment available",
+    text: "We have an earlier appointment available and would be happy to accommodate your booking at the alternative date and time below."
+  },
+  {
+    name: "Later appointment available",
+    text: "We have a later appointment available and would be happy to accommodate your booking at the alternative date and time below."
+  },
+  {
+    name: "Other",
+    text: ""
+  }
+];
+
+const messageMenu =
+  messageOptions
+    .map(
+      (option, index) =>
+        `${index + 1}. ${option.name}`
+    )
+    .join("\n");
+
+const messageSelection =
+  prompt(
+    `Select a message for the customer:\n\n${messageMenu}\n\nEnter the number:`
+  );
+
+if (!messageSelection) {
+  return;
+}
+
+const messageIndex =
+  Number(messageSelection) - 1;
+
+if (
+  !Number.isInteger(messageIndex) ||
+  messageIndex < 0 ||
+  messageIndex >= messageOptions.length
+) {
+  alert("Please select a valid message.");
+  return;
+}
+
+let message =
+  messageOptions[messageIndex].text;
+
+if (messageOptions[messageIndex].name === "Other") {
+
+  message =
     prompt(
-      "Add a message for the customer (optional):"
-    ) || "";
+      "Enter your message for the customer:"
+    );
+
+  if (!message) {
+    return;
+  }
+}
 
   const confirmed =
     confirm(
@@ -1386,19 +1448,82 @@ async function declineBooking() {
     return;
   }
 
-  const reason =
+  const reasonOptions = [
+  {
+    name: "Date unavailable",
+    text: "Unfortunately, we’re unable to accommodate this booking on the requested date due to availability."
+  },
+  {
+    name: "Time unavailable",
+    text: "Unfortunately, we’re unable to accommodate the requested time due to availability."
+  },
+  {
+    name: "Outside service area",
+    text: "Unfortunately, this property is outside our current service area."
+  },
+  {
+    name: "Service unavailable",
+    text: "Unfortunately, we’re unable to provide the requested service on this occasion."
+  },
+  {
+    name: "Booking conflict",
+    text: "Unfortunately, we’re unable to accommodate this booking due to an existing booking conflict."
+  },
+  {
+    name: "Other",
+    text: ""
+  }
+];
+
+const reasonMenu =
+  reasonOptions
+    .map(
+      (option, index) =>
+        `${index + 1}. ${option.name}`
+    )
+    .join("\n");
+
+const selection =
+  prompt(
+    `Select a reason for declining:\n\n${reasonMenu}\n\nEnter the number:`
+  );
+
+if (!selection) {
+  return;
+}
+
+const selectedIndex =
+  Number(selection) - 1;
+
+if (
+  !Number.isInteger(selectedIndex) ||
+  selectedIndex < 0 ||
+  selectedIndex >= reasonOptions.length
+) {
+  alert("Please select a valid reason.");
+  return;
+}
+
+let reason =
+  reasonOptions[selectedIndex].text;
+
+if (reasonOptions[selectedIndex].name === "Other") {
+
+  reason =
     prompt(
-      "Why is this booking being declined?"
+      "Enter the reason for declining:"
     );
 
   if (!reason) {
     return;
   }
+}
 
-  const message =
-    prompt(
-      "Add a message for the customer (optional):"
-    ) || "";
+const message =
+  prompt(
+    "Additional message for the customer:",
+    "Please feel free to contact us if you would like to arrange another date or time."
+  ) || "";
 
   const confirmed =
     confirm(
