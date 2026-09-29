@@ -1252,18 +1252,15 @@ async function proposeBookingDate() {
     return;
   }
 
-
   const date =
     prompt(
       "Enter the proposed date (YYYY-MM-DD):",
       activeBooking.preferredDate || ""
     );
 
-
   if (!date) {
     return;
   }
-
 
   const time =
     prompt(
@@ -1271,11 +1268,9 @@ async function proposeBookingDate() {
       activeBooking.preferredTime || ""
     );
 
-
   if (!time) {
     return;
   }
-
 
   const message =
     prompt(
@@ -1283,13 +1278,34 @@ async function proposeBookingDate() {
       "We are unavailable on your requested date. We would like to propose this alternative."
     );
 
-
   if (message === null) {
     return;
   }
 
+  const confirmed =
+    confirm(
+      `Propose ${date} at ${time} to this client?`
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  const button =
+    document.getElementById(
+      "proposeDateButton"
+    );
+
+  button.disabled = true;
+
+  button.textContent =
+    "Sending…";
 
   try {
+
+    // -----------------------------------------
+    // 1. Save proposed date in Firestore
+    // -----------------------------------------
 
     await updateDoc(
       doc(
@@ -1324,6 +1340,28 @@ async function proposeBookingDate() {
       message;
 
 
+    // -----------------------------------------
+    // 2. Send email to customer
+    // -----------------------------------------
+
+    await sendCustomerBookingEmail(
+      activeBooking,
+      {
+        status: "Date Proposed",
+
+        proposedDate: date,
+
+        proposedTime: time,
+
+        proposalMessage: message
+      }
+    );
+
+
+    // -----------------------------------------
+    // 3. Refresh admin interface
+    // -----------------------------------------
+
     renderBookings(currentBookings);
 
     renderRecentBookings(currentBookings);
@@ -1332,7 +1370,7 @@ async function proposeBookingDate() {
 
 
     showBookingActionMessage(
-      "Alternative date saved successfully."
+      "Alternative date saved and customer notified."
     );
 
 
@@ -1345,9 +1383,15 @@ async function proposeBookingDate() {
 
 
     showBookingActionMessage(
-      "Unable to save the proposed date.",
+      "Date was saved, but the customer email could not be sent. Check the console.",
       true
     );
+
+
+    button.disabled = false;
+
+    button.textContent =
+      "Propose different date";
 
   }
 
@@ -1364,18 +1408,15 @@ async function declineBooking() {
     return;
   }
 
-
   const reason =
     prompt(
       "Why are you declining this booking?",
       "Fully booked"
     );
 
-
   if (!reason) {
     return;
   }
-
 
   const message =
     prompt(
@@ -1383,36 +1424,34 @@ async function declineBooking() {
       "Unfortunately, we are unable to accommodate this booking on the requested date."
     );
 
-
   if (message === null) {
     return;
   }
 
-
   const confirmed =
     confirm(
-      "Decline this booking?"
+      "Decline this booking and notify the customer?"
     );
-
 
   if (!confirmed) {
     return;
   }
-
 
   const button =
     document.getElementById(
       "declineBookingButton"
     );
 
-
   button.disabled = true;
 
   button.textContent =
     "Declining…";
 
-
   try {
+
+    // -----------------------------------------
+    // 1. Save decline in Firestore
+    // -----------------------------------------
 
     await updateDoc(
       doc(
@@ -1435,14 +1474,32 @@ async function declineBooking() {
     activeBooking.status =
       "Declined";
 
-
     activeBooking.declineReason =
       reason;
-
 
     activeBooking.declineMessage =
       message;
 
+
+    // -----------------------------------------
+    // 2. Send email to customer
+    // -----------------------------------------
+
+    await sendCustomerBookingEmail(
+      activeBooking,
+      {
+        status: "Declined",
+
+        declineReason: reason,
+
+        declineMessage: message
+      }
+    );
+
+
+    // -----------------------------------------
+    // 3. Refresh admin interface
+    // -----------------------------------------
 
     renderBookings(currentBookings);
 
@@ -1452,7 +1509,7 @@ async function declineBooking() {
 
 
     showBookingActionMessage(
-      "Booking declined."
+      "Booking declined and customer notified."
     );
 
 
@@ -1465,7 +1522,7 @@ async function declineBooking() {
 
 
     showBookingActionMessage(
-      "Unable to decline this booking.",
+      "Booking was updated, but the customer email could not be sent. Check the console.",
       true
     );
 
