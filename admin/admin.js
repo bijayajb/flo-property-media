@@ -207,9 +207,6 @@ console.log("========================================");
 // CUSTOMER EMAIL — CLOUDFLARE WORKER
 // ======================================================
 
-const BOOKING_EMAIL_WORKER =
-  "https://flo-booking-email.flopropertymedia.workers.dev";
-
 
 async function sendCustomerBookingEmail(booking, statusData) {
 
