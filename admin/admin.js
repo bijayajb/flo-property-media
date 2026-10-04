@@ -20,8 +20,7 @@ import {
   deleteDoc,
   addDoc,
   serverTimestamp
-} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 // ======================================================
 // FIREBASE CONFIG
