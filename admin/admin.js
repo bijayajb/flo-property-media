@@ -95,148 +95,6 @@ async function sendCustomerBookingEmail(booking, statusData) {
 
         body: JSON.stringify({
 
-          customerName:
-            booking.name ||
-            booking.clientName ||
-            "",
-
-          customerEmail:
-            booking.email ||
-            "",
-
-          mobile:
-            booking.mobile ||
-            "",
-
-          propertyAddress:
-            booking.propertyAddress ||
-            booking.address ||
-            "",
-
-          preferredDate:
-            booking.preferredDate ||
-            booking.date ||
-            "",
-
-          preferredTime:
-            booking.preferredTime ||
-            "",
-
-          proposedDate:
-            booking.proposedDate ||
-            "",
-
-          proposedTime:
-            booking.proposedTime ||
-            "",
-
-          packageName:
-            booking.package ||
-            booking.packageName ||
-            "",
-
-          services:
-            Array.isArray(
-              booking.services
-            )
-              ? booking.services
-              : [],
-
-          paymentMethod:
-            booking.paymentMethod ||
-            "",
-
-          message:
-            booking.message ||
-            "",
-
-          source:
-            booking.source ||
-            "Website booking form",
-
-          createdAt:
-            booking.createdAt ||
-            null,
-
-          status:
-            statusData?.status ||
-            booking.status ||
-            "",
-
-          statusMessage:
-            statusData?.statusMessage ||
-            "",
-
-          confirmedDate:
-            statusData?.confirmedDate ||
-            booking.confirmedDate ||
-            "",
-
-          confirmedTime:
-            statusData?.confirmedTime ||
-            booking.confirmedTime ||
-            ""
-
-        })
-      }
-    );
-
-  if (!response.ok) {
-
-    const errorText =
-      await response.text();
-
-    throw new Error(
-      errorText ||
-      "Unable to send customer email."
-    );
-  }
-
-  return response.json();
-
-}
-
-
-console.log("========== FLO FIREBASE DEBUG ==========");
-console.log("FLO FIREBASE PROJECT:", app.options.projectId);
-console.log("FLO FIREBASE APP ID:", app.options.appId);
-console.log("FLO FIREBASE AUTH DOMAIN:", app.options.authDomain);
-console.log("========================================");
-
-// ======================================================
-// CUSTOMER EMAIL — CLOUDFLARE WORKER
-// ======================================================
-
-
-async function sendCustomerBookingEmail(booking, statusData) {
-
-  const user = auth.currentUser;
-
-  if (!user) {
-    throw new Error(
-      "Admin authentication required."
-    );
-  }
-
-  const idToken =
-    await user.getIdToken();
-
-  const response =
-    await fetch(
-      BOOKING_EMAIL_WORKER,
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type":
-            "application/json",
-
-          "Authorization":
-            `Bearer ${idToken}`
-        },
-
-        body: JSON.stringify({
-
           // --------------------------------------------------
           // CUSTOMER DETAILS
           // --------------------------------------------------
@@ -366,47 +224,123 @@ async function sendCustomerBookingEmail(booking, statusData) {
 
 }
 
+
 // ======================================================
 // DOM ELEMENTS
 // ======================================================
 
-const loginScreen = document.getElementById("loginScreen");
-const dashboard = document.getElementById("dashboard");
+const loginScreen =
+  document.getElementById("loginScreen");
 
-const googleLogin = document.getElementById("googleLogin");
-const logoutButton = document.getElementById("logoutButton");
+const dashboard =
+  document.getElementById("dashboard");
 
-const loginError = document.getElementById("loginError");
+const googleLogin =
+  document.getElementById("googleLogin");
 
-const userName = document.getElementById("userName");
-const userEmail = document.getElementById("userEmail");
-const userInitial = document.getElementById("userInitial");
+const logoutButton =
+  document.getElementById("logoutButton");
 
-const pageTitle = document.getElementById("pageTitle");
+const loginError =
+  document.getElementById("loginError");
+
+const userName =
+  document.getElementById("userName");
+
+const userEmail =
+  document.getElementById("userEmail");
+
+const userInitial =
+  document.getElementById("userInitial");
+
+const pageTitle =
+  document.getElementById("pageTitle");
 
 
 // ======================================================
 // GOOGLE LOGIN
 // ======================================================
 
-googleLogin.addEventListener("click", async () => {
+googleLogin.addEventListener(
+  "click",
+  async () => {
 
-  loginError.textContent = "";
+    loginError.textContent = "";
 
-  googleLogin.disabled = true;
+    googleLogin.disabled = true;
 
-  googleLogin.innerHTML = `
-    <span>Signing in...</span>
-  `;
+    googleLogin.innerHTML = `
+      <span>Signing in...</span>
+    `;
 
-  try {
+    try {
 
-    const result = await signInWithPopup(
-      auth,
-      googleProvider
-    );
+      const result =
+        await signInWithPopup(
+          auth,
+          googleProvider
+        );
 
-    const user = result.user;
+      const user =
+        result.user;
+
+      if (
+        user.email !== ADMIN_EMAIL ||
+        !user.emailVerified
+      ) {
+
+        await signOut(auth);
+
+        throw new Error(
+          "This Google account is not authorised for the FLO admin portal."
+        );
+
+      }
+
+    } catch (error) {
+
+      console.error(error);
+
+      loginError.textContent =
+        error.message ||
+        "Unable to sign in. Please try again.";
+
+      googleLogin.disabled = false;
+
+      googleLogin.innerHTML = `
+        <span class="google-icon">G</span>
+        <span>Continue with Google</span>
+      `;
+
+    }
+
+  }
+);
+
+
+// ======================================================
+// AUTH STATE
+// ======================================================
+
+onAuthStateChanged(
+  auth,
+  async (user) => {
+
+    if (!user) {
+
+      loginScreen.classList.remove(
+        "hidden"
+      );
+
+      dashboard.classList.add(
+        "hidden"
+      );
+
+      return;
+    }
+
+
+    // Extra frontend protection
 
     if (
       user.email !== ADMIN_EMAIL ||
@@ -415,113 +349,79 @@ googleLogin.addEventListener("click", async () => {
 
       await signOut(auth);
 
-      throw new Error(
-        "This Google account is not authorised for the FLO admin portal."
-      );
+      loginError.textContent =
+        "This Google account is not authorised for the FLO admin portal.";
+
+      return;
     }
 
-  } catch (error) {
 
-    console.error(error);
+    // Show dashboard
 
-    loginError.textContent =
-      error.message ||
-      "Unable to sign in. Please try again.";
+    loginScreen.classList.add(
+      "hidden"
+    );
 
-    googleLogin.disabled = false;
-
-    googleLogin.innerHTML = `
-      <span class="google-icon">G</span>
-      <span>Continue with Google</span>
-    `;
-  }
-
-});
+    dashboard.classList.remove(
+      "hidden"
+    );
 
 
-// ======================================================
-// AUTH STATE
-// ======================================================
+    // User information
 
-onAuthStateChanged(auth, async (user) => {
-
-  if (!user) {
-
-    loginScreen.classList.remove("hidden");
-    dashboard.classList.add("hidden");
-
-    return;
-  }
-
-
-  // Extra frontend protection
-  if (
-    user.email !== ADMIN_EMAIL ||
-    !user.emailVerified
-  ) {
-
-    await signOut(auth);
-
-    loginError.textContent =
-      "This Google account is not authorised for the FLO admin portal.";
-
-    return;
-  }
-
-
-  // Show dashboard
-
-  loginScreen.classList.add("hidden");
-  dashboard.classList.remove("hidden");
-
-
-  // User information
-
-  userName.textContent =
-    user.displayName || "FLO Admin";
-
-  userEmail.textContent =
-    user.email;
-
-  userInitial.textContent =
-    (
+    userName.textContent =
       user.displayName ||
-      user.email ||
-      "F"
-    )
-      .charAt(0)
-      .toUpperCase();
+      "FLO Admin";
+
+    userEmail.textContent =
+      user.email;
+
+    userInitial.textContent =
+      (
+        user.displayName ||
+        user.email ||
+        "F"
+      )
+        .charAt(0)
+        .toUpperCase();
 
 
-  // Load dashboard data
+    // Load dashboard data
 
-await loadDashboard();
+    await loadDashboard();
 
-// Load CRM features
-await initCRMFeatures();
-});
+
+    // Load CRM features
+
+    await initCRMFeatures();
+
+  }
+);
 
 
 // ======================================================
 // LOGOUT
 // ======================================================
 
-logoutButton.addEventListener("click", async () => {
+logoutButton.addEventListener(
+  "click",
+  async () => {
 
-  try {
+    try {
 
-    await signOut(auth);
+      await signOut(auth);
 
-  } catch (error) {
+    } catch (error) {
 
-    console.error(
-      "Logout error:",
-      error
-    );
+      console.error(
+        "Logout error:",
+        error
+      );
+
+    }
 
   }
-
-});
+);
 
 
 // ======================================================
@@ -529,91 +429,162 @@ logoutButton.addEventListener("click", async () => {
 // ======================================================
 
 const navItems =
-  document.querySelectorAll(".nav-item");
+  document.querySelectorAll(
+    ".nav-item"
+  );
 
 const sections = {
-  overview: document.getElementById("overviewSection"),
-  bookings: document.getElementById("bookingsSection"),
-  clients: document.getElementById("clientsSection"),
-  projects: document.getElementById("projectsSection"),
-  quotes: document.getElementById("quotesSection")
+
+  overview:
+    document.getElementById(
+      "overviewSection"
+    ),
+
+  bookings:
+    document.getElementById(
+      "bookingsSection"
+    ),
+
+  clients:
+    document.getElementById(
+      "clientsSection"
+    ),
+
+  projects:
+    document.getElementById(
+      "projectsSection"
+    ),
+
+  quotes:
+    document.getElementById(
+      "quotesSection"
+    )
+
 };
 
 
 function showSection(sectionName) {
 
-  Object.values(sections).forEach(section => {
-    section.classList.add("hidden");
-  });
+  Object.values(sections)
+    .forEach(
+      section => {
+
+        if (section) {
+          section.classList.add(
+            "hidden"
+          );
+        }
+
+      }
+    );
 
 
   if (sections[sectionName]) {
-    sections[sectionName].classList.remove("hidden");
+
+    sections[sectionName]
+      .classList.remove(
+        "hidden"
+      );
+
   }
 
 
-  navItems.forEach(item => {
+  navItems.forEach(
+    item => {
 
-    item.classList.toggle(
-      "active",
-      item.dataset.section === sectionName
-    );
+      item.classList.toggle(
+        "active",
+        item.dataset.section ===
+          sectionName
+      );
 
-  });
+    }
+  );
 
 
   const titles = {
-    overview: "Overview",
-    bookings: "Bookings",
-    clients: "Clients",
-    projects: "Projects",
-    quotes: "Quotes"
+
+    overview:
+      "Overview",
+
+    bookings:
+      "Bookings",
+
+    clients:
+      "Clients",
+
+    projects:
+      "Projects",
+
+    quotes:
+      "Quotes"
+
   };
 
+
   pageTitle.textContent =
-    titles[sectionName] || "Overview";
+    titles[sectionName] ||
+    "Overview";
+
 }
 
 
-navItems.forEach(item => {
+navItems.forEach(
+  item => {
 
-  item.addEventListener("click", () => {
+    item.addEventListener(
+      "click",
+      () => {
 
-    showSection(
-      item.dataset.section
+        showSection(
+          item.dataset.section
+        );
+
+      }
     );
 
-  });
-
-});
+  }
+);
 
 
 document
-  .querySelectorAll("[data-section-link]")
-  .forEach(button => {
+  .querySelectorAll(
+    "[data-section-link]"
+  )
+  .forEach(
+    button => {
 
-    button.addEventListener("click", () => {
+      button.addEventListener(
+        "click",
+        () => {
 
-      showSection(
-        button.dataset.sectionLink
+          showSection(
+            button.dataset.sectionLink
+          );
+
+        }
       );
 
-    });
-
-  });
+    }
+  );
 
 
 // ======================================================
 // FIRESTORE
 // ======================================================
 
-async function getCollectionCount(collectionName) {
+async function getCollectionCount(
+  collectionName
+) {
 
   try {
 
     const snapshot =
       await getDocs(
-        collection(db, collectionName)
+        collection(
+          db,
+          collectionName
+        )
       );
 
     return snapshot.size;
@@ -626,7 +597,9 @@ async function getCollectionCount(collectionName) {
     );
 
     return 0;
+
   }
+
 }
 
 
@@ -635,6 +608,7 @@ async function getCollectionCount(collectionName) {
 // ======================================================
 
 let currentBookings = [];
+
 let activeBooking = null;
 
 
@@ -657,15 +631,16 @@ async function loadDashboard() {
 
     const bookingsSnapshot =
       await getDocs(
-        collection(db, "bookings")
+        collection(
+          db,
+          "bookings"
+        )
       );
-
 
     console.log(
       "Bookings loaded:",
       bookingsSnapshot.size
     );
-
 
     console.log(
       "Booking document IDs:",
@@ -679,10 +654,12 @@ async function loadDashboard() {
     const bookingData =
       bookingsSnapshot.docs.map(
         documentSnapshot => ({
+
           id:
             documentSnapshot.id,
 
           ...documentSnapshot.data()
+
         })
       );
 
@@ -766,15 +743,13 @@ async function loadDashboard() {
         "bookingsList"
       );
 
-
     if (bookingsList) {
 
-      bookingsList.innerHTML =
-        `
+      bookingsList.innerHTML = `
         <div class="empty-state">
           <p>Unable to load bookings.</p>
         </div>
-        `;
+      `;
 
     }
 
@@ -789,7 +764,10 @@ async function loadDashboard() {
 
     const clientsSnapshot =
       await getDocs(
-        collection(db, "clients")
+        collection(
+          db,
+          "clients"
+        )
       );
 
 
@@ -825,7 +803,6 @@ async function loadDashboard() {
         "clientsCount"
       );
 
-
     if (clientsCount) {
 
       clientsCount.textContent =
@@ -844,7 +821,10 @@ async function loadDashboard() {
 
     const projectsSnapshot =
       await getDocs(
-        collection(db, "projects")
+        collection(
+          db,
+          "projects"
+        )
       );
 
 
@@ -880,7 +860,6 @@ async function loadDashboard() {
         "projectsCount"
       );
 
-
     if (projectsCount) {
 
       projectsCount.textContent =
@@ -899,7 +878,10 @@ async function loadDashboard() {
 
     const quotesSnapshot =
       await getDocs(
-        collection(db, "quotes")
+        collection(
+          db,
+          "quotes"
+        )
       );
 
 
@@ -923,236 +905,6 @@ async function loadDashboard() {
   );
 
 }
-
-  // -----------------------------------------
-  // BOOKINGS
-  // -----------------------------------------
-
-  try {
-
-    const bookingsSnapshot =
-  await getDocs(
-    collection(db, "bookings")
-  );
-
-console.log(
-  "Bookings loaded:",
-  bookingsSnapshot.size
-);
-
-console.log(
-  "Booking document IDs:",
-  bookingsSnapshot.docs.map(
-    documentSnapshot => documentSnapshot.id
-  )
-);
-
-
-// ======================================================
-// DIRECT BOOKING TEST
-// ======================================================
-
-console.log("========== DIRECT BOOKING TEST ==========");
-
-console.log(
-  "Logged-in user:",
-  auth.currentUser?.email
-);
-
-console.log(
-  "Email verified:",
-  auth.currentUser?.emailVerified
-);
-
-const testBooking =
-  await getDoc(
-    doc(
-      db,
-      "bookings",
-      "DvdUUYsERiF7RF6K6mo"
-    )
-  );
-
-console.log(
-  "Known booking exists:",
-  testBooking.exists()
-);
-
-console.log(
-  "Known booking data:",
-  testBooking.exists()
-    ? testBooking.data()
-    : null
-);
-
-console.log("=========================================");
-
-    const bookingData =
-      bookingsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-
-
-    const newBookings =
-      bookingData.filter(
-        booking =>
-          !booking.status ||
-          booking.status === "New"
-      );
-
-
-    const confirmedBookings =
-      bookingData.filter(
-        booking =>
-          booking.status === "Confirmed"
-      );
-
-
-    document.getElementById(
-      "newBookingsCount"
-    ).textContent =
-      newBookings.length;
-
-
-    document.getElementById(
-      "upcomingCount"
-    ).textContent =
-      confirmedBookings.length;
-
-
-    // Render the main bookings list first.
-// A problem in the small "recent bookings" panel must never erase
-// an otherwise successfully loaded bookings list.
-renderBookings(bookingData);
-
-try {
-  renderRecentBookings(bookingData);
-} catch (recentError) {
-  console.error("RECENT BOOKINGS RENDER ERROR:", recentError);
-}
-
-
-  } catch (error) {
-
-    console.error(
-      "BOOKINGS ERROR:",
-      error
-    );
-
-    const bookingsList =
-      document.getElementById("bookingsList");
-
-    if (bookingsList) {
-      bookingsList.innerHTML =
-        "Unable to load bookings.";
-    }
-
-  }
-
-
-  // -----------------------------------------
-  // CLIENTS
-  // -----------------------------------------
-
-  try {
-
-    const clientsSnapshot =
-      await getDocs(
-        collection(db, "clients")
-      );
-
-
-    document.getElementById(
-      "clientsCount"
-    ).textContent =
-      clientsSnapshot.size;
-
-
-    renderClients(clientsSnapshot);
-
-
-  } catch (error) {
-
-    console.error(
-      "CLIENTS ERROR:",
-      error
-    );
-
-    document.getElementById(
-      "clientsCount"
-    ).textContent = "0";
-
-  }
-
-
-  // -----------------------------------------
-  // PROJECTS
-  // -----------------------------------------
-
-  try {
-
-    const projectsSnapshot =
-      await getDocs(
-        collection(db, "projects")
-      );
-
-
-    document.getElementById(
-      "projectsCount"
-    ).textContent =
-      projectsSnapshot.size;
-
-
-    renderProjects(projectsSnapshot);
-
-
-  } catch (error) {
-
-    console.error(
-      "PROJECTS ERROR:",
-      error
-    );
-
-    document.getElementById(
-      "projectsCount"
-    ).textContent = "0";
-
-  }
-
-
-  // -----------------------------------------
-  // QUOTES
-  // -----------------------------------------
-
-  try {
-
-    const quotesSnapshot =
-      await getDocs(
-        collection(db, "quotes")
-      );
-
-
-    renderQuotes(quotesSnapshot);
-
-
-  } catch (error) {
-
-    console.error(
-      "QUOTES ERROR:",
-      error
-    );
-
-  }
-
-
-  console.log(
-    "FLO admin dashboard finished loading."
-  );
-
-}
-
-
 // ======================================================
 // BOOKINGS
 // ======================================================
@@ -1163,32 +915,30 @@ function renderBookings(bookings) {
     document.getElementById("bookingsList");
 
   if (!container) {
-    console.error("bookingsList element not found.");
+    console.error(
+      "bookingsList element not found."
+    );
     return;
   }
 
-  // Keep the complete Firestore result available to the modal/actions.
-  currentBookings = Array.isArray(bookings) ? bookings : [];
+  // Keep the complete Firestore result available
+  // to the modal/actions.
+  currentBookings =
+    Array.isArray(bookings)
+      ? bookings
+      : [];
 
-  bookings = currentBookings;
+  bookings =
+    currentBookings;
 
   if (!bookings.length) {
+
     container.innerHTML = `
       <div class="booking-empty">
         No bookings yet.
       </div>
     `;
-    return;
-  }
 
-  currentBookings = bookings;
-
-  if (!bookings.length) {
-    container.innerHTML = `
-      <div class="booking-empty">
-        No bookings yet.
-      </div>
-    `;
     return;
   }
 
@@ -1211,7 +961,9 @@ function renderBookings(bookings) {
     const parsed =
       new Date(date);
 
-    return isNaN(parsed.getTime())
+    return isNaN(
+      parsed.getTime()
+    )
       ? Number.MAX_SAFE_INTEGER
       : parsed.getTime();
   }
@@ -1222,37 +974,44 @@ function renderBookings(bookings) {
   // -----------------------------------------
 
   const groups = [
-  {
-    status: "New",
-    label: "NEW",
-    className: "booking-group-new"
-  },
-  {
-    status: "Confirmed",
-    label: "ACCEPTED",
-    className: "booking-group-confirmed"
-  },
-  {
-    status: "Date Proposed",
-    label: "DATE PROPOSED",
-    className: "booking-group-proposed"
-  },
-  {
-    status: "Declined",
-    label: "DECLINED",
-    className: "booking-group-declined"
-  },
-  {
-    status: "Completed",
-    label: "COMPLETED",
-    className: "booking-group-completed"
-  },
-  {
-    status: "Closed",
-    label: "CLOSED",
-    className: "booking-group-closed"
-  }
-];
+
+    {
+      status: "New",
+      label: "NEW",
+      className: "booking-group-new"
+    },
+
+    {
+      status: "Confirmed",
+      label: "ACCEPTED",
+      className: "booking-group-confirmed"
+    },
+
+    {
+      status: "Date Proposed",
+      label: "DATE PROPOSED",
+      className: "booking-group-proposed"
+    },
+
+    {
+      status: "Declined",
+      label: "DECLINED",
+      className: "booking-group-declined"
+    },
+
+    {
+      status: "Completed",
+      label: "COMPLETED",
+      className: "booking-group-completed"
+    },
+
+    {
+      status: "Closed",
+      label: "CLOSED",
+      className: "booking-group-closed"
+    }
+
+  ];
 
 
   let output = "";
@@ -1262,157 +1021,196 @@ function renderBookings(bookings) {
   // RENDER EACH GROUP
   // -----------------------------------------
 
-groups.forEach(group => {
-    const groupBookings =
-  bookings
-    .filter(booking => {
+  groups.forEach(
+    group => {
 
-      const rawStatus =
-        String(booking.status || "New").trim();
-
-      const status =
-        rawStatus.toLowerCase() === "new"
-          ? "New"
-          : rawStatus.toLowerCase() === "confirmed"
-            ? "Confirmed"
-            : rawStatus.toLowerCase() === "date proposed"
-              ? "Date Proposed"
-              : rawStatus.toLowerCase() === "declined"
-                ? "Declined"
-                : rawStatus.toLowerCase() === "completed"
-                  ? "Completed"
-                  : rawStatus.toLowerCase() === "closed"
-                    ? "Closed"
-                    : "New";
-
-      return group.status === status;
-
-    })
-        .sort(
-      (a, b) =>
-        getBookingDate(a) -
-        getBookingDate(b)
-    );
-
-
-    if (!groupBookings.length) {
-      return;
-    }
-
-
-    output += `
-
-      <div class="booking-status-group ${group.className}">
-
-  <div class="booking-status-group-header">
-
-    <span>
-      ${group.label}
-    </span>
-
-          <small>
-            ${groupBookings.length}
-          </small>
-
-        </div>
-
-        <div class="booking-group-list">
-
-          ${groupBookings
-            .map(booking => {
-
-              const client =
-                booking.clientName ||
-                booking.name ||
-                "—";
-
-
-              const property =
-                booking.propertyAddress ||
-                booking.address ||
-                "—";
-
-
-              const date =
-                booking.status === "Date Proposed"
-                  ? (
-                      booking.proposedDate ||
-                      booking.preferredDate ||
-                      "—"
-                    )
-                  : (
-                      booking.preferredDate ||
-                      booking.date ||
-                      "—"
-                    );
-
-
-              const packageName =
-                booking.package ||
-                booking.packageName ||
-                "—";
-
+      const groupBookings =
+        bookings
+          .filter(
+            booking => {
 
               const rawStatus =
-  String(booking.status || "New").trim();
+                String(
+                  booking.status ||
+                  "New"
+                ).trim();
 
-const status =
-  ["New", "Confirmed", "Date Proposed", "Declined", "Completed", "Closed"]
-    .find(
-      value =>
-        value.toLowerCase() === rawStatus.toLowerCase()
-    ) || "New";
+              const status =
+                rawStatus.toLowerCase() ===
+                  "new"
+                  ? "New"
+                  : rawStatus.toLowerCase() ===
+                      "confirmed"
+                    ? "Confirmed"
+                    : rawStatus.toLowerCase() ===
+                        "date proposed"
+                      ? "Date Proposed"
+                      : rawStatus.toLowerCase() ===
+                          "declined"
+                        ? "Declined"
+                        : rawStatus.toLowerCase() ===
+                            "completed"
+                          ? "Completed"
+                          : rawStatus.toLowerCase() ===
+                              "closed"
+                            ? "Closed"
+                            : "New";
+
+              return (
+                group.status ===
+                status
+              );
+
+            }
+          )
+          .sort(
+            (a, b) =>
+              getBookingDate(a) -
+              getBookingDate(b)
+          );
 
 
-              return `
+      if (!groupBookings.length) {
+        return;
+      }
 
-                <button
-                  type="button"
-                  class="booking-row"
-                  data-booking-id="${booking.id}"
-                >
 
-                  <span>
-                    ${escapeHTML(client)}
-                  </span>
+      output += `
 
-                  <span>
-                    ${escapeHTML(property)}
-                  </span>
+        <div class="booking-status-group ${group.className}">
 
-                  <span>
-                    ${escapeHTML(date)}
-                  </span>
+          <div class="booking-status-group-header">
 
-                  <span>
-                    ${escapeHTML(packageName)}
-                  </span>
+            <span>
+              ${group.label}
+            </span>
 
-                  <span>
+            <small>
+              ${groupBookings.length}
+            </small>
 
-                    <b class="status-badge status-${status
-                      .toLowerCase()
-                      .replaceAll(" ", "-")}"
+          </div>
+
+          <div class="booking-group-list">
+
+            ${groupBookings
+              .map(
+                booking => {
+
+                  const client =
+                    booking.clientName ||
+                    booking.name ||
+                    "—";
+
+
+                  const property =
+                    booking.propertyAddress ||
+                    booking.address ||
+                    "—";
+
+
+                  const date =
+                    booking.status ===
+                      "Date Proposed"
+
+                      ? (
+                          booking.proposedDate ||
+                          booking.preferredDate ||
+                          "—"
+                        )
+
+                      : (
+                          booking.preferredDate ||
+                          booking.date ||
+                          "—"
+                        );
+
+
+                  const packageName =
+                    booking.package ||
+                    booking.packageName ||
+                    "—";
+
+
+                  const rawStatus =
+                    String(
+                      booking.status ||
+                      "New"
+                    ).trim();
+
+
+                  const status =
+                    [
+                      "New",
+                      "Confirmed",
+                      "Date Proposed",
+                      "Declined",
+                      "Completed",
+                      "Closed"
+                    ]
+                      .find(
+                        value =>
+                          value.toLowerCase() ===
+                          rawStatus.toLowerCase()
+                      ) ||
+                    "New";
+
+
+                  return `
+
+                    <button
+                      type="button"
+                      class="booking-row"
+                      data-booking-id="${booking.id}"
                     >
-                      ${escapeHTML(status)}
-                    </b>
 
-                  </span>
+                      <span>
+                        ${escapeHTML(client)}
+                      </span>
 
-                </button>
+                      <span>
+                        ${escapeHTML(property)}
+                      </span>
 
-              `;
+                      <span>
+                        ${escapeHTML(date)}
+                      </span>
 
-            })
-            .join("")}
+                      <span>
+                        ${escapeHTML(packageName)}
+                      </span>
+
+                      <span>
+
+                        <b
+                          class="status-badge status-${status
+                            .toLowerCase()
+                            .replaceAll(
+                              " ",
+                              "-"
+                            )}"
+                        >
+                          ${escapeHTML(status)}
+                        </b>
+
+                      </span>
+
+                    </button>
+
+                  `;
+
+                }
+              )
+              .join("")}
+
+          </div>
 
         </div>
 
-      </div>
+      `;
 
-    `;
-
-  });
+    }
+  );
 
 
   if (!output) {
@@ -1434,37 +1232,61 @@ const status =
   // CLICK HANDLERS
   // -----------------------------------------
 
-  container.onclick = function (event) {
+  container.onclick =
+    function (event) {
 
-  const row = event.target.closest(".booking-row");
+      const row =
+        event.target.closest(
+          ".booking-row"
+        );
 
-  if (!row || !container.contains(row)) {
-    return;
-  }
+      if (
+        !row ||
+        !container.contains(row)
+      ) {
+        return;
+      }
 
-  const bookingId =
-    row.getAttribute("data-booking-id");
 
-  if (!bookingId) {
-    return;
-  }
+      const bookingId =
+        row.getAttribute(
+          "data-booking-id"
+        );
 
-  console.log("Opening booking:", bookingId);
 
-  openBookingModal(bookingId);
-};
+      if (!bookingId) {
+        return;
+      }
+
+
+      console.log(
+        "Opening booking:",
+        bookingId
+      );
+
+
+      openBookingModal(
+        bookingId
+      );
+
+    };
 
 }
+
 
 // ======================================================
 // BOOKING MODAL
 // ======================================================
 
-function openBookingModal(bookingId) {
+function openBookingModal(
+  bookingId
+) {
 
   activeBooking =
     currentBookings.find(
-      booking => booking.id === bookingId
+      booking =>
+        booking.id ===
+        bookingId
     );
 
 
@@ -1474,7 +1296,9 @@ function openBookingModal(bookingId) {
 
 
   let modal =
-    document.getElementById("bookingModal");
+    document.getElementById(
+      "bookingModal"
+    );
 
 
   if (!modal) {
@@ -1482,37 +1306,51 @@ function openBookingModal(bookingId) {
     createBookingModal();
 
     modal =
-      document.getElementById("bookingModal");
+      document.getElementById(
+        "bookingModal"
+      );
 
   }
 
 
   populateBookingModal();
 
-ensureBookingClientButton();
+  ensureBookingClientButton();
 
-modal.classList.remove("hidden");
+  modal.classList.remove(
+    "hidden"
+  );
 
-  document.body.classList.add("modal-open");
+  document.body.classList.add(
+    "modal-open"
+  );
+
 }
 
 
 function createBookingModal() {
 
   const modal =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
-  modal.id = "bookingModal";
+  modal.id =
+    "bookingModal";
 
-  modal.className = "booking-modal hidden";
+  modal.className =
+    "booking-modal hidden";
 
 
   modal.innerHTML = `
 
-    <div class="booking-modal-overlay"
-         data-close-booking-modal></div>
+    <div
+      class="booking-modal-overlay"
+      data-close-booking-modal
+    ></div>
 
-             <div class="booking-modal-card">
+
+    <div class="booking-modal-card">
 
       <button
         type="button"
@@ -1649,79 +1487,95 @@ function createBookingModal() {
         class="booking-action-message"
         aria-live="polite"
       ></div>
-      
+
+
       <div class="booking-actions">
 
-  <button
-    type="button"
-    class="booking-action booking-action-primary"
-    id="acceptBookingButton"
-  >
-    Accept booking
-  </button>
+        <button
+          type="button"
+          class="booking-action booking-action-primary"
+          id="acceptBookingButton"
+        >
+          Accept booking
+        </button>
 
-  <button
-    type="button"
-    class="booking-action"
-    id="proposeDateButton"
-  >
-    Propose different date
-  </button>
 
-  <button
-    type="button"
-    class="booking-action booking-action-danger"
-    id="declineBookingButton"
-  >
-    Decline / booked out
-  </button>
+        <button
+          type="button"
+          class="booking-action"
+          id="proposeDateButton"
+        >
+          Propose different date
+        </button>
 
-  <button
-    type="button"
-    class="booking-action booking-action-complete"
-    id="completeBookingButton"
-  >
-    Complete booking
-  </button>
 
-  <button
-    type="button"
-    class="booking-action booking-action-close"
-    id="closeBookingButton"
-  >
-    Close request
-  </button>
+        <button
+          type="button"
+          class="booking-action booking-action-danger"
+          id="declineBookingButton"
+        >
+          Decline / booked out
+        </button>
 
-  <button
-    type="button"
-    class="booking-action booking-action-delete"
-    id="deleteBookingButton"
-  >
-    Delete booking
-  </button>
 
-</div>
+        <button
+          type="button"
+          class="booking-action booking-action-complete"
+          id="completeBookingButton"
+        >
+          Complete booking
+        </button>
+
+
+        <button
+          type="button"
+          class="booking-action booking-action-close"
+          id="closeBookingButton"
+        >
+          Close request
+        </button>
+
+
+        <button
+          type="button"
+          class="booking-action booking-action-delete"
+          id="deleteBookingButton"
+        >
+          Delete booking
+        </button>
+
+      </div>
+
+    </div>
 
   `;
 
 
-  document.body.appendChild(modal);
+  document.body.appendChild(
+    modal
+  );
 
 
   modal
-    .querySelectorAll("[data-close-booking-modal]")
-    .forEach(element => {
+    .querySelectorAll(
+      "[data-close-booking-modal]"
+    )
+    .forEach(
+      element => {
 
-      element.addEventListener(
-        "click",
-        closeBookingModal
-      );
+        element.addEventListener(
+          "click",
+          closeBookingModal
+        );
 
-    });
+      }
+    );
 
 
   document
-    .getElementById("acceptBookingButton")
+    .getElementById(
+      "acceptBookingButton"
+    )
     .addEventListener(
       "click",
       acceptBooking
@@ -1729,7 +1583,9 @@ function createBookingModal() {
 
 
   document
-    .getElementById("proposeDateButton")
+    .getElementById(
+      "proposeDateButton"
+    )
     .addEventListener(
       "click",
       proposeBookingDate
@@ -1737,30 +1593,44 @@ function createBookingModal() {
 
 
   document
-    .getElementById("declineBookingButton")
+    .getElementById(
+      "declineBookingButton"
+    )
     .addEventListener(
       "click",
       declineBooking
     );
+
+
   document
-    .getElementById("completeBookingButton")
+    .getElementById(
+      "completeBookingButton"
+    )
     .addEventListener(
       "click",
       completeBooking
     );
-  document
-  .getElementById("closeBookingButton")
-  .addEventListener(
-    "click",
-    closeBooking
-  );
 
-document
-  .getElementById("deleteBookingButton")
-  .addEventListener(
-    "click",
-    deleteBooking
-  );
+
+  document
+    .getElementById(
+      "closeBookingButton"
+    )
+    .addEventListener(
+      "click",
+      closeBooking
+    );
+
+
+  document
+    .getElementById(
+      "deleteBookingButton"
+    )
+    .addEventListener(
+      "click",
+      deleteBooking
+    );
+
 }
 
 
@@ -1835,7 +1705,9 @@ function populateBookingModal() {
 
 
   const services =
-    Array.isArray(booking.services)
+    Array.isArray(
+      booking.services
+    )
       ? booking.services
       : [];
 
@@ -1844,13 +1716,17 @@ function populateBookingModal() {
     "bookingModalServices"
   ).innerHTML =
     services.length
+
       ? services
-          .map(service => `
-            <span class="service-tag">
-              ${escapeHTML(service)}
-            </span>
-          `)
+          .map(
+            service => `
+              <span class="service-tag">
+                ${escapeHTML(service)}
+              </span>
+            `
+          )
           .join("")
+
       : "—";
 
 
@@ -1869,11 +1745,18 @@ function populateBookingModal() {
   document.getElementById(
     "bookingModalStatus"
   ).innerHTML = `
-    <span class="status-badge status-${status
-      .toLowerCase()
-      .replaceAll(" ", "-")}">
+
+    <span
+      class="status-badge status-${status
+        .toLowerCase()
+        .replaceAll(
+          " ",
+          "-"
+        )}"
+    >
       ${escapeHTML(status)}
     </span>
+
   `;
 
 
@@ -1882,10 +1765,13 @@ function populateBookingModal() {
       "bookingActionMessage"
     );
 
-  message.textContent = "";
+  message.textContent =
+    "";
 
 
-  // Disable actions where appropriate
+  // -----------------------------------------
+  // DISABLE ACTIONS WHERE APPROPRIATE
+  // -----------------------------------------
 
   const acceptButton =
     document.getElementById(
@@ -1904,51 +1790,61 @@ function populateBookingModal() {
 
 
   acceptButton.disabled =
-  status !== "New";
+    status !== "New";
 
-proposeButton.disabled =
-  status !== "New";
 
-declineButton.disabled =
-  status !== "New" &&
-  status !== "Date Proposed";
+  proposeButton.disabled =
+    status !== "New";
 
-const completeButton =
-  document.getElementById(
-    "completeBookingButton"
-  );
 
-if (completeButton) {
-
-  completeButton.disabled =
-    status !== "Confirmed" &&
+  declineButton.disabled =
+    status !== "New" &&
     status !== "Date Proposed";
 
-}
-const closeButton =
-  document.getElementById(
-    "closeBookingButton"
-  );
 
-if (closeButton) {
+  const completeButton =
+    document.getElementById(
+      "completeBookingButton"
+    );
 
-  closeButton.disabled =
-    status !== "Declined";
 
-}
+  if (completeButton) {
 
-const deleteButton =
-  document.getElementById(
-    "deleteBookingButton"
-  );
+    completeButton.disabled =
+      status !== "Confirmed" &&
+      status !== "Date Proposed";
 
-if (deleteButton) {
+  }
 
-  deleteButton.disabled =
-    status !== "Completed" &&
-    status !== "Closed";
 
-}
+  const closeButton =
+    document.getElementById(
+      "closeBookingButton"
+    );
+
+
+  if (closeButton) {
+
+    closeButton.disabled =
+      status !== "Declined";
+
+  }
+
+
+  const deleteButton =
+    document.getElementById(
+      "deleteBookingButton"
+    );
+
+
+  if (deleteButton) {
+
+    deleteButton.disabled =
+      status !== "Completed" &&
+      status !== "Closed";
+
+  }
+
 }
 
 
@@ -1961,7 +1857,11 @@ function closeBookingModal() {
 
 
   if (modal) {
-    modal.classList.add("hidden");
+
+    modal.classList.add(
+      "hidden"
+    );
+
   }
 
 
@@ -1969,105 +1869,11 @@ function closeBookingModal() {
     "modal-open"
   );
 
-  activeBooking = null;
+
+  activeBooking =
+    null;
+
 }
-
-// ======================================================
-// ACCEPT BOOKING
-// ======================================================
-
-async function acceptBooking() {
-
-  if (!activeBooking) {
-    return;
-  }
-
-  // Prevent duplicate confirmation emails
-  if (activeBooking.confirmedEmailSentAt) {
-    showBookingActionMessage(
-      "This booking has already been confirmed and the customer has already been notified.",
-      "info"
-    );
-    return;
-  }
-
-  const confirmed =
-    confirm("Confirm this booking and notify the customer?");
-
-  if (!confirmed) {
-    return;
-  }
-
-  const button =
-    document.getElementById("acceptBookingButton")
-  
-  if (button) {
-    button.disabled = true;
-    button.textContent = "Confirming...";
-  }
-
-  try {
-
-    // Update booking status
-    await updateDoc(
-      doc(db, "bookings", activeBooking.id),
-      {
-        status: "Confirmed",
-        confirmedAt: serverTimestamp()
-      }
-    );
-
-    // Send customer email
-    await sendCustomerBookingEmail(
-      activeBooking,
-      {
-        status: "Confirmed"
-      }
-    );
-
-    // Mark confirmation email as sent
-    await updateDoc(
-      doc(db, "bookings", activeBooking.id),
-      {
-        confirmedEmailSentAt: serverTimestamp()
-      }
-    );
-
-    // Update local booking object
-    activeBooking.status = "Confirmed";
-    activeBooking.confirmedEmailSentAt = true;
-
-    // Refresh dashboard
-    await loadDashboard();
-
-    closeBookingModal();
-
-    showBookingActionMessage(
-      "Booking confirmed and customer notified.",
-      "success"
-    );
-
-  } catch (error) {
-
-    console.error(
-      "Accept booking error:",
-      error
-    );
-
-    showBookingActionMessage(
-      "Booking was updated, but the customer email could not be sent. Please try again.",
-      "error"
-    );
-
-  } finally {
-
-    if (button) {
-      button.disabled = false;
-      button.textContent = "Accept Booking";
-    }
-  }
-}
-
 // ======================================================
 // COMPLETE BOOKING
 // ======================================================
@@ -2078,14 +1884,16 @@ async function completeBooking() {
     return;
   }
 
+
   if (activeBooking.completedEmailSentAt) {
 
-  showBookingActionMessage(
-    "Completion email has already been sent for this booking."
-  );
+    showBookingActionMessage(
+      "Completion email has already been sent for this booking."
+    );
 
-  return;
-}
+    return;
+  }
+
 
   const confirmed =
     confirm(
@@ -2113,7 +1921,7 @@ async function completeBooking() {
   try {
 
     // --------------------------------------------------
-    // 1. Send completion emails first
+    // 1. Send completion email
     // --------------------------------------------------
 
     await sendCustomerBookingEmail(
@@ -2204,6 +2012,7 @@ async function completeBooking() {
 
 }
 
+
 // ======================================================
 // PROPOSE DIFFERENT DATE
 // ======================================================
@@ -2214,166 +2023,271 @@ async function proposeBookingDate() {
     return;
   }
 
+
   // Prevent duplicate proposal emails
+
   if (activeBooking.proposedEmailSentAt) {
+
     showBookingActionMessage(
       "An alternative date has already been proposed and the customer has already been notified.",
       "info"
     );
+
     return;
   }
+
 
   const date =
     prompt(
       "Enter the proposed date (e.g. 15/10/2026):"
     );
 
+
   if (!date) {
     return;
   }
+
 
   const time =
     prompt(
       "Enter the proposed time (e.g. 2:00 PM):"
     );
 
+
   if (!time) {
     return;
   }
 
+
   const messageOptions = [
-  {
-    name: "Requested time unavailable",
-    text: "Unfortunately, we’re unavailable at the requested time. We’d be happy to accommodate your booking on the alternative date and time below."
-  },
-  {
-    name: "Scheduling adjustment",
-    text: "We’ve had a scheduling adjustment and would like to offer you the alternative date and time below."
-  },
-  {
-    name: "Earlier appointment available",
-    text: "We have an earlier appointment available and would be happy to accommodate your booking at the alternative date and time below."
-  },
-  {
-    name: "Later appointment available",
-    text: "We have a later appointment available and would be happy to accommodate your booking at the alternative date and time below."
-  },
-  {
-    name: "Other",
-    text: ""
-  }
-];
 
-const messageMenu =
-  messageOptions
-    .map(
-      (option, index) =>
-        `${index + 1}. ${option.name}`
-    )
-    .join("\n");
+    {
+      name:
+        "Requested time unavailable",
 
-const messageSelection =
-  prompt(
-    `Select a message for the customer:\n\n${messageMenu}\n\nEnter the number:`
-  );
+      text:
+        "Unfortunately, we’re unavailable at the requested time. We’d be happy to accommodate your booking on the alternative date and time below."
+    },
 
-if (!messageSelection) {
-  return;
-}
+    {
+      name:
+        "Scheduling adjustment",
 
-const messageIndex =
-  Number(messageSelection) - 1;
+      text:
+        "We’ve had a scheduling adjustment and would like to offer you the alternative date and time below."
+    },
 
-if (
-  !Number.isInteger(messageIndex) ||
-  messageIndex < 0 ||
-  messageIndex >= messageOptions.length
-) {
-  alert("Please select a valid message.");
-  return;
-}
+    {
+      name:
+        "Earlier appointment available",
 
-let message =
-  messageOptions[messageIndex].text;
+      text:
+        "We have an earlier appointment available and would be happy to accommodate your booking at the alternative date and time below."
+    },
 
-if (messageOptions[messageIndex].name === "Other") {
+    {
+      name:
+        "Later appointment available",
 
-  message =
+      text:
+        "We have a later appointment available and would be happy to accommodate your booking at the alternative date and time below."
+    },
+
+    {
+      name:
+        "Other",
+
+      text:
+        ""
+    }
+
+  ];
+
+
+  const messageMenu =
+    messageOptions
+      .map(
+        (option, index) =>
+          `${index + 1}. ${option.name}`
+      )
+      .join("\n");
+
+
+  const messageSelection =
     prompt(
-      "Enter your message for the customer:"
+      `Select a message for the customer:\n\n${messageMenu}\n\nEnter the number:`
     );
 
-  if (!message) {
+
+  if (!messageSelection) {
     return;
   }
-}
+
+
+  const messageIndex =
+    Number(messageSelection) - 1;
+
+
+  if (
+    !Number.isInteger(messageIndex) ||
+    messageIndex < 0 ||
+    messageIndex >= messageOptions.length
+  ) {
+
+    alert(
+      "Please select a valid message."
+    );
+
+    return;
+  }
+
+
+  let message =
+    messageOptions[
+      messageIndex
+    ].text;
+
+
+  if (
+    messageOptions[
+      messageIndex
+    ].name === "Other"
+  ) {
+
+    message =
+      prompt(
+        "Enter your message for the customer:"
+      );
+
+
+    if (!message) {
+      return;
+    }
+
+  }
+
 
   const confirmed =
     confirm(
       `Propose ${date} at ${time} to the customer?`
     );
 
+
   if (!confirmed) {
     return;
   }
 
+
   const button =
-    document.getElementById("proposeDateButton")
+    document.getElementById(
+      "proposeDateButton"
+    );
+
 
   if (button) {
+
     button.disabled = true;
-    button.textContent = "Sending...";
+
+    button.textContent =
+      "Sending...";
+
   }
+
 
   try {
 
     // Save proposed date to Firestore
+
     await updateDoc(
-      doc(db, "bookings", activeBooking.id),
+      doc(
+        db,
+        "bookings",
+        activeBooking.id
+      ),
       {
-        status: "Date Proposed",
-        proposedDate: date,
-        proposedTime: time,
-        proposalMessage: message,
-        proposedAt: serverTimestamp()
+        status:
+          "Date Proposed",
+
+        proposedDate:
+          date,
+
+        proposedTime:
+          time,
+
+        proposalMessage:
+          message,
+
+        proposedAt:
+          serverTimestamp()
       }
     );
 
+
     // Send customer email
+
     await sendCustomerBookingEmail(
       activeBooking,
       {
-        status: "Date Proposed",
-        proposedDate: date,
-        proposedTime: time,
-        proposalMessage: message
+        status:
+          "Date Proposed",
+
+        proposedDate:
+          date,
+
+        proposedTime:
+          time,
+
+        proposalMessage:
+          message
       }
     );
+
 
     // Mark proposal email as sent
+
     await updateDoc(
-      doc(db, "bookings", activeBooking.id),
+      doc(
+        db,
+        "bookings",
+        activeBooking.id
+      ),
       {
-        proposedEmailSentAt: serverTimestamp()
+        proposedEmailSentAt:
+          serverTimestamp()
       }
     );
 
+
     // Update local booking object
-    activeBooking.status = "Date Proposed";
-    activeBooking.proposedDate = date;
-    activeBooking.proposedTime = time;
-    activeBooking.proposalMessage = message;
-    activeBooking.proposedEmailSentAt = true;
+
+    activeBooking.status =
+      "Date Proposed";
+
+    activeBooking.proposedDate =
+      date;
+
+    activeBooking.proposedTime =
+      time;
+
+    activeBooking.proposalMessage =
+      message;
+
+    activeBooking.proposedEmailSentAt =
+      true;
+
 
     // Refresh dashboard
+
     await loadDashboard();
 
     closeBookingModal();
+
 
     showBookingActionMessage(
       "Alternative date saved and customer notified.",
       "success"
     );
+
 
   } catch (error) {
 
@@ -2382,18 +2296,26 @@ if (messageOptions[messageIndex].name === "Other") {
       error
     );
 
+
     showBookingActionMessage(
       "The alternative date was saved, but the customer email could not be sent. Please try again.",
       "error"
     );
 
+
   } finally {
 
     if (button) {
+
       button.disabled = false;
-      button.textContent = "Propose New Date";
+
+      button.textContent =
+        "Propose New Date";
+
     }
+
   }
+
 }
 
 
@@ -2407,154 +2329,255 @@ async function declineBooking() {
     return;
   }
 
+
   // Prevent duplicate decline emails
+
   if (activeBooking.declinedEmailSentAt) {
+
     showBookingActionMessage(
       "This booking has already been declined and the customer has already been notified.",
       "info"
     );
+
     return;
   }
+
 
   const reasonOptions = [
-  {
-    name: "Date unavailable",
-    text: "Unfortunately, we’re unable to accommodate this booking on the requested date due to availability."
-  },
-  {
-    name: "Time unavailable",
-    text: "Unfortunately, we’re unable to accommodate the requested time due to availability."
-  },
-  {
-    name: "Outside service area",
-    text: "Unfortunately, this property is outside our current service area."
-  },
-  {
-    name: "Service unavailable",
-    text: "Unfortunately, we’re unable to provide the requested service on this occasion."
-  },
-  {
-    name: "Booking conflict",
-    text: "Unfortunately, we’re unable to accommodate this booking due to an existing booking conflict."
-  },
-  {
-    name: "Other",
-    text: ""
-  }
-];
 
-const reasonMenu =
-  reasonOptions
-    .map(
-      (option, index) =>
-        `${index + 1}. ${option.name}`
-    )
-    .join("\n");
+    {
+      name:
+        "Date unavailable",
 
-const selection =
-  prompt(
-    `Select a reason for declining:\n\n${reasonMenu}\n\nEnter the number:`
-  );
+      text:
+        "Unfortunately, we’re unable to accommodate this booking on the requested date due to availability."
+    },
 
-if (!selection) {
-  return;
-}
+    {
+      name:
+        "Time unavailable",
 
-const selectedIndex =
-  Number(selection) - 1;
+      text:
+        "Unfortunately, we’re unable to accommodate the requested time due to availability."
+    },
 
-if (
-  !Number.isInteger(selectedIndex) ||
-  selectedIndex < 0 ||
-  selectedIndex >= reasonOptions.length
-) {
-  alert("Please select a valid reason.");
-  return;
-}
+    {
+      name:
+        "Outside service area",
 
-let reason =
-  reasonOptions[selectedIndex].text;
+      text:
+        "Unfortunately, this property is outside our current service area."
+    },
 
-if (reasonOptions[selectedIndex].name === "Other") {
+    {
+      name:
+        "Service unavailable",
 
-  reason =
+      text:
+        "Unfortunately, we’re unable to provide the requested service on this occasion."
+    },
+
+    {
+      name:
+        "Booking conflict",
+
+      text:
+        "Unfortunately, we’re unable to accommodate this booking due to an existing booking conflict."
+    },
+
+    {
+      name:
+        "Other",
+
+      text:
+        ""
+    }
+
+  ];
+
+
+  const reasonMenu =
+    reasonOptions
+      .map(
+        (option, index) =>
+          `${index + 1}. ${option.name}`
+      )
+      .join("\n");
+
+
+  const selection =
     prompt(
-      "Enter the reason for declining:"
+      `Select a reason for declining:\n\n${reasonMenu}\n\nEnter the number:`
     );
 
-  if (!reason) {
+
+  if (!selection) {
     return;
   }
-}
 
-const message =
-  prompt(
-    "Additional message for the customer:",
-    "Please feel free to contact us if you would like to arrange another date or time."
-  ) || "";
+
+  const selectedIndex =
+    Number(selection) - 1;
+
+
+  if (
+    !Number.isInteger(selectedIndex) ||
+    selectedIndex < 0 ||
+    selectedIndex >= reasonOptions.length
+  ) {
+
+    alert(
+      "Please select a valid reason."
+    );
+
+    return;
+  }
+
+
+  let reason =
+    reasonOptions[
+      selectedIndex
+    ].text;
+
+
+  if (
+    reasonOptions[
+      selectedIndex
+    ].name === "Other"
+  ) {
+
+    reason =
+      prompt(
+        "Enter the reason for declining:"
+      );
+
+
+    if (!reason) {
+      return;
+    }
+
+  }
+
+
+  const message =
+    prompt(
+      "Additional message for the customer:",
+      "Please feel free to contact us if you would like to arrange another date or time."
+    ) || "";
+
 
   const confirmed =
     confirm(
       "Decline this booking and notify the customer?"
     );
 
+
   if (!confirmed) {
     return;
   }
 
+
   const button =
-    document.getElementById("declineBookingButton")
+    document.getElementById(
+      "declineBookingButton"
+    );
+
 
   if (button) {
+
     button.disabled = true;
-    button.textContent = "Declining...";
+
+    button.textContent =
+      "Declining...";
+
   }
 
+
   try {
-        // Update booking status
+
+    // Update booking status
+
     await updateDoc(
-      doc(db, "bookings", activeBooking.id),
+      doc(
+        db,
+        "bookings",
+        activeBooking.id
+      ),
       {
-        status: "Declined",
-        declineReason: reason,
-        declineMessage: message,
-        declinedAt: serverTimestamp()
+        status:
+          "Declined",
+
+        declineReason:
+          reason,
+
+        declineMessage:
+          message,
+
+        declinedAt:
+          serverTimestamp()
       }
     );
 
+
     // Send customer email
+
     await sendCustomerBookingEmail(
       activeBooking,
       {
-        status: "Declined",
-        declineReason: reason,
-        declineMessage: message
+        status:
+          "Declined",
+
+        declineReason:
+          reason,
+
+        declineMessage:
+          message
       }
     );
+
 
     // Mark decline email as sent
+
     await updateDoc(
-      doc(db, "bookings", activeBooking.id),
+      doc(
+        db,
+        "bookings",
+        activeBooking.id
+      ),
       {
-        declinedEmailSentAt: serverTimestamp()
+        declinedEmailSentAt:
+          serverTimestamp()
       }
     );
 
+
     // Update local booking object
-    activeBooking.status = "Declined";
-    activeBooking.declineReason = reason;
-    activeBooking.declineMessage = message;
-    activeBooking.declinedEmailSentAt = true;
+
+    activeBooking.status =
+      "Declined";
+
+    activeBooking.declineReason =
+      reason;
+
+    activeBooking.declineMessage =
+      message;
+
+    activeBooking.declinedEmailSentAt =
+      true;
+
 
     // Refresh dashboard
+
     await loadDashboard();
 
     closeBookingModal();
+
 
     showBookingActionMessage(
       "Booking declined and customer notified.",
       "success"
     );
+
 
   } catch (error) {
 
@@ -2563,19 +2586,28 @@ const message =
       error
     );
 
+
     showBookingActionMessage(
       "Booking was updated, but the customer email could not be sent. Please try again.",
       "error"
     );
 
+
   } finally {
 
     if (button) {
+
       button.disabled = false;
-      button.textContent = "Decline Booking";
+
+      button.textContent =
+        "Decline Booking";
+
     }
+
   }
+
 }
+
 
 // ======================================================
 // CLOSE DECLINED BOOKING
@@ -2587,28 +2619,37 @@ async function closeBooking() {
     return;
   }
 
-  if (activeBooking.status !== "Declined") {
+
+  if (
+    activeBooking.status !==
+    "Declined"
+  ) {
     return;
   }
+
 
   const confirmed =
     confirm(
       "Close this declined booking?\n\nIt will be moved to the CLOSED section but will not be deleted."
     );
 
+
   if (!confirmed) {
     return;
   }
+
 
   const button =
     document.getElementById(
       "closeBookingButton"
     );
 
+
   button.disabled = true;
 
   button.textContent =
     "Closing…";
+
 
   try {
 
@@ -2619,14 +2660,19 @@ async function closeBooking() {
         activeBooking.id
       ),
       {
-        status: "Closed",
-        closedAt: serverTimestamp()
+        status:
+          "Closed",
+
+        closedAt:
+          serverTimestamp()
       }
     );
+
 
     await loadDashboard();
 
     closeBookingModal();
+
 
   } catch (error) {
 
@@ -2635,11 +2681,13 @@ async function closeBooking() {
       error
     );
 
+
     showBookingActionMessage(
       error.message ||
       "Unable to close this booking.",
       true
     );
+
 
     button.disabled = false;
 
@@ -2661,10 +2709,12 @@ async function deleteBooking() {
     return;
   }
 
+
   const allowedStatuses = [
     "Completed",
     "Closed"
   ];
+
 
   if (
     !allowedStatuses.includes(
@@ -2674,24 +2724,29 @@ async function deleteBooking() {
     return;
   }
 
+
   const confirmed =
     confirm(
       "Permanently delete this booking?\n\nThis cannot be undone."
     );
 
+
   if (!confirmed) {
     return;
   }
+
 
   const button =
     document.getElementById(
       "deleteBookingButton"
     );
 
+
   button.disabled = true;
 
   button.textContent =
     "Deleting…";
+
 
   try {
 
@@ -2703,9 +2758,11 @@ async function deleteBooking() {
       )
     );
 
+
     await loadDashboard();
 
     closeBookingModal();
+
 
   } catch (error) {
 
@@ -2714,11 +2771,13 @@ async function deleteBooking() {
       error
     );
 
+
     showBookingActionMessage(
       error.message ||
       "Unable to delete this booking.",
       true
     );
+
 
     button.disabled = false;
 
@@ -2728,6 +2787,8 @@ async function deleteBooking() {
   }
 
 }
+
+
 // ======================================================
 // ACTION MESSAGE
 // ======================================================
@@ -2760,23 +2821,38 @@ function showBookingActionMessage(
 }
 
 
-function renderRecentBookings(bookings) {
+// ======================================================
+// RECENT BOOKINGS
+// ======================================================
+
+function renderRecentBookings(
+  bookings
+) {
 
   const container =
     document.getElementById(
       "recentBookings"
     );
 
-  // The recent-bookings card is optional. Never allow its absence
-  // to break the main dashboard/bookings list.
+
+  // The recent-bookings card is optional.
+  // Never allow its absence to break
+  // the main dashboard.
+
   if (!container) {
+
     console.warn(
       "recentBookings element not found; skipping recent bookings panel."
     );
+
     return;
   }
 
-  if (!Array.isArray(bookings) || !bookings.length) {
+
+  if (
+    !Array.isArray(bookings) ||
+    !bookings.length
+  ) {
 
     container.innerHTML = `
       <span>—</span>
@@ -2786,37 +2862,48 @@ function renderRecentBookings(bookings) {
     return;
   }
 
+
   const latest =
     bookings.slice(0, 5);
 
+
   container.innerHTML =
     latest
-      .map(booking => {
+      .map(
+        booking => {
 
-        const name =
-          booking.clientName ||
-          booking.name ||
-          "New booking";
+          const name =
+            booking.clientName ||
+            booking.name ||
+            "New booking";
 
-        const date =
-          booking.preferredDate ||
-          booking.date ||
-          "";
 
-        return `
-          <div class="recent-booking">
-            <strong>
-              ${escapeHTML(name)}
-            </strong>
+          const date =
+            booking.preferredDate ||
+            booking.date ||
+            "";
 
-            <small>
-              ${escapeHTML(date)}
-            </small>
-          </div>
-        `;
 
-      })
+          return `
+
+            <div class="recent-booking">
+
+              <strong>
+                ${escapeHTML(name)}
+              </strong>
+
+              <small>
+                ${escapeHTML(date)}
+              </small>
+
+            </div>
+
+          `;
+
+        }
+      )
       .join("");
+
 }
 
 
@@ -2824,12 +2911,19 @@ function renderRecentBookings(bookings) {
 // CLIENTS
 // ======================================================
 
-function renderClients(snapshot) {
+function renderClients(
+  snapshot
+) {
 
   const container =
     document.getElementById(
       "clientsGrid"
     );
+
+
+  if (!container) {
+    return;
+  }
 
 
   if (snapshot.empty) {
@@ -2846,35 +2940,43 @@ function renderClients(snapshot) {
 
   container.innerHTML =
     snapshot.docs
-      .map(doc => {
+      .map(
+        documentSnapshot => {
 
-        const client =
-          doc.data();
+          const client =
+            documentSnapshot.data();
 
-        return `
-          <div class="client-card">
 
-            <span class="panel-eyebrow">
-              CLIENT
-            </span>
+          return `
 
-            <h3>
-              ${escapeHTML(
-                client.name || "Unnamed client"
-              )}
-            </h3>
+            <div class="client-card">
 
-            <p>
-              ${escapeHTML(
-                client.email || ""
-              )}
-            </p>
+              <span class="panel-eyebrow">
+                CLIENT
+              </span>
 
-          </div>
-        `;
+              <h3>
+                ${escapeHTML(
+                  client.name ||
+                  "Unnamed client"
+                )}
+              </h3>
 
-      })
+              <p>
+                ${escapeHTML(
+                  client.email ||
+                  ""
+                )}
+              </p>
+
+            </div>
+
+          `;
+
+        }
+      )
       .join("");
+
 }
 
 
@@ -2882,12 +2984,19 @@ function renderClients(snapshot) {
 // PROJECTS
 // ======================================================
 
-function renderProjects(snapshot) {
+function renderProjects(
+  snapshot
+) {
 
   const container =
     document.getElementById(
       "projectsGrid"
     );
+
+
+  if (!container) {
+    return;
+  }
 
 
   if (snapshot.empty) {
@@ -2904,37 +3013,44 @@ function renderProjects(snapshot) {
 
   container.innerHTML =
     snapshot.docs
-      .map(doc => {
+      .map(
+        documentSnapshot => {
 
-        const project =
-          doc.data();
+          const project =
+            documentSnapshot.data();
 
-        return `
-          <div class="project-card">
 
-            <span class="panel-eyebrow">
-              PROJECT
-            </span>
+          return `
 
-            <h3>
-              ${escapeHTML(
-                project.name ||
-                project.propertyName ||
-                "Unnamed project"
-              )}
-            </h3>
+            <div class="project-card">
 
-            <p>
-              ${escapeHTML(
-                project.status || "Active"
-              )}
-            </p>
+              <span class="panel-eyebrow">
+                PROJECT
+              </span>
 
-          </div>
-        `;
+              <h3>
+                ${escapeHTML(
+                  project.name ||
+                  project.propertyName ||
+                  "Unnamed project"
+                )}
+              </h3>
 
-      })
+              <p>
+                ${escapeHTML(
+                  project.status ||
+                  "Active"
+                )}
+              </p>
+
+            </div>
+
+          `;
+
+        }
+      )
       .join("");
+
 }
 
 
@@ -2942,12 +3058,19 @@ function renderProjects(snapshot) {
 // QUOTES
 // ======================================================
 
-function renderQuotes(snapshot) {
+function renderQuotes(
+  snapshot
+) {
 
   const container =
     document.getElementById(
       "quotesGrid"
     );
+
+
+  if (!container) {
+    return;
+  }
 
 
   if (snapshot.empty) {
@@ -2964,39 +3087,45 @@ function renderQuotes(snapshot) {
 
   container.innerHTML =
     snapshot.docs
-      .map(doc => {
+      .map(
+        documentSnapshot => {
 
-        const quote =
-          doc.data();
+          const quote =
+            documentSnapshot.data();
 
-        return `
-          <div class="quote-card">
 
-            <span class="panel-eyebrow">
-              QUOTE
-            </span>
+          return `
 
-            <h3>
-              ${escapeHTML(
-                quote.clientName ||
-                quote.name ||
-                "Unnamed client"
-              )}
-            </h3>
+            <div class="quote-card">
 
-            <p>
-              ${escapeHTML(
-                quote.amount ||
-                quote.total ||
-                ""
-              )}
-            </p>
+              <span class="panel-eyebrow">
+                QUOTE
+              </span>
 
-          </div>
-        `;
+              <h3>
+                ${escapeHTML(
+                  quote.clientName ||
+                  quote.name ||
+                  "Unnamed client"
+                )}
+              </h3>
 
-      })
+              <p>
+                ${escapeHTML(
+                  quote.amount ||
+                  quote.total ||
+                  ""
+                )}
+              </p>
+
+            </div>
+
+          `;
+
+        }
+      )
       .join("");
+
 }
 
 
@@ -3004,43 +3133,73 @@ function renderQuotes(snapshot) {
 // HTML SAFETY
 // ======================================================
 
-function escapeHTML(value) {
+function escapeHTML(
+  value
+) {
 
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+  return String(
+    value ?? ""
+  )
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+
 }
+
+
 // ======================================================
 // FLO CRM / PROJECTS / CUSTOM QUOTES
 // ======================================================
 
 let crmInitialised = false;
 
+
 const FLO_SERVICES = [
+
   "Photography",
   "Video",
   "Drone",
   "2D Floorplan",
   "3D Floorplan",
   "Twilight"
+
 ];
 
+
 const FLO_PACKAGES = [
+
   {
     name: "Photography",
     price: 150
   },
+
   {
     name: "Mixed Media",
     price: 450
   },
+
   {
     name: "Premium Media",
     price: 700
   }
+
 ];
 
 
@@ -3054,31 +3213,51 @@ async function initCRMFeatures() {
     return;
   }
 
+
   crmInitialised = true;
 
-  injectCRMToolbar("clientsSection", "clientsGrid", "CLIENTS", [
-  {
-    label: "Add Client",
-    action: openAddClientModal,
-    primary: true
-  }
-]);
 
-injectCRMToolbar("projectsSection", "projectsGrid", "PROJECTS", [
-  {
-    label: "Add Project",
-    action: openAddProjectModal,
-    primary: true
-  }
-]);
+  injectCRMToolbar(
+    "clientsSection",
+    "clientsGrid",
+    "CLIENTS",
+    [
+      {
+        label: "Add Client",
+        action: openAddClientModal,
+        primary: true
+      }
+    ]
+  );
 
-injectCRMToolbar("quotesSection", "quotesGrid", "QUOTES", [
-  {
-    label: "Calculate Quote",
-    action: openCreateQuoteModal,
-    primary: true
-  }
-]);
+
+  injectCRMToolbar(
+    "projectsSection",
+    "projectsGrid",
+    "PROJECTS",
+    [
+      {
+        label: "Add Project",
+        action: openAddProjectModal,
+        primary: true
+      }
+    ]
+  );
+
+
+  injectCRMToolbar(
+    "quotesSection",
+    "quotesGrid",
+    "QUOTES",
+    [
+      {
+        label: "Calculate Quote",
+        action: openCreateQuoteModal,
+        primary: true
+      }
+    ]
+  );
+
 
   await refreshCRMData();
 
@@ -3097,14 +3276,21 @@ function injectCRMToolbar(
 ) {
 
   const section =
-    document.getElementById(sectionId);
+    document.getElementById(
+      sectionId
+    );
+
 
   const grid =
-    document.getElementById(gridId);
+    document.getElementById(
+      gridId
+    );
+
 
   if (!section || !grid) {
     return;
   }
+
 
   if (
     section.querySelector(
@@ -3114,14 +3300,20 @@ function injectCRMToolbar(
     return;
   }
 
+
   const toolbar =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
+
 
   toolbar.className =
     "crm-section-toolbar";
 
+
   toolbar.dataset.crmToolbar =
     gridId;
+
 
   toolbar.innerHTML = `
 
@@ -3133,11 +3325,13 @@ function injectCRMToolbar(
 
     </div>
 
+
     <div class="crm-toolbar-actions">
 
       ${buttons
         .map(
           (button, index) => `
+
             <button
               type="button"
               class="
@@ -3146,8 +3340,11 @@ function injectCRMToolbar(
               "
               data-crm-action="${gridId}-${index}"
             >
-              ${escapeHTML(button.label)}
+              ${escapeHTML(
+                button.label
+              )}
             </button>
+
           `
         )
         .join("")}
@@ -3156,10 +3353,12 @@ function injectCRMToolbar(
 
   `;
 
+
   grid.parentNode.insertBefore(
     toolbar,
     grid
   );
+
 
   buttons.forEach(
     (button, index) => {
@@ -3168,6 +3367,7 @@ function injectCRMToolbar(
         toolbar.querySelector(
           `[data-crm-action="${gridId}-${index}"]`
         );
+
 
       if (element) {
 
@@ -3196,9 +3396,9 @@ async function refreshCRMData() {
       clientsSnapshot,
       projectsSnapshot,
       quotesSnapshot
-    ] = await Promise.all([
-
-      getDocs(
+    ] =
+      await Promise.all([
+              getDocs(
         collection(db, "clients")
       ),
 
@@ -3212,6 +3412,7 @@ async function refreshCRMData() {
 
     ]);
 
+
     renderEnhancedClients(
       clientsSnapshot
     );
@@ -3223,6 +3424,7 @@ async function refreshCRMData() {
     renderEnhancedQuotes(
       quotesSnapshot
     );
+
 
   } catch (error) {
 
@@ -3237,10 +3439,12 @@ async function refreshCRMData() {
 
 
 // ======================================================
-// CLIENTS
+// ENHANCED CLIENTS
 // ======================================================
 
-function renderEnhancedClients(snapshot) {
+function renderEnhancedClients(
+  snapshot
+) {
 
   const container =
     document.getElementById(
@@ -3250,6 +3454,7 @@ function renderEnhancedClients(snapshot) {
   if (!container) {
     return;
   }
+
 
   if (snapshot.empty) {
 
@@ -3282,243 +3487,329 @@ function renderEnhancedClients(snapshot) {
 
     `;
 
+
     const emptyButton =
       document.getElementById(
         "emptyAddClientButton"
       );
 
+
     if (emptyButton) {
+
       emptyButton.addEventListener(
         "click",
         openAddClientModal
       );
+
     }
+
 
     return;
   }
 
+
   const clients =
-    snapshot.docs.map(clientDoc => ({
+    snapshot.docs.map(
+      clientDoc => ({
 
-      id: clientDoc.id,
+        id:
+          clientDoc.id,
 
-      ...clientDoc.data()
+        ...clientDoc.data()
 
-    }));
+      })
+    );
 
-  container.innerHTML = clients
-    .map(client => {
 
-      const status =
-        client.status ||
-        "Active";
+  container.innerHTML =
+    clients
+      .map(
+        client => {
 
-      const projectCount =
-        Number(
-          client.projectCount || 0
-        );
+          const status =
+            client.status ||
+            "Active";
 
-      const quoteCount =
-        Number(
-          client.quoteCount || 0
-        );
 
-      return `
+          const projectCount =
+            Number(
+              client.projectCount ||
+              0
+            );
 
-        <article
-          class="client-card crm-record-card"
-          data-client-id="${escapeHTML(client.id)}"
-        >
 
-          <div class="crm-record-top">
+          const quoteCount =
+            Number(
+              client.quoteCount ||
+              0
+            );
 
-            <span class="panel-eyebrow">
-              CLIENT
-            </span>
 
-            <span
-              class="
-                crm-status
-                crm-status-${escapeHTML(
-                  status
-                    .toLowerCase()
-                    .replaceAll(" ", "-")
+          return `
+
+            <article
+              class="client-card crm-record-card"
+              data-client-id="${escapeHTML(
+                client.id
+              )}"
+            >
+
+              <div class="crm-record-top">
+
+                <span class="panel-eyebrow">
+                  CLIENT
+                </span>
+
+                <span
+                  class="
+                    crm-status
+                    crm-status-${escapeHTML(
+                      status
+                        .toLowerCase()
+                        .replaceAll(
+                          " ",
+                          "-"
+                        )
+                    )}
+                  "
+                >
+                  ${escapeHTML(status)}
+                </span>
+
+              </div>
+
+
+              <h3>
+                ${escapeHTML(
+                  client.name ||
+                  "Unnamed client"
                 )}
-              "
-            >
-              ${escapeHTML(status)}
-            </span>
+              </h3>
 
-          </div>
 
-          <h3>
-            ${escapeHTML(
-              client.name ||
-              "Unnamed client"
-            )}
-          </h3>
+              <p>
+                ${escapeHTML(
+                  client.email ||
+                  ""
+                )}
+              </p>
 
-          <p>
-            ${escapeHTML(
-              client.email || ""
-            )}
-          </p>
 
-          <p>
-            ${escapeHTML(
-              client.mobile || ""
-            )}
-          </p>
+              <p>
+                ${escapeHTML(
+                  client.mobile ||
+                  ""
+                )}
+              </p>
 
-          <p>
-            ${escapeHTML(
-              client.propertyAddress ||
-              client.address ||
-              ""
-            )}
-          </p>
 
-          <div class="crm-record-meta">
+              <p>
+                ${escapeHTML(
+                  client.propertyAddress ||
+                  client.address ||
+                  ""
+                )}
+              </p>
 
-            <span>
-              ${projectCount}
-              ${projectCount === 1
-                ? "project"
-                : "projects"}
-            </span>
 
-            <span>
-              ${quoteCount}
-              ${quoteCount === 1
-                ? "quote"
-                : "quotes"}
-            </span>
+              <div class="crm-record-meta">
 
-          </div>
+                <span>
+                  ${projectCount}
+                  ${
+                    projectCount === 1
+                      ? "project"
+                      : "projects"
+                  }
+                </span>
 
-          <div class="crm-card-actions">
+                <span>
+                  ${quoteCount}
+                  ${
+                    quoteCount === 1
+                      ? "quote"
+                      : "quotes"
+                  }
+                </span>
 
-            <button
-              type="button"
-              class="crm-small-button"
-              data-edit-client="${escapeHTML(client.id)}"
-            >
-              Edit
-            </button>
+              </div>
 
-            <button
-              type="button"
-              class="crm-small-button"
-              data-client-project="${escapeHTML(client.id)}"
-            >
-              + Project
-            </button>
 
-            <button
-              type="button"
-              class="crm-small-button"
-              data-client-quote="${escapeHTML(client.id)}"
-            >
-              + Quote
-            </button>
+              <div class="crm-card-actions">
 
-            <button
-              type="button"
-              class="crm-small-button crm-danger-button"
-              data-archive-client="${escapeHTML(client.id)}"
-            >
-              Archive
-            </button>
+                <button
+                  type="button"
+                  class="crm-small-button"
+                  data-edit-client="${escapeHTML(
+                    client.id
+                  )}"
+                >
+                  Edit
+                </button>
 
-            <button
-              type="button"
-              class="crm-small-button crm-danger-button"
-              data-delete-client="${escapeHTML(client.id)}"
-            >
-              Delete
-            </button>
 
-          </div>
+                <button
+                  type="button"
+                  class="crm-small-button"
+                  data-client-project="${escapeHTML(
+                    client.id
+                  )}"
+                >
+                  + Project
+                </button>
 
-        </article>
 
-      `;
+                <button
+                  type="button"
+                  class="crm-small-button"
+                  data-client-quote="${escapeHTML(
+                    client.id
+                  )}"
+                >
+                  + Quote
+                </button>
 
-    })
-    .join("");
+
+                <button
+                  type="button"
+                  class="crm-small-button crm-danger-button"
+                  data-archive-client="${escapeHTML(
+                    client.id
+                  )}"
+                >
+                  Archive
+                </button>
+
+
+                <button
+                  type="button"
+                  class="crm-small-button crm-danger-button"
+                  data-delete-client="${escapeHTML(
+                    client.id
+                  )}"
+                >
+                  Delete
+                </button>
+
+              </div>
+
+            </article>
+
+          `;
+
+        }
+      )
+      .join("");
+
 
   container
     .querySelectorAll(
       "[data-edit-client]"
     )
-    .forEach(button => {
+    .forEach(
+      button => {
 
-      button.addEventListener(
-        "click",
-        () => {
+        button.addEventListener(
+          "click",
+          () => {
 
-          openEditClientModal(
-            button.dataset.editClient
-          );
+            openEditClientModal(
+              button.dataset.editClient
+            );
 
-        }
-      );
+          }
+        );
 
-    });
+      }
+    );
+
 
   container
     .querySelectorAll(
       "[data-client-project]"
     )
-    .forEach(button => {
+    .forEach(
+      button => {
 
-      button.addEventListener(
-        "click",
-        () => {
+        button.addEventListener(
+          "click",
+          () => {
 
-          openAddProjectModal(
-            button.dataset.clientProject
-          );
+            openAddProjectModal(
+              button.dataset.clientProject
+            );
 
-        }
-      );
+          }
+        );
 
-    });
+      }
+    );
+
 
   container
     .querySelectorAll(
       "[data-client-quote]"
     )
-    .forEach(button => {
+    .forEach(
+      button => {
 
-      button.addEventListener(
-        "click",
-        () => {
+        button.addEventListener(
+          "click",
+          () => {
 
-          openCreateQuoteModal(
-            button.dataset.clientQuote
-          );
+            openCreateQuoteModal(
+              button.dataset.clientQuote
+            );
 
-        }
-      );
+          }
+        );
 
-    });
+      }
+    );
 
-  container
-    .querySelectorAll("[data-archive-client]")
-    .forEach(button => {
-      button.addEventListener("click", () => {
-        archiveClient(button.dataset.archiveClient);
-      });
-    });
 
   container
-    .querySelectorAll("[data-delete-client]")
-    .forEach(button => {
-      button.addEventListener("click", () => {
-        deleteClientRecord(button.dataset.deleteClient);
-      });
-    });
+    .querySelectorAll(
+      "[data-archive-client]"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            archiveClient(
+              button.dataset.archiveClient
+            );
+
+          }
+        );
+
+      }
+    );
+
+
+  container
+    .querySelectorAll(
+      "[data-delete-client]"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            deleteClientRecord(
+              button.dataset.deleteClient
+            );
+
+          }
+        );
+
+      }
+    );
 
 }
 
@@ -3533,68 +3824,122 @@ function openAddClientModal(
 
   openCRMFormModal({
 
-    title: "Add Client",
+    title:
+      "Add Client",
 
-    eyebrow: "CLIENT",
+    eyebrow:
+      "CLIENT",
 
     fields: [
 
       {
-        name: "name",
-        label: "Client name",
-        type: "text",
-        required: true,
+        name:
+          "name",
+
+        label:
+          "Client name",
+
+        type:
+          "text",
+
+        required:
+          true,
+
         value:
-          prefill.name || ""
+          prefill.name ||
+          ""
       },
 
-      {
-        name: "email",
-        label: "Email",
-        type: "email",
-        required: true,
-        value:
-          prefill.email || ""
-      },
 
       {
-        name: "mobile",
-        label: "Mobile",
-        type: "tel",
+        name:
+          "email",
+
+        label:
+          "Email",
+
+        type:
+          "email",
+
+        required:
+          true,
+
         value:
-          prefill.mobile || ""
+          prefill.email ||
+          ""
       },
 
-      {
-        name: "propertyAddress",
-        label: "Property / address",
-        type: "text",
-        value:
-          prefill.propertyAddress || ""
-      },
 
       {
-        name: "status",
-        label: "Client status",
-        type: "select",
+        name:
+          "mobile",
+
+        label:
+          "Mobile",
+
+        type:
+          "tel",
+
+        value:
+          prefill.mobile ||
+          ""
+      },
+
+
+      {
+        name:
+          "propertyAddress",
+
+        label:
+          "Property / address",
+
+        type:
+          "text",
+
+        value:
+          prefill.propertyAddress ||
+          ""
+      },
+
+
+      {
+        name:
+          "status",
+
+        label:
+          "Client status",
+
+        type:
+          "select",
+
         options: [
           "Active",
           "Completed",
           "Archived"
         ],
-        value: "Active"
+
+        value:
+          "Active"
       },
 
+
       {
-        name: "notes",
-        label: "Notes",
-        type: "textarea"
+        name:
+          "notes",
+
+        label:
+          "Notes",
+
+        type:
+          "textarea"
       }
 
     ],
 
+
     submitLabel:
       "Add Client",
+
 
     onSubmit:
       async values => {
@@ -3604,6 +3949,7 @@ function openAddClientModal(
             values.email
           );
 
+
         if (existing) {
 
           throw new Error(
@@ -3612,8 +3958,12 @@ function openAddClientModal(
 
         }
 
+
         await addDoc(
-          collection(db, "clients"),
+          collection(
+            db,
+            "clients"
+          ),
           {
 
             name:
@@ -3629,14 +3979,17 @@ function openAddClientModal(
               values.propertyAddress.trim(),
 
             status:
-              values.status || "Active",
+              values.status ||
+              "Active",
 
             notes:
               values.notes.trim(),
 
-            projectCount: 0,
+            projectCount:
+              0,
 
-            quoteCount: 0,
+            quoteCount:
+              0,
 
             createdAt:
               serverTimestamp(),
@@ -3647,7 +4000,9 @@ function openAddClientModal(
           }
         );
 
+
         await refreshCRMData();
+
 
         showCRMToast(
           "Client added successfully."
@@ -3664,48 +4019,126 @@ function openAddClientModal(
 // CLIENT ARCHIVE / DELETE
 // ======================================================
 
-async function archiveClient(clientId) {
+async function archiveClient(
+  clientId
+) {
 
-  if (!clientId) return;
+  if (!clientId) {
+    return;
+  }
 
-  const confirmed = confirm(
-    "Archive this client? They will remain in Firestore but will be marked Archived."
-  );
 
-  if (!confirmed) return;
+  const confirmed =
+    confirm(
+      "Archive this client? They will remain in Firestore but will be marked Archived."
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
 
   try {
-    await updateDoc(doc(db, "clients", clientId), {
-      status: "Archived",
-      updatedAt: serverTimestamp()
-    });
+
+    await updateDoc(
+      doc(
+        db,
+        "clients",
+        clientId
+      ),
+      {
+        status:
+          "Archived",
+
+        updatedAt:
+          serverTimestamp()
+      }
+    );
+
 
     await refreshCRMData();
-    showCRMToast("Client archived.");
+
+
+    showCRMToast(
+      "Client archived."
+    );
+
+
   } catch (error) {
-    console.error("Archive client error:", error);
-    showCRMToast(error.message || "Unable to archive client.", true);
+
+    console.error(
+      "Archive client error:",
+      error
+    );
+
+
+    showCRMToast(
+      error.message ||
+      "Unable to archive client.",
+      true
+    );
+
   }
+
 }
 
-async function deleteClientRecord(clientId) {
 
-  if (!clientId) return;
+async function deleteClientRecord(
+  clientId
+) {
 
-  const confirmed = confirm(
-    "Delete this client permanently? This cannot be undone."
-  );
+  if (!clientId) {
+    return;
+  }
 
-  if (!confirmed) return;
+
+  const confirmed =
+    confirm(
+      "Delete this client permanently? This cannot be undone."
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
 
   try {
-    await deleteDoc(doc(db, "clients", clientId));
+
+    await deleteDoc(
+      doc(
+        db,
+        "clients",
+        clientId
+      )
+    );
+
+
     await refreshCRMData();
-    showCRMToast("Client deleted.");
+
+
+    showCRMToast(
+      "Client deleted."
+    );
+
+
   } catch (error) {
-    console.error("Delete client error:", error);
-    showCRMToast(error.message || "Unable to delete client.", true);
+
+    console.error(
+      "Delete client error:",
+      error
+    );
+
+
+    showCRMToast(
+      error.message ||
+      "Unable to delete client.",
+      true
+    );
+
   }
+
 }
 
 
@@ -3724,90 +4157,156 @@ async function openEditClientModal(
       clientId
     );
 
+
   const snapshot =
     await getDocs(
-      collection(db, "clients")
+      collection(
+        db,
+        "clients"
+      )
     );
+
 
   const found =
     snapshot.docs.find(
-      item => item.id === clientId
+      item =>
+        item.id ===
+        clientId
     );
+
 
   if (!found) {
     return;
   }
 
+
   const client =
     found.data();
 
+
   openCRMFormModal({
 
-    title: "Edit Client",
+    title:
+      "Edit Client",
 
-    eyebrow: "CLIENT",
+    eyebrow:
+      "CLIENT",
 
     fields: [
 
       {
-        name: "name",
-        label: "Client name",
-        type: "text",
-        required: true,
+        name:
+          "name",
+
+        label:
+          "Client name",
+
+        type:
+          "text",
+
+        required:
+          true,
+
         value:
-          client.name || ""
+          client.name ||
+          ""
       },
 
-      {
-        name: "email",
-        label: "Email",
-        type: "email",
-        required: true,
-        value:
-          client.email || ""
-      },
 
       {
-        name: "mobile",
-        label: "Mobile",
-        type: "tel",
+        name:
+          "email",
+
+        label:
+          "Email",
+
+        type:
+          "email",
+
+        required:
+          true,
+
         value:
-          client.mobile || ""
+          client.email ||
+          ""
       },
 
-      {
-        name: "propertyAddress",
-        label: "Property / address",
-        type: "text",
-        value:
-          client.propertyAddress || ""
-      },
 
       {
-        name: "status",
-        label: "Client status",
-        type: "select",
+        name:
+          "mobile",
+
+        label:
+          "Mobile",
+
+        type:
+          "tel",
+
+        value:
+          client.mobile ||
+          ""
+      },
+
+
+      {
+        name:
+          "propertyAddress",
+
+        label:
+          "Property / address",
+
+        type:
+          "text",
+
+        value:
+          client.propertyAddress ||
+          ""
+      },
+
+
+      {
+        name:
+          "status",
+
+        label:
+          "Client status",
+
+        type:
+          "select",
+
         options: [
           "Active",
           "Completed",
           "Archived"
         ],
+
         value:
-          client.status || "Active"
+          client.status ||
+          "Active"
       },
 
+
       {
-        name: "notes",
-        label: "Notes",
-        type: "textarea",
+        name:
+          "notes",
+
+        label:
+          "Notes",
+
+        type:
+          "textarea",
+
         value:
-          client.notes || ""
+          client.notes ||
+          ""
       }
 
     ],
 
+
     submitLabel:
       "Save Changes",
+
 
     onSubmit:
       async values => {
@@ -3840,7 +4339,9 @@ async function openEditClientModal(
           }
         );
 
+
         await refreshCRMData();
+
 
         showCRMToast(
           "Client updated."
@@ -3865,13 +4366,21 @@ async function findClientByEmail(
     return null;
   }
 
+
   const snapshot =
     await getDocs(
-      collection(db, "clients")
+      collection(
+        db,
+        "clients"
+      )
     );
 
+
   const target =
-    email.trim().toLowerCase();
+    email
+      .trim()
+      .toLowerCase();
+
 
   const found =
     snapshot.docs.find(
@@ -3880,23 +4389,30 @@ async function findClientByEmail(
         const data =
           clientDoc.data();
 
+
         return (
           String(
-            data.email || ""
+            data.email ||
+            ""
           )
             .trim()
-            .toLowerCase() === target
+            .toLowerCase() ===
+          target
         );
 
       }
     );
 
+
   if (!found) {
     return null;
   }
 
+
   return {
-    id: found.id,
+    id:
+      found.id,
+
     ...found.data()
   };
 
@@ -3914,36 +4430,40 @@ function ensureBookingClientButton() {
       "bookingModal"
     );
 
-  if (!modal ||
-      !activeBooking) {
 
+  if (
+    !modal ||
+    !activeBooking
+  ) {
     return;
-
   }
+
 
   if (
     modal.querySelector(
       "#addBookingClientButton"
     )
   ) {
-
     return;
-
   }
+
 
   const actions =
     modal.querySelector(
       ".booking-actions"
     );
 
+
   if (!actions) {
     return;
   }
+
 
   const button =
     document.createElement(
       "button"
     );
+
 
   button.type =
     "button";
@@ -3957,10 +4477,12 @@ function ensureBookingClientButton() {
   button.textContent =
     "Add to Clients";
 
+
   actions.parentNode.insertBefore(
     button,
     actions
   );
+
 
   button.addEventListener(
     "click",
@@ -3980,16 +4502,23 @@ async function addActiveBookingToClient() {
     return;
   }
 
+
   const button =
     document.getElementById(
       "addBookingClientButton"
     );
 
+
   if (button) {
-    button.disabled = true;
+
+    button.disabled =
+      true;
+
     button.textContent =
       "Checking...";
+
   }
+
 
   try {
 
@@ -3997,27 +4526,37 @@ async function addActiveBookingToClient() {
       activeBooking.email ||
       "";
 
+
     const existing =
       await findClientByEmail(
         email
       );
 
+
     if (existing) {
 
       if (button) {
+
         button.textContent =
           "Already a Client";
+
       }
+
 
       showCRMToast(
         "This customer is already in Clients."
       );
 
+
       return;
     }
 
+
     await addDoc(
-      collection(db, "clients"),
+      collection(
+        db,
+        "clients"
+      ),
       {
 
         name:
@@ -4050,9 +4589,11 @@ async function addActiveBookingToClient() {
         bookingId:
           activeBooking.id,
 
-        projectCount: 0,
+        projectCount:
+          0,
 
-        quoteCount: 0,
+        quoteCount:
+          0,
 
         createdAt:
           serverTimestamp(),
@@ -4063,16 +4604,22 @@ async function addActiveBookingToClient() {
       }
     );
 
+
     if (button) {
+
       button.textContent =
         "Added to Clients";
+
     }
+
 
     showCRMToast(
       "Customer added to Clients."
     );
 
+
     await refreshCRMData();
+
 
   } catch (error) {
 
@@ -4081,11 +4628,17 @@ async function addActiveBookingToClient() {
       error
     );
 
+
     if (button) {
-      button.disabled = false;
+
+      button.disabled =
+        false;
+
       button.textContent =
         "Add to Clients";
+
     }
+
 
     showCRMToast(
       error.message ||
@@ -4107,107 +4660,353 @@ function renderEnhancedProjects(
 ) {
 
   const container =
-    document.getElementById("projectsGrid");
+    document.getElementById(
+      "projectsGrid"
+    );
+
 
   if (!container) {
     return;
   }
 
+
   if (snapshot.empty) {
 
     container.innerHTML = `
+
       <div class="large-empty crm-empty">
-        <h3>No projects yet</h3>
-        <p>Create a project and connect it to one of your clients.</p>
-        <button type="button" class="crm-inline-button" id="emptyAddProjectButton">
+
+        <h3>
+          No projects yet
+        </h3>
+
+        <p>
+          Create a project and connect it
+          to one of your clients.
+        </p>
+
+        <button
+          type="button"
+          class="crm-inline-button"
+          id="emptyAddProjectButton"
+        >
           Add Project
         </button>
+
       </div>
+
     `;
 
+
     document
-      .getElementById("emptyAddProjectButton")
-      ?.addEventListener("click", () => openAddProjectModal());
+      .getElementById(
+        "emptyAddProjectButton"
+      )
+      ?.addEventListener(
+        "click",
+        () =>
+          openAddProjectModal()
+      );
+
 
     return;
   }
 
-  const projects = snapshot.docs.map(projectDoc => ({
-    id: projectDoc.id,
-    ...projectDoc.data()
-  }));
 
-  container.innerHTML = projects.map(project => `
-    <article class="project-card crm-record-card">
-      <div class="crm-record-top">
-        <span class="panel-eyebrow">PROJECT</span>
-        <span class="crm-status crm-project-status-${escapeHTML(
-          (project.status || "Upcoming").toLowerCase().replaceAll(" ", "-")
-        )}">
-          ${escapeHTML(project.status || "Upcoming")}
-        </span>
-      </div>
+  const projects =
+    snapshot.docs.map(
+      projectDoc => ({
 
-      <h3>${escapeHTML(project.name || project.propertyName || "Unnamed project")}</h3>
-      <p>${escapeHTML(project.clientName || "")}</p>
-      <p>${escapeHTML(project.propertyAddress || "")}</p>
+        id:
+          projectDoc.id,
 
-      <div class="crm-record-meta">
-        <span>${escapeHTML(project.startDate || "No start date")}</span>
-        <span>${escapeHTML(project.dueDate || "No due date")}</span>
-      </div>
+        ...projectDoc.data()
 
-      <div class="crm-card-actions">
-        <button type="button" class="crm-small-button" data-edit-project="${escapeHTML(project.id)}">Edit Status</button>
-        ${project.status !== "Completed" ? `
-          <button type="button" class="crm-small-button" data-complete-project="${escapeHTML(project.id)}">Complete</button>
-        ` : ""}
-        ${project.status !== "Archived" ? `
-          <button type="button" class="crm-small-button" data-archive-project="${escapeHTML(project.id)}">Archive</button>
-        ` : ""}
-        <button type="button" class="crm-small-button crm-danger-button" data-delete-project="${escapeHTML(project.id)}">Delete</button>
-      </div>
-    </article>
-  `).join("");
+      })
+    );
 
-  container.querySelectorAll("[data-edit-project]").forEach(button => {
-    button.addEventListener("click", () => openEditProjectModal(button.dataset.editProject));
-  });
 
-  container.querySelectorAll("[data-complete-project]").forEach(button => {
-    button.addEventListener("click", () => completeProject(button.dataset.completeProject));
-  });
+  container.innerHTML =
+    projects
+      .map(
+        project => `
 
-  container.querySelectorAll("[data-archive-project]").forEach(button => {
-    button.addEventListener("click", () => archiveProject(button.dataset.archiveProject));
-  });
+          <article
+            class="project-card crm-record-card"
+          >
 
-  container.querySelectorAll("[data-delete-project]").forEach(button => {
-    button.addEventListener("click", () => deleteProjectRecord(button.dataset.deleteProject));
-  });
+            <div class="crm-record-top">
+
+              <span class="panel-eyebrow">
+                PROJECT
+              </span>
+
+              <span
+                class="
+                  crm-status
+                  crm-project-status-${escapeHTML(
+                    (
+                      project.status ||
+                      "Upcoming"
+                    )
+                      .toLowerCase()
+                      .replaceAll(
+                        " ",
+                        "-"
+                      )
+                  )}
+                "
+              >
+                ${escapeHTML(
+                  project.status ||
+                  "Upcoming"
+                )}
+              </span>
+
+            </div>
+
+
+            <h3>
+              ${escapeHTML(
+                project.name ||
+                project.propertyName ||
+                "Unnamed project"
+              )}
+            </h3>
+
+
+            <p>
+              ${escapeHTML(
+                project.clientName ||
+                ""
+              )}
+            </p>
+
+
+            <p>
+              ${escapeHTML(
+                project.propertyAddress ||
+                ""
+              )}
+            </p>
+
+
+            <div class="crm-record-meta">
+
+              <span>
+                ${escapeHTML(
+                  project.startDate ||
+                  "No start date"
+                )}
+              </span>
+
+              <span>
+                ${escapeHTML(
+                  project.dueDate ||
+                  "No due date"
+                )}
+              </span>
+
+            </div>
+
+
+            <div class="crm-card-actions">
+
+              <button
+                type="button"
+                class="crm-small-button"
+                data-edit-project="${escapeHTML(
+                  project.id
+                )}"
+              >
+                Edit Status
+              </button>
+
+              ${
+                project.status !==
+                "Completed"
+                  ? `
+                    <button
+                      type="button"
+                      class="crm-small-button"
+                      data-complete-project="${escapeHTML(
+                        project.id
+                      )}"
+                    >
+                      Complete
+                    </button>
+                  `
+                  : ""
+              }
+
+              ${
+                project.status !==
+                "Archived"
+                  ? `
+                    <button
+                      type="button"
+                      class="crm-small-button"
+                      data-archive-project="${escapeHTML(
+                        project.id
+                      )}"
+                    >
+                      Archive
+                    </button>
+                  `
+                  : ""
+              }
+
+              <button
+                type="button"
+                class="crm-small-button crm-danger-button"
+                data-delete-project="${escapeHTML(
+                  project.id
+                )}"
+              >
+                Delete
+              </button>
+
+            </div>
+
+          </article>
+
+        `
+      )
+      .join("");
+
+
+  container
+    .querySelectorAll(
+      "[data-edit-project]"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () =>
+            openEditProjectModal(
+              button.dataset.editProject
+            )
+        );
+
+      }
+    );
+
+
+  container
+    .querySelectorAll(
+      "[data-complete-project]"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () =>
+            completeProject(
+              button.dataset.completeProject
+            )
+        );
+
+      }
+    );
+
+
+  container
+    .querySelectorAll(
+      "[data-archive-project]"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () =>
+            archiveProject(
+              button.dataset.archiveProject
+            )
+        );
+
+      }
+    );
+
+
+  container
+    .querySelectorAll(
+      "[data-delete-project]"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () =>
+            deleteProjectRecord(
+              button.dataset.deleteProject
+            )
+        );
+
+      }
+    );
+
 }
+
 
 // ======================================================
 // PROJECT MANAGEMENT
 // ======================================================
 
-async function openEditProjectModal(projectId) {
+async function openEditProjectModal(
+  projectId
+) {
 
-  const snapshot = await getDocs(collection(db, "projects"));
-  const found = snapshot.docs.find(item => item.id === projectId);
+  const snapshot =
+    await getDocs(
+      collection(
+        db,
+        "projects"
+      )
+    );
 
-  if (!found) return;
 
-  const project = found.data();
+  const found =
+    snapshot.docs.find(
+      item =>
+        item.id ===
+        projectId
+    );
+
+
+  if (!found) {
+    return;
+  }
+
+
+  const project =
+    found.data();
+
 
   openCRMFormModal({
-    title: "Edit Project",
-    eyebrow: "PROJECT",
+
+    title:
+      "Edit Project",
+
+    eyebrow:
+      "PROJECT",
+
     fields: [
+
       {
-        name: "status",
-        label: "Project status",
-        type: "select",
+        name:
+          "status",
+
+        label:
+          "Project status",
+
+        type:
+          "select",
+
         options: [
           "Upcoming",
           "In Progress",
@@ -4216,151 +5015,377 @@ async function openEditProjectModal(projectId) {
           "Cancelled",
           "Archived"
         ],
-        value: project.status || "Upcoming"
+
+        value:
+          project.status ||
+          "Upcoming"
       },
+
+
       {
-        name: "dueDate",
-        label: "Due date",
-        type: "date",
-        value: project.dueDate || ""
-      },
-      {
-        name: "notes",
-        label: "Project notes",
-        type: "textarea",
-        value: project.notes || ""
+        name:
+          "notes",
+
+        label:
+          "Project notes",
+
+        type:
+          "textarea",
+
+        value:
+          project.notes ||
+          ""
       }
+
     ],
-    submitLabel: "Save Project",
-    onSubmit: async values => {
-      const previousStatus = project.status || "Upcoming";
 
-      await updateDoc(doc(db, "projects", projectId), {
-        status: values.status,
-        dueDate: values.dueDate || "",
-        notes: values.notes.trim(),
-        updatedAt: serverTimestamp()
-      });
 
-      if (values.status === "Completed" && previousStatus !== "Completed") {
-        await sendProjectCompletionEmail({
-          id: projectId,
-          ...project,
-          status: "Completed",
-          dueDate: values.dueDate || "",
-          notes: values.notes.trim()
-        });
+    submitLabel:
+      "Save Changes",
+
+
+    onSubmit:
+      async values => {
+
+        await updateDoc(
+          doc(
+            db,
+            "projects",
+            projectId
+          ),
+          {
+
+            status:
+              values.status,
+
+            notes:
+              values.notes.trim(),
+
+            updatedAt:
+              serverTimestamp()
+
+          }
+        );
+
+
+        await refreshCRMData();
+
+
+        showCRMToast(
+          "Project updated."
+        );
+
       }
 
-      await refreshCRMData();
-      showCRMToast(
-        values.status === "Completed"
-          ? "Project completed and FLO notified."
-          : "Project updated."
-      );
-    }
   });
+
 }
 
-async function completeProject(projectId) {
 
-  if (!projectId) return;
+async function completeProject(
+  projectId
+) {
 
-  const confirmed = confirm(
-    "Mark this project as completed? A completion notification will be sent to FLO."
-  );
+  if (!projectId) {
+    return;
+  }
 
-  if (!confirmed) return;
+
+  const confirmed =
+    confirm(
+      "Mark this project as completed and notify the customer?"
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
 
   try {
-    const snapshot = await getDocs(collection(db, "projects"));
-    const found = snapshot.docs.find(item => item.id === projectId);
 
-    if (!found) return;
+    const snapshot =
+      await getDocs(
+        collection(
+          db,
+          "projects"
+        )
+      );
 
-    const project = { id: found.id, ...found.data() };
 
-    await updateDoc(doc(db, "projects", projectId), {
-      status: "Completed",
-      completedAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
+    const found =
+      snapshot.docs.find(
+        item =>
+          item.id ===
+          projectId
+      );
 
-    await sendProjectCompletionEmail(project);
+
+    if (!found) {
+      return;
+    }
+
+
+    const project = {
+      id:
+        found.id,
+
+      ...found.data()
+    };
+
+
+    await sendProjectCompletionEmail(
+      project
+    );
+
+
+    await updateDoc(
+      doc(
+        db,
+        "projects",
+        projectId
+      ),
+      {
+
+        status:
+          "Completed",
+
+        completedAt:
+          serverTimestamp(),
+
+        updatedAt:
+          serverTimestamp()
+
+      }
+    );
+
 
     await refreshCRMData();
-    showCRMToast("Project completed and FLO notified.");
+
+
+    showCRMToast(
+      "Project completed and customer notified."
+    );
+
+
   } catch (error) {
-    console.error("Complete project error:", error);
-    showCRMToast(error.message || "Unable to complete project.", true);
+
+    console.error(
+      "Complete project error:",
+      error
+    );
+
+
+    showCRMToast(
+      error.message ||
+      "Unable to complete project.",
+      true
+    );
+
   }
+
 }
 
-async function archiveProject(projectId) {
 
-  if (!projectId) return;
+async function archiveProject(
+  projectId
+) {
 
-  const confirmed = confirm("Archive this project?");
-  if (!confirmed) return;
+  if (!projectId) {
+    return;
+  }
+
+
+  const confirmed =
+    confirm(
+      "Archive this project?"
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
 
   try {
-    await updateDoc(doc(db, "projects", projectId), {
-      status: "Archived",
-      archivedAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
+
+    await updateDoc(
+      doc(
+        db,
+        "projects",
+        projectId
+      ),
+      {
+
+        status:
+          "Archived",
+
+        archivedAt:
+          serverTimestamp(),
+
+        updatedAt:
+          serverTimestamp()
+
+      }
+    );
+
 
     await refreshCRMData();
-    showCRMToast("Project archived.");
+
+
+    showCRMToast(
+      "Project archived."
+    );
+
+
   } catch (error) {
-    console.error("Archive project error:", error);
-    showCRMToast(error.message || "Unable to archive project.", true);
+
+    console.error(
+      "Archive project error:",
+      error
+    );
+
+
+    showCRMToast(
+      error.message ||
+      "Unable to archive project.",
+      true
+    );
+
   }
+
 }
 
-async function deleteProjectRecord(projectId) {
 
-  if (!projectId) return;
+async function deleteProjectRecord(
+  projectId
+) {
 
-  const confirmed = confirm(
-    "Delete this project permanently? This cannot be undone."
-  );
+  if (!projectId) {
+    return;
+  }
 
-  if (!confirmed) return;
+
+  const confirmed =
+    confirm(
+      "Delete this project permanently? This cannot be undone."
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
 
   try {
-    await deleteDoc(doc(db, "projects", projectId));
+
+    await deleteDoc(
+      doc(
+        db,
+        "projects",
+        projectId
+      )
+    );
+
+
     await refreshCRMData();
-    showCRMToast("Project deleted.");
+
+
+    showCRMToast(
+      "Project deleted."
+    );
+
+
   } catch (error) {
-    console.error("Delete project error:", error);
-    showCRMToast(error.message || "Unable to delete project.", true);
+
+    console.error(
+      "Delete project error:",
+      error
+    );
+
+
+    showCRMToast(
+      error.message ||
+      "Unable to delete project.",
+      true
+    );
+
   }
+
 }
 
-async function sendProjectCompletionEmail(project) {
+
+// ======================================================
+// PROJECT COMPLETION EMAIL
+// ======================================================
+
+async function sendProjectCompletionEmail(
+  project
+) {
 
   const completionRecord = {
-    name: project.clientName || "",
-    clientName: project.clientName || "",
-    email: project.clientEmail || "",
-    propertyAddress: project.propertyAddress || "",
-    preferredDate: project.startDate || "",
-    proposedDate: project.dueDate || "",
-    services: Array.isArray(project.services) ? project.services : [],
-    source: "FLO CRM project",
-    projectName: project.name || ""
+
+    name:
+      project.clientName ||
+      "",
+
+    clientName:
+      project.clientName ||
+      "",
+
+    email:
+      project.clientEmail ||
+      "",
+
+    propertyAddress:
+      project.propertyAddress ||
+      "",
+
+    preferredDate:
+      project.startDate ||
+      "",
+
+    proposedDate:
+      project.dueDate ||
+      "",
+
+    services:
+      Array.isArray(
+        project.services
+      )
+        ? project.services
+        : [],
+
+    source:
+      "FLO CRM project",
+
+    projectName:
+      project.name ||
+      ""
+
   };
+
 
   return sendCustomerBookingEmail(
     completionRecord,
     {
-      status: "Completed",
-      type: "project-completed",
-      adminEmail: ADMIN_EMAIL,
-      projectId: project.id || ""
+
+      status:
+        "Completed",
+
+      type:
+        "project-completed",
+
+      adminEmail:
+        ADMIN_EMAIL,
+
+      projectId:
+        project.id ||
+        ""
+
     }
   );
+
 }
 
 
@@ -4375,6 +5400,7 @@ async function openAddProjectModal(
   const clients =
     await getClientOptions();
 
+
   if (!clients.length) {
 
     showCRMToast(
@@ -4383,72 +5409,124 @@ async function openAddProjectModal(
     );
 
     return;
-
   }
+
 
   openCRMFormModal({
 
-    title: "Add Project",
+    title:
+      "Add Project",
 
-    eyebrow: "PROJECT",
+    eyebrow:
+      "PROJECT",
 
     fields: [
 
       {
-        name: "clientId",
-        label: "Client",
-        type: "select",
+        name:
+          "clientId",
+
+        label:
+          "Client",
+
+        type:
+          "select",
+
         options:
           clients.map(
             client => ({
+
               value:
                 client.id,
+
               label:
                 client.name ||
                 client.email
+
             })
           ),
+
         value:
           clientId
       },
 
-      {
-        name: "name",
-        label: "Project name",
-        type: "text",
-        required: true
-      },
 
       {
-        name: "propertyAddress",
-        label: "Property / address",
-        type: "text"
+        name:
+          "name",
+
+        label:
+          "Project name",
+
+        type:
+          "text",
+
+        required:
+          true
       },
 
+
       {
-        name: "services",
-        label: "Services",
-        type: "multiselect",
+        name:
+          "propertyAddress",
+
+        label:
+          "Property / address",
+
+        type:
+          "text"
+      },
+
+
+      {
+        name:
+          "services",
+
+        label:
+          "Services",
+
+        type:
+          "multiselect",
+
         options:
           FLO_SERVICES
       },
 
-      {
-        name: "startDate",
-        label: "Start date",
-        type: "date"
-      },
 
       {
-        name: "dueDate",
-        label: "Due date",
-        type: "date"
+        name:
+          "startDate",
+
+        label:
+          "Start date",
+
+        type:
+          "date"
       },
 
+
       {
-        name: "status",
-        label: "Project status",
-        type: "select",
+        name:
+          "dueDate",
+
+        label:
+          "Due date",
+
+        type:
+          "date"
+      },
+
+
+      {
+        name:
+          "status",
+
+        label:
+          "Project status",
+
+        type:
+          "select",
+
         options: [
           "Upcoming",
           "In Progress",
@@ -4456,20 +5534,29 @@ async function openAddProjectModal(
           "Completed",
           "Cancelled"
         ],
+
         value:
           "Upcoming"
       },
 
+
       {
-        name: "notes",
-        label: "Project notes",
-        type: "textarea"
+        name:
+          "notes",
+
+        label:
+          "Project notes",
+
+        type:
+          "textarea"
       }
 
     ],
 
+
     submitLabel:
       "Create Project",
+
 
     onSubmit:
       async values => {
@@ -4481,18 +5568,24 @@ async function openAddProjectModal(
               values.clientId
           );
 
+
         await addDoc(
-          collection(db, "projects"),
+          collection(
+            db,
+            "projects"
+          ),
           {
 
             clientId:
               values.clientId,
 
             clientName:
-              client?.name || "",
+              client?.name ||
+              "",
 
             clientEmail:
-              client?.email || "",
+              client?.email ||
+              "",
 
             name:
               values.name.trim(),
@@ -4501,13 +5594,16 @@ async function openAddProjectModal(
               values.propertyAddress.trim(),
 
             services:
-              values.services || [],
+              values.services ||
+              [],
 
             startDate:
-              values.startDate || "",
+              values.startDate ||
+              "",
 
             dueDate:
-              values.dueDate || "",
+              values.dueDate ||
+              "",
 
             status:
               values.status,
@@ -4516,7 +5612,7 @@ async function openAddProjectModal(
               values.notes.trim(),
 
             createdAt:
-                            serverTimestamp(),
+              serverTimestamp(),
 
             updatedAt:
               serverTimestamp()
@@ -4524,7 +5620,9 @@ async function openAddProjectModal(
           }
         );
 
+
         await refreshCRMData();
+
 
         showCRMToast(
           "Project created."
@@ -4545,8 +5643,12 @@ async function getClientOptions() {
 
   const snapshot =
     await getDocs(
-      collection(db, "clients")
+      collection(
+        db,
+        "clients"
+      )
     );
+
 
   return snapshot.docs.map(
     clientDoc => ({
@@ -4563,7 +5665,7 @@ async function getClientOptions() {
 
 
 // ======================================================
-// QUOTES
+// ENHANCED QUOTES
 // ======================================================
 
 function renderEnhancedQuotes(
@@ -4575,9 +5677,11 @@ function renderEnhancedQuotes(
       "quotesGrid"
     );
 
+
   if (!container) {
     return;
   }
+
 
   if (snapshot.empty) {
 
@@ -4610,6 +5714,7 @@ function renderEnhancedQuotes(
 
     `;
 
+
     document
       .getElementById(
         "emptyCreateQuoteButton"
@@ -4619,8 +5724,10 @@ function renderEnhancedQuotes(
         openCreateQuoteModal
       );
 
+
     return;
   }
+
 
   const quotes =
     snapshot.docs.map(
@@ -4634,11 +5741,11 @@ function renderEnhancedQuotes(
       })
     );
 
+
   container.innerHTML =
     quotes
-      .map(quote => {
-
-        return `
+      .map(
+        quote => `
 
           <article
             class="quote-card crm-record-card"
@@ -4659,6 +5766,7 @@ function renderEnhancedQuotes(
 
             </div>
 
+
             <h3>
               ${escapeHTML(
                 quote.clientName ||
@@ -4667,6 +5775,7 @@ function renderEnhancedQuotes(
               )}
             </h3>
 
+
             <p>
               ${escapeHTML(
                 quote.propertyAddress ||
@@ -4674,13 +5783,16 @@ function renderEnhancedQuotes(
               )}
             </p>
 
+
             <div class="crm-quote-total">
 
               $${Number(
-                quote.total || 0
+                quote.total ||
+                0
               ).toFixed(2)}
 
             </div>
+
 
             <div class="crm-card-actions">
 
@@ -4694,14 +5806,29 @@ function renderEnhancedQuotes(
                 View
               </button>
 
-              ${quote.status !== "Archived" ? `
-                <button type="button" class="crm-small-button" data-archive-quote="${escapeHTML(quote.id)}">Archive</button>
-              ` : ""}
+              ${
+                quote.status !==
+                "Archived"
+                  ? `
+                    <button
+                      type="button"
+                      class="crm-small-button"
+                      data-archive-quote="${escapeHTML(
+                        quote.id
+                      )}"
+                    >
+                      Archive
+                    </button>
+                  `
+                  : ""
+              }
 
               <button
                 type="button"
                 class="crm-small-button crm-danger-button"
-                data-delete-quote="${escapeHTML(quote.id)}"
+                data-delete-quote="${escapeHTML(
+                  quote.id
+                )}"
               >
                 Delete
               </button>
@@ -4710,37 +5837,69 @@ function renderEnhancedQuotes(
 
           </article>
 
-        `;
-
-      })
+        `
+      )
       .join("");
+
 
   container
     .querySelectorAll(
       "[data-view-quote]"
     )
-    .forEach(button => {
+    .forEach(
+      button => {
 
-      button.addEventListener(
-        "click",
-        () => {
+        button.addEventListener(
+          "click",
+          () => {
 
-          openQuoteViewModal(
-            button.dataset.viewQuote
-          );
+            openQuoteViewModal(
+              button.dataset.viewQuote
+            );
 
-        }
-      );
+          }
+        );
 
-    });
+      }
+    );
 
-  container.querySelectorAll("[data-archive-quote]").forEach(button => {
-    button.addEventListener("click", () => archiveQuote(button.dataset.archiveQuote));
-  });
 
-  container.querySelectorAll("[data-delete-quote]").forEach(button => {
-    button.addEventListener("click", () => deleteQuoteRecord(button.dataset.deleteQuote));
-  });
+  container
+    .querySelectorAll(
+      "[data-archive-quote]"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () =>
+            archiveQuote(
+              button.dataset.archiveQuote
+            )
+        );
+
+      }
+    );
+
+
+  container
+    .querySelectorAll(
+      "[data-delete-quote]"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () =>
+            deleteQuoteRecord(
+              button.dataset.deleteQuote
+            )
+        );
+
+      }
+    );
 
 }
 
@@ -4749,46 +5908,131 @@ function renderEnhancedQuotes(
 // QUOTE ARCHIVE / DELETE
 // ======================================================
 
-async function archiveQuote(quoteId) {
+async function archiveQuote(
+  quoteId
+) {
 
-  if (!quoteId) return;
+  if (!quoteId) {
+    return;
+  }
 
-  const confirmed = confirm("Archive this quote?");
-  if (!confirmed) return;
+
+  const confirmed =
+    confirm(
+      "Archive this quote?"
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
 
   try {
-    await updateDoc(doc(db, "quotes", quoteId), {
-      status: "Archived",
-      archivedAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
+
+    await updateDoc(
+      doc(
+        db,
+        "quotes",
+        quoteId
+      ),
+      {
+
+        status:
+          "Archived",
+
+        archivedAt:
+          serverTimestamp(),
+
+        updatedAt:
+          serverTimestamp()
+
+      }
+    );
+
 
     await refreshCRMData();
-    showCRMToast("Quote archived.");
+
+
+    showCRMToast(
+      "Quote archived."
+    );
+
+
   } catch (error) {
-    console.error("Archive quote error:", error);
-    showCRMToast(error.message || "Unable to archive quote.", true);
+
+    console.error(
+      "Archive quote error:",
+      error
+    );
+
+
+    showCRMToast(
+      error.message ||
+      "Unable to archive quote.",
+      true
+    );
+
   }
+
 }
 
-async function deleteQuoteRecord(quoteId) {
 
-  if (!quoteId) return;
+async function deleteQuoteRecord(
+  quoteId
+) {
 
-  const confirmed = confirm(
-    "Delete this quote permanently? This cannot be undone."
-  );
+  if (!quoteId) {
+    return;
+  }
 
-  if (!confirmed) return;
+
+  const confirmed =
+    confirm(
+      "Delete this quote permanently? This cannot be undone."
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
 
   try {
-    await deleteDoc(doc(db, "quotes", quoteId));
+
+    await deleteDoc(
+      doc(
+        db,
+        "quotes",
+        quoteId
+      )
+    );
+
+
     await refreshCRMData();
-    showCRMToast("Quote deleted.");
+
+
+    showCRMToast(
+      "Quote deleted."
+    );
+
+
   } catch (error) {
-    console.error("Delete quote error:", error);
-    showCRMToast(error.message || "Unable to delete quote.", true);
+
+    console.error(
+      "Delete quote error:",
+      error
+    );
+
+
+    showCRMToast(
+      error.message ||
+      "Unable to delete quote.",
+      true
+    );
+
   }
+
 }
 
 
@@ -4803,6 +6047,7 @@ async function openCreateQuoteModal(
   const clients =
     await getClientOptions();
 
+
   if (!clients.length) {
 
     showCRMToast(
@@ -4811,8 +6056,8 @@ async function openCreateQuoteModal(
     );
 
     return;
-
   }
+
 
   const modal =
     createCRMModalShell(
@@ -4820,10 +6065,12 @@ async function openCreateQuoteModal(
       "QUOTE"
     );
 
+
   const body =
     modal.querySelector(
       ".crm-modal-body"
     );
+
 
   body.innerHTML = `
 
@@ -4831,7 +6078,9 @@ async function openCreateQuoteModal(
 
       <label class="crm-field">
 
-        <span>Client</span>
+        <span>
+          Client
+        </span>
 
         <select
           id="customQuoteClient"
@@ -4841,10 +6090,14 @@ async function openCreateQuoteModal(
           ${clients
             .map(
               client => `
+
                 <option
-                  value="${escapeHTML(client.id)}"
+                  value="${escapeHTML(
+                    client.id
+                  )}"
                   ${
-                    client.id === clientId
+                    client.id ===
+                    clientId
                       ? "selected"
                       : ""
                   }
@@ -4854,6 +6107,7 @@ async function openCreateQuoteModal(
                     client.email
                   )}
                 </option>
+
               `
             )
             .join("")}
@@ -4862,9 +6116,12 @@ async function openCreateQuoteModal(
 
       </label>
 
+
       <label class="crm-field">
 
-        <span>Property / address</span>
+        <span>
+          Property / address
+        </span>
 
         <input
           id="customQuoteAddress"
@@ -4875,6 +6132,7 @@ async function openCreateQuoteModal(
       </label>
 
     </div>
+
 
     <div class="crm-quote-builder">
 
@@ -4902,27 +6160,28 @@ async function openCreateQuoteModal(
 
       </div>
 
+
       <div
         id="quoteServiceRows"
         class="quote-service-rows"
-      >
+      ></div>
 
-      </div>
 
       <div
         id="quoteOtherRows"
         class="quote-other-rows"
-      >
-
-      </div>
+      ></div>
 
     </div>
+
 
     <div class="crm-form-grid">
 
       <label class="crm-field">
 
-        <span>Discount</span>
+        <span>
+          Discount
+        </span>
 
         <input
           id="customQuoteDiscount"
@@ -4934,9 +6193,12 @@ async function openCreateQuoteModal(
 
       </label>
 
+
       <label class="crm-field">
 
-        <span>GST</span>
+        <span>
+          GST
+        </span>
 
         <select
           id="customQuoteGST"
@@ -4946,7 +6208,10 @@ async function openCreateQuoteModal(
             No GST
           </option>
 
-          <option value="10" selected>
+          <option
+            value="10"
+            selected
+          >
             10% GST
           </option>
 
@@ -4956,6 +6221,7 @@ async function openCreateQuoteModal(
 
     </div>
 
+
     <div
       class="crm-quote-summary"
       id="customQuoteSummary"
@@ -4963,24 +6229,33 @@ async function openCreateQuoteModal(
 
       <div>
         <span>Subtotal</span>
-        <strong id="quoteSubtotal">$0.00</strong>
+        <strong id="quoteSubtotal">
+          $0.00
+        </strong>
       </div>
 
       <div>
         <span>GST</span>
-        <strong id="quoteGST">$0.00</strong>
+        <strong id="quoteGST">
+          $0.00
+        </strong>
       </div>
 
       <div>
         <span>Total</span>
-        <strong id="quoteTotal">$0.00</strong>
+        <strong id="quoteTotal">
+          $0.00
+        </strong>
       </div>
 
     </div>
 
+
     <label class="crm-field">
 
-      <span>Quote notes</span>
+      <span>
+        Quote notes
+      </span>
 
       <textarea
         id="customQuoteNotes"
@@ -4992,15 +6267,18 @@ async function openCreateQuoteModal(
 
   `;
 
+
   const footer =
     modal.querySelector(
       ".crm-modal-footer"
     );
 
+
   const saveButton =
     document.createElement(
       "button"
     );
+
 
   saveButton.type =
     "button";
@@ -5011,19 +6289,23 @@ async function openCreateQuoteModal(
   saveButton.textContent =
     "Save Quote";
 
+
   footer.appendChild(
     saveButton
   );
+
 
   const serviceRows =
     document.getElementById(
       "quoteServiceRows"
     );
 
+
   const otherRows =
     document.getElementById(
       "quoteOtherRows"
     );
+
 
   FLO_SERVICES.forEach(
     service => {
@@ -5033,8 +6315,10 @@ async function openCreateQuoteModal(
           "div"
         );
 
+
       row.className =
         "quote-service-row";
+
 
       row.innerHTML = `
 
@@ -5042,7 +6326,9 @@ async function openCreateQuoteModal(
 
           <input
             type="checkbox"
-            value="${escapeHTML(service)}"
+            value="${escapeHTML(
+              service
+            )}"
           >
 
           <span>
@@ -5051,6 +6337,7 @@ async function openCreateQuoteModal(
 
         </label>
 
+
         <input
           class="quote-service-price"
           type="number"
@@ -5058,20 +6345,25 @@ async function openCreateQuoteModal(
           step="0.01"
           value="0"
           disabled
-          aria-label="${escapeHTML(service)} price"
+          aria-label="${escapeHTML(
+            service
+          )} price"
         >
 
       `;
+
 
       const checkbox =
         row.querySelector(
           "input[type='checkbox']"
         );
 
+
       const price =
         row.querySelector(
           ".quote-service-price"
         );
+
 
       checkbox.addEventListener(
         "change",
@@ -5079,6 +6371,7 @@ async function openCreateQuoteModal(
 
           price.disabled =
             !checkbox.checked;
+
 
           if (
             checkbox.checked &&
@@ -5092,22 +6385,28 @@ async function openCreateQuoteModal(
                   service
               );
 
+
             if (packagePreset) {
+
               price.value =
                 packagePreset.price;
+
             }
 
           }
+
 
           calculateCustomQuote();
 
         }
       );
 
+
       price.addEventListener(
         "input",
         calculateCustomQuote
       );
+
 
       serviceRows.appendChild(
         row
@@ -5116,20 +6415,19 @@ async function openCreateQuoteModal(
     }
   );
 
+
   document
     .getElementById(
       "addQuoteOther"
     )
     .addEventListener(
       "click",
-      () => {
-
+      () =>
         addOtherQuoteRow(
           otherRows
-        );
-
-      }
+        )
     );
+
 
   document
     .getElementById(
@@ -5140,6 +6438,7 @@ async function openCreateQuoteModal(
       calculateCustomQuote
     );
 
+
   document
     .getElementById(
       "customQuoteGST"
@@ -5148,6 +6447,7 @@ async function openCreateQuoteModal(
       "change",
       calculateCustomQuote
     );
+
 
   saveButton.addEventListener(
     "click",
@@ -5161,83 +6461,95 @@ async function openCreateQuoteModal(
         saveButton.textContent =
           "Saving...";
 
+
         const selectedServices =
           [];
+
 
         serviceRows
           .querySelectorAll(
             ".quote-service-row"
           )
-          .forEach(row => {
+          .forEach(
+            row => {
 
-            const checkbox =
-              row.querySelector(
-                "input[type='checkbox']"
-              );
+              const checkbox =
+                row.querySelector(
+                  "input[type='checkbox']"
+                );
 
-            const price =
-              row.querySelector(
-                ".quote-service-price"
-              );
 
-            if (
-              checkbox.checked
-            ) {
+              const price =
+                row.querySelector(
+                  ".quote-service-price"
+                );
 
-              selectedServices.push({
 
-                name:
-                  checkbox.value,
+              if (
+                checkbox.checked
+              ) {
 
-                price:
-                  Number(
-                    price.value || 0
-                  )
+                selectedServices.push({
 
-              });
+                  name:
+                    checkbox.value,
+
+                  price:
+                    Number(
+                      price.value ||
+                      0
+                    )
+
+                });
+
+              }
 
             }
-
-          });
-
+          );
         otherRows
           .querySelectorAll(
             ".quote-other-row"
           )
-          .forEach(row => {
+          .forEach(
+            row => {
 
-            const name =
-              row.querySelector(
-                ".quote-other-name"
-              );
+              const name =
+                row.querySelector(
+                  ".quote-other-name"
+                );
 
-            const price =
-              row.querySelector(
-                ".quote-other-price"
-              );
 
-            if (
-              name.value.trim()
-            ) {
+              const price =
+                row.querySelector(
+                  ".quote-other-price"
+                );
 
-              selectedServices.push({
 
-                name:
-                  name.value.trim(),
+              if (
+                name.value.trim()
+              ) {
 
-                price:
-                  Number(
-                    price.value || 0
-                  ),
+                selectedServices.push({
 
-                custom:
-                  true
+                  name:
+                    name.value.trim(),
 
-              });
+                  price:
+                    Number(
+                      price.value ||
+                      0
+                    ),
+
+                  custom:
+                    true
+
+                });
+
+              }
 
             }
+          );
 
-          });
 
         if (
           !selectedServices.length
@@ -5249,10 +6561,12 @@ async function openCreateQuoteModal(
 
         }
 
+
         const selectedClient =
           document.getElementById(
             "customQuoteClient"
           ).value;
+
 
         const client =
           clients.find(
@@ -5260,6 +6574,7 @@ async function openCreateQuoteModal(
               item.id ===
               selectedClient
           );
+
 
         const subtotal =
           selectedServices.reduce(
@@ -5269,17 +6584,21 @@ async function openCreateQuoteModal(
             ) =>
               total +
               Number(
-                item.price || 0
+                item.price ||
+                0
               ),
             0
           );
+
 
         const discount =
           Number(
             document.getElementById(
               "customQuoteDiscount"
-            ).value || 0
+            ).value ||
+            0
           );
+
 
         const taxable =
           Math.max(
@@ -5288,33 +6607,43 @@ async function openCreateQuoteModal(
             0
           );
 
+
         const gstRate =
           Number(
             document.getElementById(
               "customQuoteGST"
-            ).value || 0
+            ).value ||
+            0
           );
+
 
         const gst =
           taxable *
           (gstRate / 100);
 
+
         const total =
           taxable +
           gst;
 
+
         await addDoc(
-          collection(db, "quotes"),
+          collection(
+            db,
+            "quotes"
+          ),
           {
 
             clientId:
               selectedClient,
 
             clientName:
-              client?.name || "",
+              client?.name ||
+              "",
 
             clientEmail:
-              client?.email || "",
+              client?.email ||
+              "",
 
             propertyAddress:
               document.getElementById(
@@ -5363,13 +6692,17 @@ async function openCreateQuoteModal(
           }
         );
 
+
         closeCRMModal();
 
+
         await refreshCRMData();
+
 
         showCRMToast(
           "Custom quote saved."
         );
+
 
       } catch (error) {
 
@@ -5378,11 +6711,13 @@ async function openCreateQuoteModal(
           error
         );
 
+
         saveButton.disabled =
           false;
 
         saveButton.textContent =
           "Save Quote";
+
 
         showCRMToast(
           error.message ||
@@ -5394,6 +6729,7 @@ async function openCreateQuoteModal(
 
     }
   );
+
 
   calculateCustomQuote();
 
@@ -5413,8 +6749,10 @@ function addOtherQuoteRow(
       "div"
     );
 
+
   row.className =
     "quote-other-row";
+
 
   row.innerHTML = `
 
@@ -5442,6 +6780,7 @@ function addOtherQuoteRow(
 
   `;
 
+
   row
     .querySelector(
       "button"
@@ -5457,6 +6796,7 @@ function addOtherQuoteRow(
       }
     );
 
+
   row
     .querySelector(
       ".quote-other-price"
@@ -5465,6 +6805,7 @@ function addOtherQuoteRow(
       "input",
       calculateCustomQuote
     );
+
 
   container.appendChild(
     row
@@ -5484,12 +6825,15 @@ function calculateCustomQuote() {
       "#quoteServiceRows .quote-service-row"
     );
 
+
   const otherRows =
     document.querySelectorAll(
       "#quoteOtherRows .quote-other-row"
     );
 
+
   let subtotal = 0;
+
 
   serviceRows.forEach(
     row => {
@@ -5499,10 +6843,12 @@ function calculateCustomQuote() {
           "input[type='checkbox']"
         );
 
+
       const price =
         row.querySelector(
           ".quote-service-price"
         );
+
 
       if (
         checkbox &&
@@ -5511,12 +6857,15 @@ function calculateCustomQuote() {
 
         subtotal +=
           Number(
-            price.value || 0
+            price.value ||
+            0
           );
 
       }
-          }
+
+    }
   );
+
 
   otherRows.forEach(
     row => {
@@ -5526,20 +6875,25 @@ function calculateCustomQuote() {
           ".quote-other-price"
         );
 
+
       subtotal +=
         Number(
-          price?.value || 0
+          price?.value ||
+          0
         );
 
     }
   );
 
+
   const discount =
     Number(
       document.getElementById(
         "customQuoteDiscount"
-      )?.value || 0
+      )?.value ||
+      0
     );
+
 
   const taxable =
     Math.max(
@@ -5548,50 +6902,66 @@ function calculateCustomQuote() {
       0
     );
 
+
   const gstRate =
     Number(
       document.getElementById(
         "customQuoteGST"
-      )?.value || 0
+      )?.value ||
+      0
     );
+
 
   const gst =
     taxable *
     gstRate /
     100;
 
+
   const total =
     taxable +
     gst;
+
 
   const subtotalElement =
     document.getElementById(
       "quoteSubtotal"
     );
 
+
   const gstElement =
     document.getElementById(
       "quoteGST"
     );
+
 
   const totalElement =
     document.getElementById(
       "quoteTotal"
     );
 
+
   if (subtotalElement) {
+
     subtotalElement.textContent =
       `$${subtotal.toFixed(2)}`;
+
   }
+
 
   if (gstElement) {
+
     gstElement.textContent =
       `$${gst.toFixed(2)}`;
+
   }
 
+
   if (totalElement) {
+
     totalElement.textContent =
       `$${total.toFixed(2)}`;
+
   }
 
 }
@@ -5607,21 +6977,29 @@ async function openQuoteViewModal(
 
   const snapshot =
     await getDocs(
-      collection(db, "quotes")
+      collection(
+        db,
+        "quotes"
+      )
     );
+
 
   const found =
     snapshot.docs.find(
       item =>
-        item.id === quoteId
+        item.id ===
+        quoteId
     );
+
 
   if (!found) {
     return;
   }
 
+
   const quote =
     found.data();
+
 
   const services =
     Array.isArray(
@@ -5629,6 +7007,7 @@ async function openQuoteViewModal(
     )
       ? quote.services
       : [];
+
 
   openCRMFormModal({
 
@@ -5656,8 +7035,8 @@ async function openQuoteViewModal(
         value:
           quote.clientName ||
           ""
-
       },
+
 
       {
         name:
@@ -5672,8 +7051,8 @@ async function openQuoteViewModal(
         value:
           quote.propertyAddress ||
           ""
-
       },
+
 
       {
         name:
@@ -5690,12 +7069,13 @@ async function openQuoteViewModal(
             .map(
               item =>
                 `${item.name} — $${Number(
-                  item.price || 0
+                  item.price ||
+                  0
                 ).toFixed(2)}`
             )
             .join("\n")
-
       },
+
 
       {
         name:
@@ -5709,10 +7089,11 @@ async function openQuoteViewModal(
 
         value:
           `$${Number(
-            quote.subtotal || 0
+            quote.subtotal ||
+            0
           ).toFixed(2)}`
-
       },
+
 
       {
         name:
@@ -5726,10 +7107,11 @@ async function openQuoteViewModal(
 
         value:
           `$${Number(
-            quote.gst || 0
+            quote.gst ||
+            0
           ).toFixed(2)}`
-
       },
+
 
       {
         name:
@@ -5743,9 +7125,9 @@ async function openQuoteViewModal(
 
         value:
           `$${Number(
-            quote.total || 0
+            quote.total ||
+            0
           ).toFixed(2)}`
-
       }
 
     ],
@@ -5769,16 +7151,20 @@ function createCRMModalShell(
 
   closeCRMModal();
 
+
   const modal =
     document.createElement(
       "div"
     );
 
+
   modal.id =
     "crmModal";
 
+
   modal.className =
     "crm-modal";
+
 
   modal.innerHTML = `
 
@@ -5786,6 +7172,7 @@ function createCRMModalShell(
       class="crm-modal-overlay"
       data-crm-close
     ></div>
+
 
     <div class="crm-modal-card">
 
@@ -5797,6 +7184,7 @@ function createCRMModalShell(
       >
         ×
       </button>
+
 
       <div class="crm-modal-header">
 
@@ -5810,8 +7198,10 @@ function createCRMModalShell(
 
       </div>
 
+
       <div class="crm-modal-body">
       </div>
+
 
       <div class="crm-modal-footer">
       </div>
@@ -5820,9 +7210,11 @@ function createCRMModalShell(
 
   `;
 
+
   document.body.appendChild(
     modal
   );
+
 
   modal
     .querySelectorAll(
@@ -5839,10 +7231,15 @@ function createCRMModalShell(
       }
     );
 
+
   return modal;
 
 }
 
+
+// ======================================================
+// OPEN CRM FORM
+// ======================================================
 
 function openCRMFormModal(
   config
@@ -5854,26 +7251,32 @@ function openCRMFormModal(
       config.eyebrow
     );
 
+
   const body =
     modal.querySelector(
       ".crm-modal-body"
     );
+
 
   const footer =
     modal.querySelector(
       ".crm-modal-footer"
     );
 
+
   const form =
     document.createElement(
       "form"
     );
 
+
   form.id =
     "crmDynamicForm";
 
+
   form.className =
     "crm-form";
+
 
   config.fields.forEach(
     field => {
@@ -5883,22 +7286,32 @@ function openCRMFormModal(
           "label"
         );
 
+
       wrapper.className =
         "crm-field";
+
 
       const label =
         document.createElement(
           "span"
         );
 
+
       label.textContent =
         field.label;
+
 
       wrapper.appendChild(
         label
       );
 
+
       let input;
+
+
+      // --------------------------------------
+      // TEXTAREA
+      // --------------------------------------
 
       if (
         field.type ===
@@ -5910,7 +7323,13 @@ function openCRMFormModal(
             "textarea"
           );
 
-        input.rows = 4;
+        input.rows =
+          4;
+
+
+      // --------------------------------------
+      // SELECT
+      // --------------------------------------
 
       } else if (
         field.type ===
@@ -5922,52 +7341,61 @@ function openCRMFormModal(
             "select"
           );
 
-        field.options
-          .forEach(
-            option => {
 
-              const optionElement =
-                document.createElement(
-                  "option"
-                );
+        field.options.forEach(
+          option => {
 
-              if (
-                typeof option ===
-                "string"
-              ) {
-
-                optionElement.value =
-                  option;
-
-                optionElement.textContent =
-                  option;
-
-              } else {
-
-                optionElement.value =
-                  option.value;
-
-                optionElement.textContent =
-                  option.label;
-
-              }
-
-              if (
-                optionElement.value ===
-                field.value
-              ) {
-
-                optionElement.selected =
-                  true;
-
-              }
-
-              input.appendChild(
-                optionElement
+            const optionElement =
+              document.createElement(
+                "option"
               );
 
+
+            if (
+              typeof option ===
+              "string"
+            ) {
+
+              optionElement.value =
+                option;
+
+              optionElement.textContent =
+                option;
+
+
+            } else {
+
+              optionElement.value =
+                option.value;
+
+              optionElement.textContent =
+                option.label;
+
             }
-          );
+
+
+            if (
+              optionElement.value ===
+              field.value
+            ) {
+
+              optionElement.selected =
+                true;
+
+            }
+
+
+            input.appendChild(
+              optionElement
+            );
+
+          }
+        );
+
+
+      // --------------------------------------
+      // MULTISELECT
+      // --------------------------------------
 
       } else if (
         field.type ===
@@ -5979,40 +7407,51 @@ function openCRMFormModal(
             "div"
           );
 
+
         input.className =
           "crm-multiselect";
 
-        field.options
-          .forEach(
-            option => {
 
-              const label =
-                document.createElement(
-                  "label"
-                );
+        field.options.forEach(
+          option => {
 
-              label.className =
-                "crm-check-option";
-
-              label.innerHTML = `
-
-                <input
-                  type="checkbox"
-                  value="${escapeHTML(option)}"
-                >
-
-                <span>
-                  ${escapeHTML(option)}
-                </span>
-
-              `;
-
-              input.appendChild(
-                label
+            const optionLabel =
+              document.createElement(
+                "label"
               );
 
-            }
-          );
+
+            optionLabel.className =
+              "crm-check-option";
+
+
+            optionLabel.innerHTML = `
+
+              <input
+                type="checkbox"
+                value="${escapeHTML(
+                  option
+                )}"
+              >
+
+              <span>
+                ${escapeHTML(option)}
+              </span>
+
+            `;
+
+
+            input.appendChild(
+              optionLabel
+            );
+
+          }
+        );
+
+
+      // --------------------------------------
+      // STANDARD INPUT
+      // --------------------------------------
 
       } else {
 
@@ -6021,13 +7460,17 @@ function openCRMFormModal(
             "input"
           );
 
+
         input.type =
-          field.type || "text";
+          field.type ||
+          "text";
 
       }
 
+
       input.name =
         field.name;
+
 
       if (
         field.type !==
@@ -6035,9 +7478,11 @@ function openCRMFormModal(
       ) {
 
         input.value =
-          field.value || "";
+          field.value ||
+          "";
 
       }
+
 
       if (
         field.required
@@ -6048,6 +7493,7 @@ function openCRMFormModal(
 
       }
 
+
       if (
         config.readOnly
       ) {
@@ -6057,9 +7503,11 @@ function openCRMFormModal(
 
       }
 
+
       wrapper.appendChild(
         input
       );
+
 
       form.appendChild(
         wrapper
@@ -6068,9 +7516,11 @@ function openCRMFormModal(
     }
   );
 
+
   body.appendChild(
     form
   );
+
 
   if (
     config.submitLabel
@@ -6081,23 +7531,29 @@ function openCRMFormModal(
         "button"
       );
 
+
     submitButton.type =
       "submit";
+
 
     submitButton.className =
       "crm-modal-submit";
 
+
     submitButton.textContent =
       config.submitLabel;
+
 
     submitButton.setAttribute(
       "form",
       "crmDynamicForm"
     );
 
+
     footer.appendChild(
       submitButton
     );
+
 
     form.addEventListener(
       "submit",
@@ -6105,16 +7561,20 @@ function openCRMFormModal(
 
         event.preventDefault();
 
+
         submitButton.disabled =
           true;
 
+
         submitButton.textContent =
           "Saving...";
+
 
         try {
 
           const values =
             {};
+
 
           config.fields.forEach(
             field => {
@@ -6124,10 +7584,12 @@ function openCRMFormModal(
                 "multiselect"
               ) {
 
-                values[field.name] =
+                values[
+                  field.name
+                ] =
                   Array.from(
                     form.querySelectorAll(
-                      `input[name="${field.name}"]`
+                      `input[type="checkbox"][value]`
                     )
                   )
                     .filter(
@@ -6139,25 +7601,32 @@ function openCRMFormModal(
                         checkbox.value
                     );
 
+
               } else {
 
-                values[field.name] =
+                values[
+                  field.name
+                ] =
                   form
                     .querySelector(
                       `[name="${field.name}"]`
                     )
-                    ?.value || "";
+                    ?.value ||
+                  "";
 
               }
 
             }
           );
 
+
           await config.onSubmit(
             values
           );
 
+
           closeCRMModal();
+
 
         } catch (error) {
 
@@ -6166,11 +7635,14 @@ function openCRMFormModal(
             error
           );
 
+
           submitButton.disabled =
             false;
 
+
           submitButton.textContent =
             config.submitLabel;
+
 
           showCRMToast(
             error.message ||
@@ -6184,6 +7656,7 @@ function openCRMFormModal(
     );
 
   }
+
 
   return modal;
 
@@ -6201,15 +7674,18 @@ function closeCRMModal() {
       "crmModal"
     );
 
+
   if (modal) {
+
     modal.remove();
+
   }
 
 }
 
 
 // ======================================================
-// TOAST
+// CRM TOAST
 // ======================================================
 
 function showCRMToast(
@@ -6222,6 +7698,7 @@ function showCRMToast(
       "crmToast"
     );
 
+
   if (!toast) {
 
     toast =
@@ -6229,11 +7706,14 @@ function showCRMToast(
         "div"
       );
 
+
     toast.id =
       "crmToast";
 
+
     toast.className =
       "crm-toast";
+
 
     document.body.appendChild(
       toast
@@ -6241,21 +7721,26 @@ function showCRMToast(
 
   }
 
+
   toast.textContent =
     message;
+
 
   toast.classList.toggle(
     "error",
     isError
   );
 
+
   toast.classList.add(
     "visible"
   );
 
+
   clearTimeout(
     window.floCRMToastTimer
   );
+
 
   window.floCRMToastTimer =
     setTimeout(
