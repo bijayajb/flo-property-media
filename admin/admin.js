@@ -5106,12 +5106,15 @@ function openCRMFormModal(
     );
 
   const form =
-    document.createElement(
-      "form"
-    );
+  document.createElement(
+    "form"
+  );
 
-  form.className =
-    "crm-form";
+form.id =
+  "crmDynamicForm";
+
+form.className =
+  "crm-form";
 
   config.fields.forEach(
     field => {
@@ -5320,13 +5323,24 @@ function openCRMFormModal(
       );
 
     submitButton.type =
-      "submit";
+  "submit";
 
-    submitButton.className =
-      "crm-modal-submit";
+submitButton.className =
+  "crm-modal-submit";
 
-    submitButton.textContent =
-      config.submitLabel;
+submitButton.textContent =
+  config.submitLabel;
+
+/*
+ * The submit button lives in the modal footer,
+ * outside the form element.
+ *
+ * Explicitly associate it with the form.
+ */
+submitButton.setAttribute(
+  "form",
+  "crmDynamicForm"
+);
 
     footer.appendChild(
       submitButton
