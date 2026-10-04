@@ -68,7 +68,9 @@ async function sendCustomerBookingEmail(booking, statusData) {
   const user = auth.currentUser;
 
   if (!user) {
-    throw new Error("Admin authentication required.");
+    throw new Error(
+      "Admin authentication required."
+    );
   }
 
   const idToken =
@@ -81,11 +83,19 @@ async function sendCustomerBookingEmail(booking, statusData) {
         method: "POST",
 
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`
+          "Content-Type":
+            "application/json",
+
+          "Authorization":
+            `Bearer ${idToken}`
         },
 
         body: JSON.stringify({
+
+          // --------------------------------------------------
+          // CUSTOMER DETAILS
+          // --------------------------------------------------
+
           customerName:
             booking.name ||
             booking.clientName ||
@@ -95,10 +105,22 @@ async function sendCustomerBookingEmail(booking, statusData) {
             booking.email ||
             "",
 
+          mobile:
+            booking.mobile ||
+            "",
+
+          // --------------------------------------------------
+          // PROPERTY
+          // --------------------------------------------------
+
           propertyAddress:
             booking.propertyAddress ||
             booking.address ||
             "",
+
+          // --------------------------------------------------
+          // BOOKING DATE / TIME
+          // --------------------------------------------------
 
           preferredDate:
             booking.preferredDate ||
@@ -109,16 +131,76 @@ async function sendCustomerBookingEmail(booking, statusData) {
             booking.preferredTime ||
             "",
 
+          proposedDate:
+            booking.proposedDate ||
+            "",
+
+          proposedTime:
+            booking.proposedTime ||
+            "",
+
+          // --------------------------------------------------
+          // SERVICES / PACKAGE
+          // --------------------------------------------------
+
           packageName:
             booking.package ||
             booking.packageName ||
+            "",
+
+          services:
+            Array.isArray(
+              booking.services
+            )
+              ? booking.services
+              : [],
+
+          // --------------------------------------------------
+          // PAYMENT / MESSAGE
+          // --------------------------------------------------
+
+          paymentMethod:
+            booking.paymentMethod ||
             "",
 
           message:
             booking.message ||
             "",
 
+          // --------------------------------------------------
+          // BOOKING INFORMATION
+          // --------------------------------------------------
+
+          source:
+            booking.source ||
+            "Website booking form",
+
+          createdAt:
+            booking.createdAt ||
+            null,
+
+          // --------------------------------------------------
+          // PROPOSAL / DECLINE INFORMATION
+          // --------------------------------------------------
+
+          proposalMessage:
+            booking.proposalMessage ||
+            "",
+
+          declineReason:
+            booking.declineReason ||
+            "",
+
+          declineMessage:
+            booking.declineMessage ||
+            "",
+
+          // --------------------------------------------------
+          // STATUS DATA
+          // --------------------------------------------------
+
           ...statusData
+
         })
       }
     );
@@ -127,13 +209,16 @@ async function sendCustomerBookingEmail(booking, statusData) {
     await response.json();
 
   if (!response.ok) {
+
     throw new Error(
       result.error ||
       "Customer email could not be sent."
     );
+
   }
 
   return result;
+
 }
 
 // ======================================================
@@ -1406,6 +1491,133 @@ async function acceptBooking() {
   }
 }
 
+// ======================================================
+// COMPLETE BOOKING
+// ======================================================
+
+async function completeBooking() {
+
+  if (!activeBooking) {
+    return;
+  }
+
+
+  const confirmed =
+    confirm(
+      "Mark this booking as completed?\n\nThis will send a completion email to the customer and a confirmation email to FLO."
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  const button =
+    document.getElementById(
+      "completeBookingButton"
+    );
+
+
+  button.disabled = true;
+
+  button.textContent =
+    "Completing…";
+
+
+  try {
+
+    // --------------------------------------------------
+    // 1. Send completion emails first
+    // --------------------------------------------------
+
+    await sendCustomerBookingEmail(
+      activeBooking,
+      {
+        status: "Completed"
+      }
+    );
+
+
+    // --------------------------------------------------
+    // 2. Mark booking as completed
+    // --------------------------------------------------
+
+    await updateDoc(
+      doc(
+        db,
+        "bookings",
+        activeBooking.id
+      ),
+      {
+        status: "Completed",
+
+        completedAt:
+          serverTimestamp(),
+
+        completedEmailSentAt:
+          serverTimestamp()
+      }
+    );
+
+
+    // --------------------------------------------------
+    // 3. Update local booking
+    // --------------------------------------------------
+
+    activeBooking.status =
+      "Completed";
+
+    activeBooking.completedAt =
+      new Date();
+
+    activeBooking.completedEmailSentAt =
+      new Date();
+
+
+    // --------------------------------------------------
+    // 4. Refresh booking lists
+    // --------------------------------------------------
+
+    renderBookings(
+      currentBookings
+    );
+
+    renderRecentBookings(
+      currentBookings
+    );
+
+    populateBookingModal();
+
+
+    showBookingActionMessage(
+      "Booking completed successfully."
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Complete booking error:",
+      error
+    );
+
+
+    showBookingActionMessage(
+      error.message ||
+      "Unable to complete this booking.",
+      true
+    );
+
+
+    button.disabled = false;
+
+    button.textContent =
+      "Complete booking";
+
+  }
+
+}
 
 // ======================================================
 // PROPOSE DIFFERENT DATE
