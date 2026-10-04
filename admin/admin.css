@@ -1740,3 +1740,18 @@ body.modal-open {
   }
 
 }
+.booking-row {
+  width: 100%;
+  cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+}
+
+.booking-row:hover {
+  transform: translateY(-1px);
+}
+
+.booking-row:focus {
+  outline: 1px solid rgba(216, 199, 163, 0.6);
+  outline-offset: 2px;
+}
