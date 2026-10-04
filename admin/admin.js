@@ -1501,6 +1501,14 @@ async function completeBooking() {
     return;
   }
 
+  if (activeBooking.completedEmailSentAt) {
+
+  showBookingActionMessage(
+    "Completion email has already been sent for this booking."
+  );
+
+  return;
+}
 
   const confirmed =
     confirm(
