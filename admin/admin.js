@@ -1135,7 +1135,6 @@ function createBookingModal() {
     Accept booking
   </button>
 
-
   <button
     type="button"
     class="booking-action"
@@ -1143,7 +1142,6 @@ function createBookingModal() {
   >
     Propose different date
   </button>
-
 
   <button
     type="button"
@@ -1153,7 +1151,6 @@ function createBookingModal() {
     Decline / booked out
   </button>
 
-
   <button
     type="button"
     class="booking-action booking-action-complete"
@@ -1162,16 +1159,23 @@ function createBookingModal() {
     Complete booking
   </button>
 
+  <button
+    type="button"
+    class="booking-action booking-action-close"
+    id="closeBookingButton"
+  >
+    Close request
+  </button>
+
+  <button
+    type="button"
+    class="booking-action booking-action-delete"
+    id="deleteBookingButton"
+  >
+    Delete booking
+  </button>
+
 </div>
-
-
-      <div
-        id="bookingActionMessage"
-        class="booking-action-message"
-      ></div>
-
-
-    </div>
 
   `;
 
@@ -1219,6 +1223,19 @@ function createBookingModal() {
       "click",
       completeBooking
     );
+  document
+  .getElementById("closeBookingButton")
+  .addEventListener(
+    "click",
+    closeBooking
+  );
+
+document
+  .getElementById("deleteBookingButton")
+  .addEventListener(
+    "click",
+    deleteBooking
+  );
 }
 
 
@@ -1379,7 +1396,30 @@ if (completeButton) {
     status !== "Date Proposed";
 
 }
+const closeButton =
+  document.getElementById(
+    "closeBookingButton"
+  );
 
+if (closeButton) {
+
+  closeButton.disabled =
+    status !== "Declined";
+
+}
+
+const deleteButton =
+  document.getElementById(
+    "deleteBookingButton"
+  );
+
+if (deleteButton) {
+
+  deleteButton.disabled =
+    status !== "Completed" &&
+    status !== "Closed";
+
+}
 }
 
 
@@ -1402,7 +1442,6 @@ function closeBookingModal() {
 
   activeBooking = null;
 }
-
 
 // ======================================================
 // ACCEPT BOOKING
@@ -2010,7 +2049,157 @@ const message =
   }
 }
 
+// ======================================================
+// CLOSE DECLINED BOOKING
+// ======================================================
 
+async function closeBooking() {
+
+  if (!activeBooking) {
+    return;
+  }
+
+  if (activeBooking.status !== "Declined") {
+    return;
+  }
+
+  const confirmed =
+    confirm(
+      "Close this declined booking?\n\nIt will be moved to the CLOSED section but will not be deleted."
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  const button =
+    document.getElementById(
+      "closeBookingButton"
+    );
+
+  button.disabled = true;
+
+  button.textContent =
+    "Closing…";
+
+  try {
+
+    await updateDoc(
+      doc(
+        db,
+        "bookings",
+        activeBooking.id
+      ),
+      {
+        status: "Closed",
+        closedAt: serverTimestamp()
+      }
+    );
+
+    await loadDashboard();
+
+    closeBookingModal();
+
+  } catch (error) {
+
+    console.error(
+      "Close booking error:",
+      error
+    );
+
+    showBookingActionMessage(
+      error.message ||
+      "Unable to close this booking.",
+      true
+    );
+
+    button.disabled = false;
+
+    button.textContent =
+      "Close request";
+
+  }
+
+}
+
+
+// ======================================================
+// DELETE BOOKING
+// ======================================================
+
+async function deleteBooking() {
+
+  if (!activeBooking) {
+    return;
+  }
+
+  const allowedStatuses = [
+    "Completed",
+    "Closed"
+  ];
+
+  if (
+    !allowedStatuses.includes(
+      activeBooking.status
+    )
+  ) {
+    return;
+  }
+
+  const confirmed =
+    confirm(
+      "Permanently delete this booking?\n\nThis cannot be undone."
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  const button =
+    document.getElementById(
+      "deleteBookingButton"
+    );
+
+  button.disabled = true;
+
+  button.textContent =
+    "Deleting…";
+
+  try {
+
+    await deleteDoc(
+      doc(
+        db,
+        "bookings",
+        activeBooking.id
+      )
+    );
+
+    await loadDashboard();
+
+    closeBookingModal();
+
+  } catch (error) {
+
+    console.error(
+      "Delete booking error:",
+      error
+    );
+
+    showBookingActionMessage(
+      error.message ||
+      "Unable to delete this booking.",
+      true
+    );
+
+    button.disabled = false;
+
+    button.textContent =
+      "Delete booking";
+
+  }
+
+}
 // ======================================================
 // ACTION MESSAGE
 // ======================================================
