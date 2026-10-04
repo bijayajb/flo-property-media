@@ -5474,9 +5474,4 @@ function showCRMToast(
 
 }
 
-      }
-
-    }
-  );
-
-}
+     
