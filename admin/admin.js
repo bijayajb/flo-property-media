@@ -2539,7 +2539,7 @@ async function initCRMFeatures() {
 
   injectCRMToolbar("clientsSection", "clientsGrid", "CLIENTS", [
     {
-      label: "+ Add Client",
+      label: "Add Client",
       action: openAddClientModal,
       primary: true
     }
@@ -2555,7 +2555,7 @@ async function initCRMFeatures() {
 
   injectCRMToolbar("quotesSection", "quotesGrid", "QUOTES", [
     {
-      label: "+ Create Quote",
+      label: "Calculate Quote",
       action: openCreateQuoteModal,
       primary: true
     }
@@ -2643,24 +2643,48 @@ function injectCRMToolbar(
   );
 
   buttons.forEach(
-    (button, index) => {
+  (button, index) => {
 
-      const element =
-        toolbar.querySelector(
-          `[data-crm-action="${gridId}-${index}"]`
-        );
+    const element =
+      toolbar.querySelector(
+        `[data-crm-action="${gridId}-${index}"]`
+      );
 
-      if (element) {
+    if (!element) {
+      return;
+    }
 
-        element.addEventListener(
-          "click",
-          button.action
-        );
+    element.addEventListener(
+      "click",
+      event => {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        try {
+
+          button.action();
+
+        } catch (error) {
+
+          console.error(
+            "CRM button error:",
+            error
+          );
+
+          showCRMToast(
+            error.message ||
+            "Unable to open.",
+            true
+          );
+
+        }
 
       }
+    );
 
-    }
-  );
+  }
+);
 
 }
 
@@ -2770,9 +2794,16 @@ function renderEnhancedClients(snapshot) {
 
     if (emptyButton) {
       emptyButton.addEventListener(
-        "click",
-        openAddClientModal
-      );
+  "click",
+  event => {
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    openAddClientModal();
+
+  }
+);
     }
 
     return;
