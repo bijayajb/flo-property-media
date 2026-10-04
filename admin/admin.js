@@ -518,7 +518,10 @@ async function loadDashboard() {
       "Bookings loaded:",
       bookingsSnapshot.size
     );
-
+console.log(
+  "Booking document IDs:",
+  bookingsSnapshot.docs.map(documentSnapshot => documentSnapshot.id)
+);
 
     const bookingData =
       bookingsSnapshot.docs.map(doc => ({
@@ -554,9 +557,16 @@ async function loadDashboard() {
       confirmedBookings.length;
 
 
-    renderBookings(bookingData);
+    // Render the main bookings list first.
+// A problem in the small "recent bookings" panel must never erase
+// an otherwise successfully loaded bookings list.
+renderBookings(bookingData);
 
-    renderRecentBookings(bookingData);
+try {
+  renderRecentBookings(bookingData);
+} catch (recentError) {
+  console.error("RECENT BOOKINGS RENDER ERROR:", recentError);
+}
 
 
   } catch (error) {
@@ -688,6 +698,25 @@ function renderBookings(bookings) {
   const container =
     document.getElementById("bookingsList");
 
+  if (!container) {
+    console.error("bookingsList element not found.");
+    return;
+  }
+
+  // Keep the complete Firestore result available to the modal/actions.
+  currentBookings = Array.isArray(bookings) ? bookings : [];
+
+  bookings = currentBookings;
+
+  if (!bookings.length) {
+    container.innerHTML = `
+      <div class="booking-empty">
+        No bookings yet.
+      </div>
+    `;
+    return;
+  }
+
   currentBookings = bookings;
 
   if (!bookings.length) {
@@ -771,15 +800,35 @@ function renderBookings(bookings) {
 
 groups.forEach(group => {
     const groupBookings =
-      bookings
-        .filter(booking => {
+  bookings
+    .filter(booking => {
 
-          const status =
-            booking.status || "New";
+      const rawStatus =
+        String(booking.status || "New").trim();
 
-          return group.status === status;
+      const status =
+        rawStatus.toLowerCase() === "new"
+          ? "New"
+          : rawStatus.toLowerCase() === "confirmed"
+            ? "Confirmed"
+            : rawStatus.toLowerCase() === "date proposed"
+              ? "Date Proposed"
+              : rawStatus.toLowerCase() === "declined"
+                ? "Declined"
+                : rawStatus.toLowerCase() === "completed"
+                  ? "Completed"
+                  : rawStatus.toLowerCase() === "closed"
+                    ? "Closed"
+                    : "New";
 
-        })
+      return group.status === status;
+
+    })
+    .sort(
+      (a, b) =>
+        getBookingDate(a) -
+        getBookingDate(b)
+    );
         .sort(
           (a, b) =>
             getBookingDate(a) -
@@ -845,9 +894,15 @@ groups.forEach(group => {
                 "—";
 
 
-              const status =
-                booking.status ||
-                "New";
+              const rawStatus =
+  String(booking.status || "New").trim();
+
+const status =
+  ["New", "Confirmed", "Date Proposed", "Declined", "Completed", "Closed"]
+    .find(
+      value =>
+        value.toLowerCase() === rawStatus.toLowerCase()
+    ) || "New";
 
 
               return `
@@ -2253,8 +2308,16 @@ function renderRecentBookings(bookings) {
       "recentBookings"
     );
 
+  // The recent-bookings card is optional. Never allow its absence
+  // to break the main dashboard/bookings list.
+  if (!container) {
+    console.warn(
+      "recentBookings element not found; skipping recent bookings panel."
+    );
+    return;
+  }
 
-  if (!bookings.length) {
+  if (!Array.isArray(bookings) || !bookings.length) {
 
     container.innerHTML = `
       <span>—</span>
@@ -2264,10 +2327,8 @@ function renderRecentBookings(bookings) {
     return;
   }
 
-
   const latest =
     bookings.slice(0, 5);
-
 
   container.innerHTML =
     latest
