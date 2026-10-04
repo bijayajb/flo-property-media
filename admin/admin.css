@@ -2956,3 +2956,295 @@ body.modal-open {
   }
 
 }
+
+/* ======================================================
+   FLO CRM — CLEAN SECTION HEADER
+====================================================== */
+
+.crm-section-toolbar {
+  position: relative;
+  z-index: 20;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin: 0 0 30px;
+  padding: 0 0 16px;
+
+  background: transparent !important;
+
+  border: 0 !important;
+  border-bottom: 0 !important;
+
+  box-shadow: none !important;
+}
+
+
+/* CLIENTS / PROJECTS / QUOTES label */
+
+.crm-toolbar-title {
+  padding: 0;
+}
+
+
+/* ======================================================
+   MODERN ACTION BUTTON
+====================================================== */
+
+.crm-toolbar-button {
+  position: relative;
+  z-index: 50;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  min-width: 155px;
+  height: 44px;
+
+  padding: 0 21px;
+
+  border: 1px solid rgba(216,199,163,.55);
+  border-radius: 3px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(216,199,163,.96),
+      rgba(191,171,126,.96)
+    );
+
+  color: #111;
+
+  font-family: inherit;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+  pointer-events: auto;
+
+  box-shadow:
+    0 0 0 rgba(216,199,163,0);
+
+  transition:
+    transform .25s ease,
+    box-shadow .25s ease,
+    border-color .25s ease,
+    background .25s ease;
+}
+
+
+/* Remove the old plus and use a cleaner symbol */
+
+.crm-toolbar-button::before {
+  content: "＋";
+
+  display: inline-block;
+
+  font-size: 14px;
+  font-weight: 300;
+
+  line-height: 1;
+
+  color: #151515;
+
+  transition:
+    transform .25s ease;
+}
+
+
+/* ======================================================
+   GLOW
+====================================================== */
+
+.crm-toolbar-button::after {
+  content: "";
+
+  position: absolute;
+
+  inset: -8px;
+
+  z-index: -1;
+
+  border-radius: 5px;
+
+  background:
+    radial-gradient(
+      ellipse,
+      rgba(216,199,163,.28),
+      transparent 68%
+    );
+
+  filter: blur(12px);
+
+  opacity: .45;
+
+  pointer-events: none;
+
+  transition:
+    opacity .25s ease,
+    transform .25s ease;
+}
+
+
+.crm-toolbar-button:hover {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(240,226,198,.95);
+
+  background:
+    linear-gradient(
+      135deg,
+      #eee2c7,
+      #d8c7a3
+    );
+
+  box-shadow:
+    0 10px 28px rgba(0,0,0,.28),
+    0 0 24px rgba(216,199,163,.18);
+}
+
+
+.crm-toolbar-button:hover::before {
+  transform:
+    rotate(90deg);
+}
+
+
+.crm-toolbar-button:hover::after {
+  opacity: .9;
+
+  transform:
+    scale(1.08);
+}
+
+
+.crm-toolbar-button:active {
+  transform:
+    translateY(0);
+}
+
+
+/* ======================================================
+   REMOVE OLD PRIMARY STYLING CONFLICT
+====================================================== */
+
+.crm-toolbar-button.primary {
+  background:
+    linear-gradient(
+      135deg,
+      #e5d6b8,
+      #cdbb94
+    );
+
+  color: #111;
+
+  border-color:
+    rgba(235,220,190,.75);
+}
+
+
+/* ======================================================
+   MOBILE
+====================================================== */
+
+@media (max-width: 700px) {
+
+  .crm-section-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+
+    gap: 18px;
+  }
+
+  .crm-toolbar-actions {
+    width: 100%;
+  }
+
+  .crm-toolbar-button {
+    width: 100%;
+  }
+
+}
+
+/* ======================================================
+   CRM MODAL PRIMARY ACTION
+====================================================== */
+
+.crm-modal-submit {
+  position: relative;
+
+  min-width: 150px;
+  height: 44px;
+
+  padding: 0 24px;
+
+  border: 1px solid rgba(235,220,190,.8);
+  border-radius: 3px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #e5d6b8,
+      #cdbb94
+    );
+
+  color: #111;
+
+  font-family: inherit;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.20);
+
+  transition:
+    transform .22s ease,
+    box-shadow .22s ease,
+    background .22s ease;
+}
+
+
+.crm-modal-submit:hover {
+  transform:
+    translateY(-2px);
+
+  background:
+    linear-gradient(
+      135deg,
+      #eee2c7,
+      #d8c7a3
+    );
+
+  box-shadow:
+    0 12px 30px rgba(0,0,0,.28),
+    0 0 25px rgba(216,199,163,.16);
+}
+
+
+.crm-modal-submit:disabled {
+  opacity: .55;
+
+  cursor:
+    wait;
+
+  transform:
+    none;
+
+  box-shadow:
+    none;
+}
