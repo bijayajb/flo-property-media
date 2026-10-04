@@ -1582,8 +1582,7 @@ body.modal-open {
    STATUS GROUP ACCENTS
    ------------------------------------------------------ */
 
-.booking-group-new
-.booking-status-group-header {
+.booking-group-new .booking-status-group-header {
   color: #f4f1eb;
 }
 
