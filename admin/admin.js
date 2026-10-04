@@ -917,24 +917,21 @@ groups.forEach(group => {
   // -----------------------------------------
 
   container
-    .querySelectorAll(".booking-row")
-    .forEach(row => {
+  .querySelectorAll(".booking-row")
+  .forEach(row => {
 
-      row.addEventListener(
-        "click",
-        () => {
+    row.addEventListener("click", function () {
 
-          const bookingId =
-            row.dataset.bookingId;
+      const bookingId =
+        this.getAttribute("data-booking-id");
 
-          openBookingModal(
-            bookingId
-          );
+      console.log("Opening booking:", bookingId);
 
-        }
-      );
+      openBookingModal(bookingId);
 
     });
+
+  });
 
 }
 
