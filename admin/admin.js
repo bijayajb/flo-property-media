@@ -916,22 +916,25 @@ groups.forEach(group => {
   // CLICK HANDLERS
   // -----------------------------------------
 
-  container
-  .querySelectorAll(".booking-row")
-  .forEach(row => {
+  container.onclick = function (event) {
 
-    row.addEventListener("click", function () {
+  const row = event.target.closest(".booking-row");
 
-      const bookingId =
-        this.getAttribute("data-booking-id");
+  if (!row || !container.contains(row)) {
+    return;
+  }
 
-      console.log("Opening booking:", bookingId);
+  const bookingId =
+    row.getAttribute("data-booking-id");
 
-      openBookingModal(bookingId);
+  if (!bookingId) {
+    return;
+  }
 
-    });
+  console.log("Opening booking:", bookingId);
 
-  });
+  openBookingModal(bookingId);
+};
 
 }
 
@@ -1122,6 +1125,12 @@ function createBookingModal() {
       </div>
 
 
+      <div
+        id="bookingActionMessage"
+        class="booking-action-message"
+        aria-live="polite"
+      ></div>
+      
       <div class="booking-actions">
 
   <button
@@ -1240,6 +1249,10 @@ function populateBookingModal() {
 
   const booking =
     activeBooking;
+
+  if (!booking) {
+    return;
+  }
 
 
   document.getElementById(
@@ -1467,8 +1480,8 @@ async function acceptBooking() {
   }
 
   const button =
-    document.querySelector("#bookingConfirmBtn");
-
+    document.getElementById("acceptBookingButton")
+  
   if (button) {
     button.disabled = true;
     button.textContent = "Confirming...";
@@ -1786,7 +1799,7 @@ if (messageOptions[messageIndex].name === "Other") {
   }
 
   const button =
-    document.querySelector("#bookingProposeBtn");
+    document.getElementById("proposeDateButton")
 
   if (button) {
     button.disabled = true;
@@ -1971,7 +1984,7 @@ const message =
   }
 
   const button =
-    document.querySelector("#bookingDeclineBtn");
+    document.getElementById("declineBookingButton")
 
   if (button) {
     button.disabled = true;
