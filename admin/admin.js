@@ -764,8 +764,7 @@ function renderBookings(bookings) {
   // RENDER EACH GROUP
   // -----------------------------------------
 
-  statusGroups.forEach(group => {
-
+groups.forEach(group => {
     const groupBookings =
       bookings
         .filter(booking => {
