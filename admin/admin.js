@@ -50,6 +50,10 @@ const auth = getAuth(app);
 const db = initializeFirestore(app, {
   experimentalForceLongPolling: true
 });
+
+window.floAuth = auth;
+window.floDb = db;
+
 console.log("========== FLO FIREBASE DEBUG ==========");
 console.log("FLO FIREBASE PROJECT:", app.options.projectId);
 console.log("FLO FIREBASE APP ID:", app.options.appId);
