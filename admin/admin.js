@@ -600,98 +600,255 @@ function renderBookings(bookings) {
 
   currentBookings = bookings;
 
-
   if (!bookings.length) {
-
     container.innerHTML = `
       <div class="booking-empty">
         No bookings yet.
       </div>
     `;
-
     return;
   }
 
 
+  // -----------------------------------------
+  // DATE SORTING
+  // -----------------------------------------
+
+  function getBookingDate(booking) {
+
+    const date =
+      booking.status === "Date Proposed"
+        ? booking.proposedDate
+        : booking.preferredDate;
+
+    if (!date) {
+      return Number.MAX_SAFE_INTEGER;
+    }
+
+    const parsed =
+      new Date(date);
+
+    return isNaN(parsed.getTime())
+      ? Number.MAX_SAFE_INTEGER
+      : parsed.getTime();
+  }
+
+
+  // -----------------------------------------
+  // STATUS GROUPS
+  // -----------------------------------------
+
+  const statusGroups = [
+
+    {
+      title: "NEW",
+      statuses: ["New"],
+      className: "booking-group-new"
+    },
+
+    {
+      title: "ACCEPTED",
+      statuses: ["Confirmed"],
+      className: "booking-group-confirmed"
+    },
+
+    {
+      title: "DATE PROPOSED",
+      statuses: ["Date Proposed"],
+      className: "booking-group-proposed"
+    },
+
+    {
+      title: "DECLINED",
+      statuses: ["Declined"],
+      className: "booking-group-declined"
+    },
+
+    {
+      title: "COMPLETED",
+      statuses: ["Completed"],
+      className: "booking-group-completed"
+    }
+
+  ];
+
+
+  let output = "";
+
+
+  // -----------------------------------------
+  // RENDER EACH GROUP
+  // -----------------------------------------
+
+  statusGroups.forEach(group => {
+
+    const groupBookings =
+      bookings
+        .filter(booking => {
+
+          const status =
+            booking.status || "New";
+
+          return group.statuses.includes(status);
+
+        })
+        .sort(
+          (a, b) =>
+            getBookingDate(a) -
+            getBookingDate(b)
+        );
+
+
+    if (!groupBookings.length) {
+      return;
+    }
+
+
+    output += `
+
+      <div class="booking-status-group">
+
+        <div class="booking-status-group-header">
+
+          <span>
+            ${group.title}
+          </span>
+
+          <small>
+            ${groupBookings.length}
+          </small>
+
+        </div>
+
+        <div class="booking-group-list">
+
+          ${groupBookings
+            .map(booking => {
+
+              const client =
+                booking.clientName ||
+                booking.name ||
+                "—";
+
+
+              const property =
+                booking.propertyAddress ||
+                booking.address ||
+                "—";
+
+
+              const date =
+                booking.status === "Date Proposed"
+                  ? (
+                      booking.proposedDate ||
+                      booking.preferredDate ||
+                      "—"
+                    )
+                  : (
+                      booking.preferredDate ||
+                      booking.date ||
+                      "—"
+                    );
+
+
+              const packageName =
+                booking.package ||
+                booking.packageName ||
+                "—";
+
+
+              const status =
+                booking.status ||
+                "New";
+
+
+              return `
+
+                <button
+                  type="button"
+                  class="booking-row"
+                  data-booking-id="${booking.id}"
+                >
+
+                  <span>
+                    ${escapeHTML(client)}
+                  </span>
+
+                  <span>
+                    ${escapeHTML(property)}
+                  </span>
+
+                  <span>
+                    ${escapeHTML(date)}
+                  </span>
+
+                  <span>
+                    ${escapeHTML(packageName)}
+                  </span>
+
+                  <span>
+
+                    <b class="status-badge status-${status
+                      .toLowerCase()
+                      .replaceAll(" ", "-")}"
+                    >
+                      ${escapeHTML(status)}
+                    </b>
+
+                  </span>
+
+                </button>
+
+              `;
+
+            })
+            .join("")}
+
+        </div>
+
+      </div>
+
+    `;
+
+  });
+
+
+  if (!output) {
+
+    output = `
+      <div class="booking-empty">
+        No active bookings.
+      </div>
+    `;
+
+  }
+
+
   container.innerHTML =
-    bookings
-      .map(booking => {
-
-        const client =
-          booking.clientName ||
-          booking.name ||
-          "—";
-
-        const property =
-          booking.propertyAddress ||
-          booking.address ||
-          "—";
-
-        const date =
-          booking.preferredDate ||
-          booking.date ||
-          "—";
-
-        const packageName =
-          booking.package ||
-          booking.packageName ||
-          "—";
-
-        const status =
-          booking.status ||
-          "New";
+    output;
 
 
-        return `
-          <button
-            type="button"
-            class="booking-row"
-            data-booking-id="${booking.id}"
-          >
-
-            <span>
-              ${escapeHTML(client)}
-            </span>
-
-            <span>
-              ${escapeHTML(property)}
-            </span>
-
-            <span>
-              ${escapeHTML(date)}
-            </span>
-
-            <span>
-              ${escapeHTML(packageName)}
-            </span>
-
-            <span>
-              <b class="status-badge status-${status
-                .toLowerCase()
-                .replaceAll(" ", "-")}">
-                ${escapeHTML(status)}
-              </b>
-            </span>
-
-          </button>
-        `;
-
-      })
-      .join("");
-
+  // -----------------------------------------
+  // CLICK HANDLERS
+  // -----------------------------------------
 
   container
     .querySelectorAll(".booking-row")
     .forEach(row => {
 
-      row.addEventListener("click", () => {
+      row.addEventListener(
+        "click",
+        () => {
 
-        const bookingId =
-          row.dataset.bookingId;
+          const bookingId =
+            row.dataset.bookingId;
 
-        openBookingModal(bookingId);
+          openBookingModal(
+            bookingId
+          );
 
-      });
+        }
+      );
 
     });
 
