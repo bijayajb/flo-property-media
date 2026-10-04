@@ -9,7 +9,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 import {
-  getFirestore,
+  initializeFirestore,
   collection,
   getDocs,
   getDoc,
@@ -47,8 +47,9 @@ const app = initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
 
-const db = getFirestore(app);
-
+const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true
+});
 console.log("========== FLO FIREBASE DEBUG ==========");
 console.log("FLO FIREBASE PROJECT:", app.options.projectId);
 console.log("FLO FIREBASE APP ID:", app.options.appId);
