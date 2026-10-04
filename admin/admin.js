@@ -12,6 +12,7 @@ import {
   getFirestore,
   collection,
   getDocs,
+  getDoc,
   query,
   orderBy,
   limit,
@@ -516,18 +517,61 @@ async function loadDashboard() {
   try {
 
     const bookingsSnapshot =
-      await getDocs(
-        collection(db, "bookings")
-      );
+  await getDocs(
+    collection(db, "bookings")
+  );
 
-    console.log(
-      "Bookings loaded:",
-      bookingsSnapshot.size
-    );
+console.log(
+  "Bookings loaded:",
+  bookingsSnapshot.size
+);
+
 console.log(
   "Booking document IDs:",
-  bookingsSnapshot.docs.map(documentSnapshot => documentSnapshot.id)
+  bookingsSnapshot.docs.map(
+    documentSnapshot => documentSnapshot.id
+  )
 );
+
+
+// ======================================================
+// DIRECT BOOKING TEST
+// ======================================================
+
+console.log("========== DIRECT BOOKING TEST ==========");
+
+console.log(
+  "Logged-in user:",
+  auth.currentUser?.email
+);
+
+console.log(
+  "Email verified:",
+  auth.currentUser?.emailVerified
+);
+
+const testBooking =
+  await getDoc(
+    doc(
+      db,
+      "bookings",
+      "DvdUUYsERiF7RF6K6mo"
+    )
+  );
+
+console.log(
+  "Known booking exists:",
+  testBooking.exists()
+);
+
+console.log(
+  "Known booking data:",
+  testBooking.exists()
+    ? testBooking.data()
+    : null
+);
+
+console.log("=========================================");
 
     const bookingData =
       bookingsSnapshot.docs.map(doc => ({
