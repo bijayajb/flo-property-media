@@ -723,39 +723,38 @@ function renderBookings(bookings) {
   // STATUS GROUPS
   // -----------------------------------------
 
-  const statusGroups = [
-
-    {
-      title: "NEW",
-      statuses: ["New"],
-      className: "booking-group-new"
-    },
-
-    {
-      title: "ACCEPTED",
-      statuses: ["Confirmed"],
-      className: "booking-group-confirmed"
-    },
-
-    {
-      title: "DATE PROPOSED",
-      statuses: ["Date Proposed"],
-      className: "booking-group-proposed"
-    },
-
-    {
-      title: "DECLINED",
-      statuses: ["Declined"],
-      className: "booking-group-declined"
-    },
-
-    {
-      title: "COMPLETED",
-      statuses: ["Completed"],
-      className: "booking-group-completed"
-    }
-
-  ];
+  const groups = [
+  {
+    status: "New",
+    label: "NEW",
+    className: "booking-group-new"
+  },
+  {
+    status: "Confirmed",
+    label: "ACCEPTED",
+    className: "booking-group-confirmed"
+  },
+  {
+    status: "Date Proposed",
+    label: "DATE PROPOSED",
+    className: "booking-group-proposed"
+  },
+  {
+    status: "Declined",
+    label: "DECLINED",
+    className: "booking-group-declined"
+  },
+  {
+    status: "Completed",
+    label: "COMPLETED",
+    className: "booking-group-completed"
+  },
+  {
+    status: "Closed",
+    label: "CLOSED",
+    className: "booking-group-closed"
+  }
+];
 
 
   let output = "";
