@@ -22,15 +22,16 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
+
 // ======================================================
 // FIREBASE CONFIG
 // ======================================================
 
 const firebaseConfig = {
   apiKey: "AIzaSyBQCqtKKHXUdBrSvKvQFN1hHct119Yp-Yo",
-  authDomain: "flo-property-media-fbbf4.firebaseapp.com",
-  projectId: "flo-property-media-fbbf4",
-  storageBucket: "flo-property-media-fbbf4.firebasestorage.app",
+  authDomain: "flo-property-media-fbb4.firebaseapp.com",
+  projectId: "flo-property-media-fbb4",
+  storageBucket: "flo-property-media-fbb4.firebasestorage.app",
   messagingSenderId: "779116796984",
   appId: "1:779116796984:web:23a54ccbbee15491611acd",
   measurementId: "G-52R9RP4JWM"
@@ -997,8 +998,7 @@ function createBookingModal() {
     <div class="booking-modal-overlay"
          data-close-booking-modal></div>
 
-
-    <div class="booking-modal-card">
+             <div class="booking-modal-card">
 
       <button
         type="button"
@@ -1997,8 +1997,7 @@ const message =
   }
 
   try {
-
-    // Update booking status
+        // Update booking status
     await updateDoc(
       doc(db, "bookings", activeBooking.id),
       {
@@ -2547,7 +2546,7 @@ async function initCRMFeatures() {
 
   injectCRMToolbar("projectsSection", "projectsGrid", "PROJECTS", [
     {
-      label: "+ Add Project",
+      label: "Add Project",
       action: openAddProjectModal,
       primary: true
     }
@@ -2643,48 +2642,24 @@ function injectCRMToolbar(
   );
 
   buttons.forEach(
-  (button, index) => {
+    (button, index) => {
 
-    const element =
-      toolbar.querySelector(
-        `[data-crm-action="${gridId}-${index}"]`
-      );
+      const element =
+        toolbar.querySelector(
+          `[data-crm-action="${gridId}-${index}"]`
+        );
 
-    if (!element) {
-      return;
-    }
+      if (element) {
 
-    element.addEventListener(
-      "click",
-      event => {
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        try {
-
-          button.action();
-
-        } catch (error) {
-
-          console.error(
-            "CRM button error:",
-            error
-          );
-
-          showCRMToast(
-            error.message ||
-            "Unable to open.",
-            true
-          );
-
-        }
+        element.addEventListener(
+          "click",
+          button.action
+        );
 
       }
-    );
 
-  }
-);
+    }
+  );
 
 }
 
@@ -2780,7 +2755,7 @@ function renderEnhancedClients(snapshot) {
           class="crm-inline-button"
           id="emptyAddClientButton"
         >
-          + Add Client
+          Add Client
         </button>
 
       </div>
@@ -2794,16 +2769,9 @@ function renderEnhancedClients(snapshot) {
 
     if (emptyButton) {
       emptyButton.addEventListener(
-  "click",
-  event => {
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    openAddClientModal();
-
-  }
-);
+        "click",
+        openAddClientModal
+      );
     }
 
     return;
@@ -2934,6 +2902,22 @@ function renderEnhancedClients(snapshot) {
               + Quote
             </button>
 
+            <button
+              type="button"
+              class="crm-small-button crm-danger-button"
+              data-archive-client="${escapeHTML(client.id)}"
+            >
+              Archive
+            </button>
+
+            <button
+              type="button"
+              class="crm-small-button crm-danger-button"
+              data-delete-client="${escapeHTML(client.id)}"
+            >
+              Delete
+            </button>
+
           </div>
 
         </article>
@@ -2998,6 +2982,22 @@ function renderEnhancedClients(snapshot) {
         }
       );
 
+    });
+
+  container
+    .querySelectorAll("[data-archive-client]")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        archiveClient(button.dataset.archiveClient);
+      });
+    });
+
+  container
+    .querySelectorAll("[data-delete-client]")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        deleteClientRecord(button.dataset.deleteClient);
+      });
     });
 
 }
@@ -3137,6 +3137,55 @@ function openAddClientModal(
 
   });
 
+}
+
+
+// ======================================================
+// CLIENT ARCHIVE / DELETE
+// ======================================================
+
+async function archiveClient(clientId) {
+
+  if (!clientId) return;
+
+  const confirmed = confirm(
+    "Archive this client? They will remain in Firestore but will be marked Archived."
+  );
+
+  if (!confirmed) return;
+
+  try {
+    await updateDoc(doc(db, "clients", clientId), {
+      status: "Archived",
+      updatedAt: serverTimestamp()
+    });
+
+    await refreshCRMData();
+    showCRMToast("Client archived.");
+  } catch (error) {
+    console.error("Archive client error:", error);
+    showCRMToast(error.message || "Unable to archive client.", true);
+  }
+}
+
+async function deleteClientRecord(clientId) {
+
+  if (!clientId) return;
+
+  const confirmed = confirm(
+    "Delete this client permanently? This cannot be undone."
+  );
+
+  if (!confirmed) return;
+
+  try {
+    await deleteDoc(doc(db, "clients", clientId));
+    await refreshCRMData();
+    showCRMToast("Client deleted.");
+  } catch (error) {
+    console.error("Delete client error:", error);
+    showCRMToast(error.message || "Unable to delete client.", true);
+  }
 }
 
 
@@ -3538,9 +3587,7 @@ function renderEnhancedProjects(
 ) {
 
   const container =
-    document.getElementById(
-      "projectsGrid"
-    );
+    document.getElementById("projectsGrid");
 
   if (!container) {
     return;
@@ -3549,128 +3596,251 @@ function renderEnhancedProjects(
   if (snapshot.empty) {
 
     container.innerHTML = `
-
       <div class="large-empty crm-empty">
-
-        <span class="panel-eyebrow">
-          PROJECTS
-        </span>
-
-        <h3>
-          No projects yet
-        </h3>
-
-        <p>
-          Create a project and connect it
-          to one of your clients.
-        </p>
-
-        <button
-          type="button"
-          class="crm-inline-button"
-          id="emptyAddProjectButton"
-        >
-          + Add Project
+        <h3>No projects yet</h3>
+        <p>Create a project and connect it to one of your clients.</p>
+        <button type="button" class="crm-inline-button" id="emptyAddProjectButton">
+          Add Project
         </button>
-
       </div>
-
     `;
 
     document
-      .getElementById(
-        "emptyAddProjectButton"
-      )
-      ?.addEventListener(
-        "click",
-        openAddProjectModal
-      );
+      .getElementById("emptyAddProjectButton")
+      ?.addEventListener("click", () => openAddProjectModal());
 
     return;
   }
 
-  const projects =
-    snapshot.docs.map(projectDoc => ({
+  const projects = snapshot.docs.map(projectDoc => ({
+    id: projectDoc.id,
+    ...projectDoc.data()
+  }));
 
-      id:
-        projectDoc.id,
+  container.innerHTML = projects.map(project => `
+    <article class="project-card crm-record-card">
+      <div class="crm-record-top">
+        <span class="panel-eyebrow">PROJECT</span>
+        <span class="crm-status crm-project-status-${escapeHTML(
+          (project.status || "Upcoming").toLowerCase().replaceAll(" ", "-")
+        )}">
+          ${escapeHTML(project.status || "Upcoming")}
+        </span>
+      </div>
 
-      ...projectDoc.data()
+      <h3>${escapeHTML(project.name || project.propertyName || "Unnamed project")}</h3>
+      <p>${escapeHTML(project.clientName || "")}</p>
+      <p>${escapeHTML(project.propertyAddress || "")}</p>
 
-    }));
+      <div class="crm-record-meta">
+        <span>${escapeHTML(project.startDate || "No start date")}</span>
+        <span>${escapeHTML(project.dueDate || "No due date")}</span>
+      </div>
 
-  container.innerHTML =
-    projects
-      .map(project => {
+      <div class="crm-card-actions">
+        <button type="button" class="crm-small-button" data-edit-project="${escapeHTML(project.id)}">Edit Status</button>
+        ${project.status !== "Completed" ? `
+          <button type="button" class="crm-small-button" data-complete-project="${escapeHTML(project.id)}">Complete</button>
+        ` : ""}
+        ${project.status !== "Archived" ? `
+          <button type="button" class="crm-small-button" data-archive-project="${escapeHTML(project.id)}">Archive</button>
+        ` : ""}
+        <button type="button" class="crm-small-button crm-danger-button" data-delete-project="${escapeHTML(project.id)}">Delete</button>
+      </div>
+    </article>
+  `).join("");
 
-        return `
+  container.querySelectorAll("[data-edit-project]").forEach(button => {
+    button.addEventListener("click", () => openEditProjectModal(button.dataset.editProject));
+  });
 
-          <article
-            class="project-card crm-record-card"
-          >
+  container.querySelectorAll("[data-complete-project]").forEach(button => {
+    button.addEventListener("click", () => completeProject(button.dataset.completeProject));
+  });
 
-            <div class="crm-record-top">
+  container.querySelectorAll("[data-archive-project]").forEach(button => {
+    button.addEventListener("click", () => archiveProject(button.dataset.archiveProject));
+  });
 
-              <span class="panel-eyebrow">
-                PROJECT
-              </span>
+  container.querySelectorAll("[data-delete-project]").forEach(button => {
+    button.addEventListener("click", () => deleteProjectRecord(button.dataset.deleteProject));
+  });
+}
 
-              <span class="crm-status">
-                ${escapeHTML(
-                  project.status ||
-                  "Upcoming"
-                )}
-              </span>
+// ======================================================
+// PROJECT MANAGEMENT
+// ======================================================
 
-            </div>
+async function openEditProjectModal(projectId) {
 
-            <h3>
-              ${escapeHTML(
-                project.name ||
-                project.propertyName ||
-                "Unnamed project"
-              )}
-            </h3>
+  const snapshot = await getDocs(collection(db, "projects"));
+  const found = snapshot.docs.find(item => item.id === projectId);
 
-            <p>
-              ${escapeHTML(
-                project.clientName ||
-                ""
-              )}
-            </p>
+  if (!found) return;
 
-            <p>
-              ${escapeHTML(
-                project.propertyAddress ||
-                ""
-              )}
-            </p>
+  const project = found.data();
 
-            <div class="crm-record-meta">
+  openCRMFormModal({
+    title: "Edit Project",
+    eyebrow: "PROJECT",
+    fields: [
+      {
+        name: "status",
+        label: "Project status",
+        type: "select",
+        options: [
+          "Upcoming",
+          "In Progress",
+          "Awaiting Client",
+          "Completed",
+          "Cancelled",
+          "Archived"
+        ],
+        value: project.status || "Upcoming"
+      },
+      {
+        name: "dueDate",
+        label: "Due date",
+        type: "date",
+        value: project.dueDate || ""
+      },
+      {
+        name: "notes",
+        label: "Project notes",
+        type: "textarea",
+        value: project.notes || ""
+      }
+    ],
+    submitLabel: "Save Project",
+    onSubmit: async values => {
+      const previousStatus = project.status || "Upcoming";
 
-              <span>
-                ${escapeHTML(
-                  project.startDate ||
-                  "No start date"
-                )}
-              </span>
+      await updateDoc(doc(db, "projects", projectId), {
+        status: values.status,
+        dueDate: values.dueDate || "",
+        notes: values.notes.trim(),
+        updatedAt: serverTimestamp()
+      });
 
-              <span>
-                ${escapeHTML(
-                  project.dueDate ||
-                  "No due date"
-                )}
-              </span>
+      if (values.status === "Completed" && previousStatus !== "Completed") {
+        await sendProjectCompletionEmail({
+          id: projectId,
+          ...project,
+          status: "Completed",
+          dueDate: values.dueDate || "",
+          notes: values.notes.trim()
+        });
+      }
 
-            </div>
+      await refreshCRMData();
+      showCRMToast(
+        values.status === "Completed"
+          ? "Project completed and FLO notified."
+          : "Project updated."
+      );
+    }
+  });
+}
 
-          </article>
+async function completeProject(projectId) {
 
-        `;
+  if (!projectId) return;
 
-      })
-      .join("");
+  const confirmed = confirm(
+    "Mark this project as completed? A completion notification will be sent to FLO."
+  );
 
+  if (!confirmed) return;
+
+  try {
+    const snapshot = await getDocs(collection(db, "projects"));
+    const found = snapshot.docs.find(item => item.id === projectId);
+
+    if (!found) return;
+
+    const project = { id: found.id, ...found.data() };
+
+    await updateDoc(doc(db, "projects", projectId), {
+      status: "Completed",
+      completedAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    await sendProjectCompletionEmail(project);
+
+    await refreshCRMData();
+    showCRMToast("Project completed and FLO notified.");
+  } catch (error) {
+    console.error("Complete project error:", error);
+    showCRMToast(error.message || "Unable to complete project.", true);
+  }
+}
+
+async function archiveProject(projectId) {
+
+  if (!projectId) return;
+
+  const confirmed = confirm("Archive this project?");
+  if (!confirmed) return;
+
+  try {
+    await updateDoc(doc(db, "projects", projectId), {
+      status: "Archived",
+      archivedAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    await refreshCRMData();
+    showCRMToast("Project archived.");
+  } catch (error) {
+    console.error("Archive project error:", error);
+    showCRMToast(error.message || "Unable to archive project.", true);
+  }
+}
+
+async function deleteProjectRecord(projectId) {
+
+  if (!projectId) return;
+
+  const confirmed = confirm(
+    "Delete this project permanently? This cannot be undone."
+  );
+
+  if (!confirmed) return;
+
+  try {
+    await deleteDoc(doc(db, "projects", projectId));
+    await refreshCRMData();
+    showCRMToast("Project deleted.");
+  } catch (error) {
+    console.error("Delete project error:", error);
+    showCRMToast(error.message || "Unable to delete project.", true);
+  }
+}
+
+async function sendProjectCompletionEmail(project) {
+
+  const completionRecord = {
+    name: project.clientName || "",
+    clientName: project.clientName || "",
+    email: project.clientEmail || "",
+    propertyAddress: project.propertyAddress || "",
+    preferredDate: project.startDate || "",
+    proposedDate: project.dueDate || "",
+    services: Array.isArray(project.services) ? project.services : [],
+    source: "FLO CRM project",
+    projectName: project.name || ""
+  };
+
+  return sendCustomerBookingEmail(
+    completionRecord,
+    {
+      status: "Completed",
+      type: "project-completed",
+      adminEmail: ADMIN_EMAIL,
+      projectId: project.id || ""
+    }
+  );
 }
 
 
@@ -3801,6 +3971,9 @@ async function openAddProjectModal(
             clientName:
               client?.name || "",
 
+            clientEmail:
+              client?.email || "",
+
             name:
               values.name.trim(),
 
@@ -3823,7 +3996,7 @@ async function openAddProjectModal(
               values.notes.trim(),
 
             createdAt:
-              serverTimestamp(),
+                            serverTimestamp(),
 
             updatedAt:
               serverTimestamp()
@@ -3910,7 +4083,7 @@ function renderEnhancedQuotes(
           class="crm-inline-button"
           id="emptyCreateQuoteButton"
         >
-          + Create Quote
+          Calculate Quote
         </button>
 
       </div>
@@ -4001,6 +4174,18 @@ function renderEnhancedQuotes(
                 View
               </button>
 
+              ${quote.status !== "Archived" ? `
+                <button type="button" class="crm-small-button" data-archive-quote="${escapeHTML(quote.id)}">Archive</button>
+              ` : ""}
+
+              <button
+                type="button"
+                class="crm-small-button crm-danger-button"
+                data-delete-quote="${escapeHTML(quote.id)}"
+              >
+                Delete
+              </button>
+
             </div>
 
           </article>
@@ -4029,6 +4214,61 @@ function renderEnhancedQuotes(
 
     });
 
+  container.querySelectorAll("[data-archive-quote]").forEach(button => {
+    button.addEventListener("click", () => archiveQuote(button.dataset.archiveQuote));
+  });
+
+  container.querySelectorAll("[data-delete-quote]").forEach(button => {
+    button.addEventListener("click", () => deleteQuoteRecord(button.dataset.deleteQuote));
+  });
+
+}
+
+
+// ======================================================
+// QUOTE ARCHIVE / DELETE
+// ======================================================
+
+async function archiveQuote(quoteId) {
+
+  if (!quoteId) return;
+
+  const confirmed = confirm("Archive this quote?");
+  if (!confirmed) return;
+
+  try {
+    await updateDoc(doc(db, "quotes", quoteId), {
+      status: "Archived",
+      archivedAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+
+    await refreshCRMData();
+    showCRMToast("Quote archived.");
+  } catch (error) {
+    console.error("Archive quote error:", error);
+    showCRMToast(error.message || "Unable to archive quote.", true);
+  }
+}
+
+async function deleteQuoteRecord(quoteId) {
+
+  if (!quoteId) return;
+
+  const confirmed = confirm(
+    "Delete this quote permanently? This cannot be undone."
+  );
+
+  if (!confirmed) return;
+
+  try {
+    await deleteDoc(doc(db, "quotes", quoteId));
+    await refreshCRMData();
+    showCRMToast("Quote deleted.");
+  } catch (error) {
+    console.error("Delete quote error:", error);
+    showCRMToast(error.message || "Unable to delete quote.", true);
+  }
 }
 
 
@@ -4755,8 +4995,7 @@ function calculateCustomQuote() {
           );
 
       }
-
-    }
+          }
   );
 
   otherRows.forEach(
@@ -5106,15 +5345,15 @@ function openCRMFormModal(
     );
 
   const form =
-  document.createElement(
-    "form"
-  );
+    document.createElement(
+      "form"
+    );
 
-form.id =
-  "crmDynamicForm";
+  form.id =
+    "crmDynamicForm";
 
-form.className =
-  "crm-form";
+  form.className =
+    "crm-form";
 
   config.fields.forEach(
     field => {
@@ -5323,24 +5562,18 @@ form.className =
       );
 
     submitButton.type =
-  "submit";
+      "submit";
 
-submitButton.className =
-  "crm-modal-submit";
+    submitButton.className =
+      "crm-modal-submit";
 
-submitButton.textContent =
-  config.submitLabel;
+    submitButton.textContent =
+      config.submitLabel;
 
-/*
- * The submit button lives in the modal footer,
- * outside the form element.
- *
- * Explicitly associate it with the form.
- */
-submitButton.setAttribute(
-  "form",
-  "crmDynamicForm"
-);
+    submitButton.setAttribute(
+      "form",
+      "crmDynamicForm"
+    );
 
     footer.appendChild(
       submitButton
@@ -5517,5 +5750,3 @@ function showCRMToast(
     );
 
 }
-
-     
