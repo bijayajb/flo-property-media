@@ -2134,3 +2134,311 @@ body.modal-open {
   }
 
 }
+
+/* ======================================================
+   FLO PREMIUM CRM ACTION BUTTONS
+   ====================================================== */
+
+.crm-section-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 0 0 24px;
+  padding: 0 0 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.crm-toolbar-title {
+  display: flex;
+  align-items: center;
+}
+
+.crm-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+/* -----------------------------------------
+   MAIN CRM BUTTON
+   ----------------------------------------- */
+
+.crm-toolbar-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  min-height: 44px;
+  padding: 0 18px;
+
+  border: 1px solid rgba(216, 199, 163, 0.30);
+  border-radius: 8px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(216, 199, 163, 0.10),
+      rgba(216, 199, 163, 0.04)
+    );
+
+  color: #e8dfcf;
+
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.crm-toolbar-button::before {
+  content: "+";
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+.crm-toolbar-button:hover {
+  transform: translateY(-1px);
+
+  border-color: rgba(216, 199, 163, 0.65);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(216, 199, 163, 0.18),
+      rgba(216, 199, 163, 0.08)
+    );
+
+  color: #fff;
+
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(216, 199, 163, 0.04);
+}
+
+.crm-toolbar-button:active {
+  transform: translateY(0);
+}
+
+
+/* -----------------------------------------
+   INLINE EMPTY-STATE BUTTON
+   ----------------------------------------- */
+
+.crm-inline-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  min-height: 46px;
+  padding: 0 20px;
+
+  border: 1px solid rgba(216, 199, 163, 0.38);
+  border-radius: 8px;
+
+  background: #d8c7a3;
+  color: #111;
+
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.18);
+
+  transition:
+    transform 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.crm-inline-button::before {
+  content: "+";
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.crm-inline-button:hover {
+  transform: translateY(-2px);
+
+  background: #eadfc8;
+
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+.crm-inline-button:active {
+  transform: translateY(0);
+}
+
+
+/* -----------------------------------------
+   CLIENT CARD ACTIONS
+   ----------------------------------------- */
+
+.crm-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 16px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.crm-small-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 34px;
+  padding: 0 13px;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+
+  background: rgba(255, 255, 255, 0.025);
+  color: rgba(255, 255, 255, 0.76);
+
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.crm-small-button:hover {
+  transform: translateY(-1px);
+
+  border-color: rgba(216, 199, 163, 0.38);
+
+  background: rgba(216, 199, 163, 0.08);
+
+  color: #e8dfcf;
+}
+
+.crm-small-button:active {
+  transform: translateY(0);
+}
+
+
+/* -----------------------------------------
+   DISABLED STATE
+   ----------------------------------------- */
+
+.crm-toolbar-button:disabled,
+.crm-inline-button:disabled,
+.crm-small-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+
+/* -----------------------------------------
+   QUOTE TOTAL
+   ----------------------------------------- */
+
+.crm-quote-total {
+  margin-top: 18px;
+
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+
+  color: #e8dfcf;
+}
+
+
+/* -----------------------------------------
+   EMPTY CRM PANELS
+   ----------------------------------------- */
+
+.crm-empty {
+  min-height: 260px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 48px 30px;
+}
+
+.crm-empty h3 {
+  margin: 12px 0 8px;
+
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.crm-empty p {
+  max-width: 420px;
+  margin: 0 0 24px;
+
+  color: rgba(255, 255, 255, 0.50);
+
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+
+/* -----------------------------------------
+   MOBILE
+   ----------------------------------------- */
+
+@media (max-width: 700px) {
+
+  .crm-section-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .crm-toolbar-actions {
+    width: 100%;
+  }
+
+  .crm-toolbar-button {
+    width: 100%;
+  }
+
+  .crm-card-actions {
+    gap: 6px;
+  }
+
+  .crm-small-button {
+    flex: 1;
+  }
+
+}
