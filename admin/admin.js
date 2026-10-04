@@ -204,12 +204,6 @@ console.log("FLO FIREBASE AUTH DOMAIN:", app.options.authDomain);
 console.log("========================================");
 
 // ======================================================
-// ADMIN EMAIL
-// ======================================================
-
-const ADMIN_EMAIL = "flopropertymedia@gmail.com";
-
-// ======================================================
 // CUSTOMER EMAIL — CLOUDFLARE WORKER
 // ======================================================
 
