@@ -1359,17 +1359,27 @@ function populateBookingModal() {
 
 
   acceptButton.disabled =
-    status === "Confirmed" ||
-    status === "Declined";
+  status !== "New";
 
+proposeButton.disabled =
+  status !== "New";
 
-  proposeButton.disabled =
-    status === "Confirmed" ||
-    status === "Declined";
+declineButton.disabled =
+  status !== "New" &&
+  status !== "Date Proposed";
 
+const completeButton =
+  document.getElementById(
+    "completeBookingButton"
+  );
 
-  declineButton.disabled =
-    status === "Declined";
+if (completeButton) {
+
+  completeButton.disabled =
+    status !== "Confirmed" &&
+    status !== "Date Proposed";
+
+}
 
 }
 
