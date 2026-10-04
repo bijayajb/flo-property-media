@@ -48,6 +48,12 @@ const auth = getAuth(app);
 
 const db = getFirestore(app);
 
+console.log("========== FLO FIREBASE DEBUG ==========");
+console.log("FLO FIREBASE PROJECT:", app.options.projectId);
+console.log("FLO FIREBASE APP ID:", app.options.appId);
+console.log("FLO FIREBASE AUTH DOMAIN:", app.options.authDomain);
+console.log("========================================");
+
 const googleProvider = new GoogleAuthProvider();
 
 
