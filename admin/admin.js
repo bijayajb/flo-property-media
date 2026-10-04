@@ -773,7 +773,7 @@ groups.forEach(group => {
           const status =
             booking.status || "New";
 
-          return group.statuses.includes(status);
+          return group.status === status;
 
         })
         .sort(
@@ -790,12 +790,12 @@ groups.forEach(group => {
 
     output += `
 
-      <div class="booking-status-group">
+      <div class="booking-status-group ${group.className}">
 
         <div class="booking-status-group-header">
 
           <span>
-            ${group.title}
+            ${group.label}
           </span>
 
           <small>
