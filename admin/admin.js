@@ -8,11 +8,20 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
 import {
-  initializeFirestore,
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+import {
+  getFirestore,
   collection,
   getDocs,
-  getDoc,
   query,
   orderBy,
   limit,
@@ -49,17 +58,14 @@ const auth = getAuth(app);
 
 const db = getFirestore(app);
 
-window.floAuth = auth;
-window.floDb = db;
+const googleProvider = new GoogleAuthProvider();
+
 
 console.log("========== FLO FIREBASE DEBUG ==========");
 console.log("FLO FIREBASE PROJECT:", app.options.projectId);
 console.log("FLO FIREBASE APP ID:", app.options.appId);
 console.log("FLO FIREBASE AUTH DOMAIN:", app.options.authDomain);
 console.log("========================================");
-
-const googleProvider = new GoogleAuthProvider();
-
 
 // ======================================================
 // ADMIN EMAIL
