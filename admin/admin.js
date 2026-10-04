@@ -1043,33 +1043,42 @@ function createBookingModal() {
 
       <div class="booking-actions">
 
-        <button
-          type="button"
-          class="booking-action booking-action-primary"
-          id="acceptBookingButton"
-        >
-          Accept booking
-        </button>
+  <button
+    type="button"
+    class="booking-action booking-action-primary"
+    id="acceptBookingButton"
+  >
+    Accept booking
+  </button>
 
 
-        <button
-          type="button"
-          class="booking-action"
-          id="proposeDateButton"
-        >
-          Propose different date
-        </button>
+  <button
+    type="button"
+    class="booking-action"
+    id="proposeDateButton"
+  >
+    Propose different date
+  </button>
 
 
-        <button
-          type="button"
-          class="booking-action booking-action-danger"
-          id="declineBookingButton"
-        >
-          Decline / booked out
-        </button>
+  <button
+    type="button"
+    class="booking-action booking-action-danger"
+    id="declineBookingButton"
+  >
+    Decline / booked out
+  </button>
 
-      </div>
+
+  <button
+    type="button"
+    class="booking-action booking-action-complete"
+    id="completeBookingButton"
+  >
+    Complete booking
+  </button>
+
+</div>
 
 
       <div
@@ -1120,7 +1129,12 @@ function createBookingModal() {
       "click",
       declineBooking
     );
-
+  document
+    .getElementById("completeBookingButton")
+    .addEventListener(
+      "click",
+      completeBooking
+    );
 }
 
 
