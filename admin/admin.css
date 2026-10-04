@@ -2592,8 +2592,7 @@ body.modal-open {
 /* Champagne plus */
 
 .crm-toolbar-button::before,
-.crm-inline-button::before,
-.crm-modal-submit::before {
+.crm-inline-button::before {
   content: "＋";
 
   display: inline-block;
@@ -2671,8 +2670,7 @@ body.modal-open {
 
 
 .crm-toolbar-button:hover::before,
-.crm-inline-button:hover::before,
-.crm-modal-submit:hover::before {
+.crm-inline-button:hover::before {
   color: #eee4d0;
 
   transform: rotate(90deg);
