@@ -1535,22 +1535,57 @@ body.modal-open {
   margin-bottom: 32px;
 }
 
+/* ======================================================
+   PHASE 3 — BOOKING STATUS GROUP HEADERS
+   ====================================================== */
+
+.booking-status-group {
+  margin-bottom: 38px;
+}
+
+/* ------------------------------------------------------
+   SECTION HEADER
+   ------------------------------------------------------ */
+
 .booking-status-group-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  margin-bottom: 10px;
-  padding-bottom: 10px;
+  margin-bottom: 14px;
+  padding: 0 4px 12px;
 
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid
+    rgba(255, 255, 255, 0.14);
 
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.16em;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
 
   color: #f4f1eb;
+}
+
+/* Section title */
+
+.booking-status-group-header::before {
+  content: "";
+  display: inline-block;
+
+  width: 4px;
+  height: 18px;
+
+  margin-right: 10px;
+
+  background: #d8c7a3;
+
+  vertical-align: middle;
+}
+
+/* Keep title and accent together */
+
+.booking-status-group-header {
+  position: relative;
 }
 
 .booking-status-group-header small {
@@ -1558,31 +1593,30 @@ body.modal-open {
   align-items: center;
   justify-content: center;
 
-  min-width: 24px;
-  height: 24px;
-  padding: 0 7px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
 
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid
+    rgba(255, 255, 255, 0.18);
+
   border-radius: 999px;
 
   font-size: 10px;
+  font-weight: 600;
   letter-spacing: 0;
 
-  color: rgba(255, 255, 255, 0.65);
-}
+  color: rgba(255, 255, 255, 0.75);
 
-.booking-group-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  background: rgba(255, 255, 255, 0.03);
 }
-
 
 /* ------------------------------------------------------
-   STATUS GROUP ACCENTS
+   STATUS-SPECIFIC TITLE ACCENTS
    ------------------------------------------------------ */
 
-.booking-group-new .booking-status-group-header {
+.booking-group-new
+.booking-status-group-header {
   color: #f4f1eb;
 }
 
@@ -1604,6 +1638,21 @@ body.modal-open {
 .booking-group-completed
 .booking-status-group-header {
   color: #d6ddd8;
+}
+
+.booking-group-closed
+.booking-status-group-header {
+  color: #aaa59d;
+}
+
+/* ------------------------------------------------------
+   BOOKING LIST
+   ------------------------------------------------------ */
+
+.booking-group-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 
 
