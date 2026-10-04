@@ -792,11 +792,11 @@ groups.forEach(group => {
 
       <div class="booking-status-group ${group.className}">
 
-        <div class="booking-status-group-header">
+  <div class="booking-status-group-header">
 
-          <span>
-            ${group.label}
-          </span>
+    <span>
+      ${group.label}
+    </span>
 
           <small>
             ${groupBookings.length}
