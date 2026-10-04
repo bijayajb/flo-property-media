@@ -8,16 +8,6 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-
 import {
   getFirestore,
   collection,
@@ -59,6 +49,152 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const googleProvider = new GoogleAuthProvider();
+
+
+// ======================================================
+// ADMIN EMAIL
+// ======================================================
+
+const ADMIN_EMAIL = "flopropertymedia@gmail.com";
+
+
+// ======================================================
+// CUSTOMER EMAIL — CLOUDFLARE WORKER
+// ======================================================
+
+const BOOKING_EMAIL_WORKER =
+  "https://flo-booking-email.flopropertymedia.workers.dev";
+
+
+async function sendCustomerBookingEmail(booking, statusData) {
+
+  const user = auth.currentUser;
+
+  if (!user) {
+    throw new Error(
+      "Admin authentication required."
+    );
+  }
+
+  const idToken =
+    await user.getIdToken();
+
+  const response =
+    await fetch(
+      BOOKING_EMAIL_WORKER,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          "Authorization":
+            `Bearer ${idToken}`
+        },
+
+        body: JSON.stringify({
+
+          customerName:
+            booking.name ||
+            booking.clientName ||
+            "",
+
+          customerEmail:
+            booking.email ||
+            "",
+
+          mobile:
+            booking.mobile ||
+            "",
+
+          propertyAddress:
+            booking.propertyAddress ||
+            booking.address ||
+            "",
+
+          preferredDate:
+            booking.preferredDate ||
+            booking.date ||
+            "",
+
+          preferredTime:
+            booking.preferredTime ||
+            "",
+
+          proposedDate:
+            booking.proposedDate ||
+            "",
+
+          proposedTime:
+            booking.proposedTime ||
+            "",
+
+          packageName:
+            booking.package ||
+            booking.packageName ||
+            "",
+
+          services:
+            Array.isArray(
+              booking.services
+            )
+              ? booking.services
+              : [],
+
+          paymentMethod:
+            booking.paymentMethod ||
+            "",
+
+          message:
+            booking.message ||
+            "",
+
+          source:
+            booking.source ||
+            "Website booking form",
+
+          createdAt:
+            booking.createdAt ||
+            null,
+
+          status:
+            statusData?.status ||
+            booking.status ||
+            "",
+
+          statusMessage:
+            statusData?.statusMessage ||
+            "",
+
+          confirmedDate:
+            statusData?.confirmedDate ||
+            booking.confirmedDate ||
+            "",
+
+          confirmedTime:
+            statusData?.confirmedTime ||
+            booking.confirmedTime ||
+            ""
+
+        })
+      }
+    );
+
+  if (!response.ok) {
+
+    const errorText =
+      await response.text();
+
+    throw new Error(
+      errorText ||
+      "Unable to send customer email."
+    );
+  }
+
+  return response.json();
+
+}
 
 
 console.log("========== FLO FIREBASE DEBUG ==========");
@@ -517,7 +653,285 @@ let activeBooking = null;
 
 async function loadDashboard() {
 
-  console.log("Loading FLO admin dashboard...");
+  console.log(
+    "Loading FLO admin dashboard..."
+  );
+
+
+  // -----------------------------------------
+  // BOOKINGS
+  // -----------------------------------------
+
+  try {
+
+    const bookingsSnapshot =
+      await getDocs(
+        collection(db, "bookings")
+      );
+
+
+    console.log(
+      "Bookings loaded:",
+      bookingsSnapshot.size
+    );
+
+
+    console.log(
+      "Booking document IDs:",
+      bookingsSnapshot.docs.map(
+        documentSnapshot =>
+          documentSnapshot.id
+      )
+    );
+
+
+    const bookingData =
+      bookingsSnapshot.docs.map(
+        documentSnapshot => ({
+          id:
+            documentSnapshot.id,
+
+          ...documentSnapshot.data()
+        })
+      );
+
+
+    const newBookings =
+      bookingData.filter(
+        booking =>
+          !booking.status ||
+          booking.status === "New"
+      );
+
+
+    const confirmedBookings =
+      bookingData.filter(
+        booking =>
+          booking.status === "Confirmed"
+      );
+
+
+    const newBookingsCount =
+      document.getElementById(
+        "newBookingsCount"
+      );
+
+    if (newBookingsCount) {
+
+      newBookingsCount.textContent =
+        newBookings.length;
+
+    }
+
+
+    const upcomingCount =
+      document.getElementById(
+        "upcomingCount"
+      );
+
+    if (upcomingCount) {
+
+      upcomingCount.textContent =
+        confirmedBookings.length;
+
+    }
+
+
+    // Render main bookings list
+
+    renderBookings(
+      bookingData
+    );
+
+
+    // Render recent bookings separately
+
+    try {
+
+      renderRecentBookings(
+        bookingData
+      );
+
+    } catch (recentError) {
+
+      console.error(
+        "RECENT BOOKINGS RENDER ERROR:",
+        recentError
+      );
+
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      "BOOKINGS ERROR:",
+      error
+    );
+
+
+    const bookingsList =
+      document.getElementById(
+        "bookingsList"
+      );
+
+
+    if (bookingsList) {
+
+      bookingsList.innerHTML =
+        `
+        <div class="empty-state">
+          <p>Unable to load bookings.</p>
+        </div>
+        `;
+
+    }
+
+  }
+
+
+  // -----------------------------------------
+  // CLIENTS
+  // -----------------------------------------
+
+  try {
+
+    const clientsSnapshot =
+      await getDocs(
+        collection(db, "clients")
+      );
+
+
+    const clientsCount =
+      document.getElementById(
+        "clientsCount"
+      );
+
+
+    if (clientsCount) {
+
+      clientsCount.textContent =
+        clientsSnapshot.size;
+
+    }
+
+
+    renderClients(
+      clientsSnapshot
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "CLIENTS ERROR:",
+      error
+    );
+
+
+    const clientsCount =
+      document.getElementById(
+        "clientsCount"
+      );
+
+
+    if (clientsCount) {
+
+      clientsCount.textContent =
+        "0";
+
+    }
+
+  }
+
+
+  // -----------------------------------------
+  // PROJECTS
+  // -----------------------------------------
+
+  try {
+
+    const projectsSnapshot =
+      await getDocs(
+        collection(db, "projects")
+      );
+
+
+    const projectsCount =
+      document.getElementById(
+        "projectsCount"
+      );
+
+
+    if (projectsCount) {
+
+      projectsCount.textContent =
+        projectsSnapshot.size;
+
+    }
+
+
+    renderProjects(
+      projectsSnapshot
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "PROJECTS ERROR:",
+      error
+    );
+
+
+    const projectsCount =
+      document.getElementById(
+        "projectsCount"
+      );
+
+
+    if (projectsCount) {
+
+      projectsCount.textContent =
+        "0";
+
+    }
+
+  }
+
+
+  // -----------------------------------------
+  // QUOTES
+  // -----------------------------------------
+
+  try {
+
+    const quotesSnapshot =
+      await getDocs(
+        collection(db, "quotes")
+      );
+
+
+    renderQuotes(
+      quotesSnapshot
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "QUOTES ERROR:",
+      error
+    );
+
+  }
+
+
+  console.log(
+    "FLO admin dashboard finished loading."
+  );
+
+}
 
   // -----------------------------------------
   // BOOKINGS
