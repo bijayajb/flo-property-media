@@ -18,8 +18,9 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  addDoc,
   serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 
 // ======================================================
@@ -351,7 +352,10 @@ onAuthStateChanged(auth, async (user) => {
 
   // Load dashboard data
 
-  await loadDashboard();
+await loadDashboard();
+
+// Load CRM features
+await initCRMFeatures();
 });
 
 
@@ -971,7 +975,9 @@ function openBookingModal(bookingId) {
 
   populateBookingModal();
 
-  modal.classList.remove("hidden");
+ensureBookingClientButton();
+
+modal.classList.remove("hidden");
 
   document.body.classList.add("modal-open");
 }
@@ -2488,4 +2494,2989 @@ function escapeHTML(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+// ======================================================
+// FLO CRM / PROJECTS / CUSTOM QUOTES
+// ======================================================
+
+let crmInitialised = false;
+
+const FLO_SERVICES = [
+  "Photography",
+  "Video",
+  "Drone",
+  "2D Floorplan",
+  "3D Floorplan",
+  "Twilight"
+];
+
+const FLO_PACKAGES = [
+  {
+    name: "Photography",
+    price: 150
+  },
+  {
+    name: "Mixed Media",
+    price: 450
+  },
+  {
+    name: "Premium Media",
+    price: 700
+  }
+];
+
+
+// ======================================================
+// CRM INITIALISATION
+// ======================================================
+
+async function initCRMFeatures() {
+
+  if (crmInitialised) {
+    return;
+  }
+
+  crmInitialised = true;
+
+  injectCRMToolbar("clientsSection", "clientsGrid", "CLIENTS", [
+    {
+      label: "+ Add Client",
+      action: openAddClientModal,
+      primary: true
+    }
+  ]);
+
+  injectCRMToolbar("projectsSection", "projectsGrid", "PROJECTS", [
+    {
+      label: "+ Add Project",
+      action: openAddProjectModal,
+      primary: true
+    }
+  ]);
+
+  injectCRMToolbar("quotesSection", "quotesGrid", "QUOTES", [
+    {
+      label: "+ Create Quote",
+      action: openCreateQuoteModal,
+      primary: true
+    }
+  ]);
+
+  await refreshCRMData();
+
+}
+
+
+// ======================================================
+// TOOLBAR
+// ======================================================
+
+function injectCRMToolbar(
+  sectionId,
+  gridId,
+  eyebrow,
+  buttons
+) {
+
+  const section =
+    document.getElementById(sectionId);
+
+  const grid =
+    document.getElementById(gridId);
+
+  if (!section || !grid) {
+    return;
+  }
+
+  if (
+    section.querySelector(
+      `[data-crm-toolbar="${gridId}"]`
+    )
+  ) {
+    return;
+  }
+
+  const toolbar =
+    document.createElement("div");
+
+  toolbar.className =
+    "crm-section-toolbar";
+
+  toolbar.dataset.crmToolbar =
+    gridId;
+
+  toolbar.innerHTML = `
+
+    <div class="crm-toolbar-title">
+
+      <span class="panel-eyebrow">
+        ${escapeHTML(eyebrow)}
+      </span>
+
+    </div>
+
+    <div class="crm-toolbar-actions">
+
+      ${buttons
+        .map(
+          (button, index) => `
+            <button
+              type="button"
+              class="
+                crm-toolbar-button
+                ${button.primary ? "primary" : ""}
+              "
+              data-crm-action="${gridId}-${index}"
+            >
+              ${escapeHTML(button.label)}
+            </button>
+          `
+        )
+        .join("")}
+
+    </div>
+
+  `;
+
+  grid.parentNode.insertBefore(
+    toolbar,
+    grid
+  );
+
+  buttons.forEach(
+    (button, index) => {
+
+      const element =
+        toolbar.querySelector(
+          `[data-crm-action="${gridId}-${index}"]`
+        );
+
+      if (element) {
+
+        element.addEventListener(
+          "click",
+          button.action
+        );
+
+      }
+
+    }
+  );
+
+}
+
+
+// ======================================================
+// CRM DATA REFRESH
+// ======================================================
+
+async function refreshCRMData() {
+
+  try {
+
+    const [
+      clientsSnapshot,
+      projectsSnapshot,
+      quotesSnapshot
+    ] = await Promise.all([
+
+      getDocs(
+        collection(db, "clients")
+      ),
+
+      getDocs(
+        collection(db, "projects")
+      ),
+
+      getDocs(
+        collection(db, "quotes")
+      )
+
+    ]);
+
+    renderEnhancedClients(
+      clientsSnapshot
+    );
+
+    renderEnhancedProjects(
+      projectsSnapshot
+    );
+
+    renderEnhancedQuotes(
+      quotesSnapshot
+    );
+
+  } catch (error) {
+
+    console.error(
+      "CRM refresh error:",
+      error
+    );
+
+  }
+
+}
+
+
+// ======================================================
+// CLIENTS
+// ======================================================
+
+function renderEnhancedClients(snapshot) {
+
+  const container =
+    document.getElementById(
+      "clientsGrid"
+    );
+
+  if (!container) {
+    return;
+  }
+
+  if (snapshot.empty) {
+
+    container.innerHTML = `
+
+      <div class="large-empty crm-empty">
+
+        <span class="panel-eyebrow">
+          CLIENTS
+        </span>
+
+        <h3>
+          No clients yet
+        </h3>
+
+        <p>
+          Add your first client to start
+          building your FLO client database.
+        </p>
+
+        <button
+          type="button"
+          class="crm-inline-button"
+          id="emptyAddClientButton"
+        >
+          + Add Client
+        </button>
+
+      </div>
+
+    `;
+
+    const emptyButton =
+      document.getElementById(
+        "emptyAddClientButton"
+      );
+
+    if (emptyButton) {
+      emptyButton.addEventListener(
+        "click",
+        openAddClientModal
+      );
+    }
+
+    return;
+  }
+
+  const clients =
+    snapshot.docs.map(clientDoc => ({
+
+      id: clientDoc.id,
+
+      ...clientDoc.data()
+
+    }));
+
+  container.innerHTML = clients
+    .map(client => {
+
+      const status =
+        client.status ||
+        "Active";
+
+      const projectCount =
+        Number(
+          client.projectCount || 0
+        );
+
+      const quoteCount =
+        Number(
+          client.quoteCount || 0
+        );
+
+      return `
+
+        <article
+          class="client-card crm-record-card"
+          data-client-id="${escapeHTML(client.id)}"
+        >
+
+          <div class="crm-record-top">
+
+            <span class="panel-eyebrow">
+              CLIENT
+            </span>
+
+            <span
+              class="
+                crm-status
+                crm-status-${escapeHTML(
+                  status
+                    .toLowerCase()
+                    .replaceAll(" ", "-")
+                )}
+              "
+            >
+              ${escapeHTML(status)}
+            </span>
+
+          </div>
+
+          <h3>
+            ${escapeHTML(
+              client.name ||
+              "Unnamed client"
+            )}
+          </h3>
+
+          <p>
+            ${escapeHTML(
+              client.email || ""
+            )}
+          </p>
+
+          <p>
+            ${escapeHTML(
+              client.mobile || ""
+            )}
+          </p>
+
+          <p>
+            ${escapeHTML(
+              client.propertyAddress ||
+              client.address ||
+              ""
+            )}
+          </p>
+
+          <div class="crm-record-meta">
+
+            <span>
+              ${projectCount}
+              ${projectCount === 1
+                ? "project"
+                : "projects"}
+            </span>
+
+            <span>
+              ${quoteCount}
+              ${quoteCount === 1
+                ? "quote"
+                : "quotes"}
+            </span>
+
+          </div>
+
+          <div class="crm-card-actions">
+
+            <button
+              type="button"
+              class="crm-small-button"
+              data-edit-client="${escapeHTML(client.id)}"
+            >
+              Edit
+            </button>
+
+            <button
+              type="button"
+              class="crm-small-button"
+              data-client-project="${escapeHTML(client.id)}"
+            >
+              + Project
+            </button>
+
+            <button
+              type="button"
+              class="crm-small-button"
+              data-client-quote="${escapeHTML(client.id)}"
+            >
+              + Quote
+            </button>
+
+          </div>
+
+        </article>
+
+      `;
+
+    })
+    .join("");
+
+  container
+    .querySelectorAll(
+      "[data-edit-client]"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          openEditClientModal(
+            button.dataset.editClient
+          );
+
+        }
+      );
+
+    });
+
+  container
+    .querySelectorAll(
+      "[data-client-project]"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          openAddProjectModal(
+            button.dataset.clientProject
+          );
+
+        }
+      );
+
+    });
+
+  container
+    .querySelectorAll(
+      "[data-client-quote]"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          openCreateQuoteModal(
+            button.dataset.clientQuote
+          );
+
+        }
+      );
+
+    });
+
+}
+
+
+// ======================================================
+// ADD CLIENT
+// ======================================================
+
+function openAddClientModal(
+  prefill = {}
+) {
+
+  openCRMFormModal({
+
+    title: "Add Client",
+
+    eyebrow: "CLIENT",
+
+    fields: [
+
+      {
+        name: "name",
+        label: "Client name",
+        type: "text",
+        required: true,
+        value:
+          prefill.name || ""
+      },
+
+      {
+        name: "email",
+        label: "Email",
+        type: "email",
+        required: true,
+        value:
+          prefill.email || ""
+      },
+
+      {
+        name: "mobile",
+        label: "Mobile",
+        type: "tel",
+        value:
+          prefill.mobile || ""
+      },
+
+      {
+        name: "propertyAddress",
+        label: "Property / address",
+        type: "text",
+        value:
+          prefill.propertyAddress || ""
+      },
+
+      {
+        name: "status",
+        label: "Client status",
+        type: "select",
+        options: [
+          "Active",
+          "Completed",
+          "Archived"
+        ],
+        value: "Active"
+      },
+
+      {
+        name: "notes",
+        label: "Notes",
+        type: "textarea"
+      }
+
+    ],
+
+    submitLabel:
+      "Add Client",
+
+    onSubmit:
+      async values => {
+
+        const existing =
+          await findClientByEmail(
+            values.email
+          );
+
+        if (existing) {
+
+          throw new Error(
+            "A client with this email already exists."
+          );
+
+        }
+
+        await addDoc(
+          collection(db, "clients"),
+          {
+
+            name:
+              values.name.trim(),
+
+            email:
+              values.email.trim(),
+
+            mobile:
+              values.mobile.trim(),
+
+            propertyAddress:
+              values.propertyAddress.trim(),
+
+            status:
+              values.status || "Active",
+
+            notes:
+              values.notes.trim(),
+
+            projectCount: 0,
+
+            quoteCount: 0,
+
+            createdAt:
+              serverTimestamp(),
+
+            updatedAt:
+              serverTimestamp()
+
+          }
+        );
+
+        await refreshCRMData();
+
+        showCRMToast(
+          "Client added successfully."
+        );
+
+      }
+
+  });
+
+}
+
+
+// ======================================================
+// EDIT CLIENT
+// ======================================================
+
+async function openEditClientModal(
+  clientId
+) {
+
+  const clientRef =
+    doc(
+      db,
+      "clients",
+      clientId
+    );
+
+  const snapshot =
+    await getDocs(
+      collection(db, "clients")
+    );
+
+  const found =
+    snapshot.docs.find(
+      item => item.id === clientId
+    );
+
+  if (!found) {
+    return;
+  }
+
+  const client =
+    found.data();
+
+  openCRMFormModal({
+
+    title: "Edit Client",
+
+    eyebrow: "CLIENT",
+
+    fields: [
+
+      {
+        name: "name",
+        label: "Client name",
+        type: "text",
+        required: true,
+        value:
+          client.name || ""
+      },
+
+      {
+        name: "email",
+        label: "Email",
+        type: "email",
+        required: true,
+        value:
+          client.email || ""
+      },
+
+      {
+        name: "mobile",
+        label: "Mobile",
+        type: "tel",
+        value:
+          client.mobile || ""
+      },
+
+      {
+        name: "propertyAddress",
+        label: "Property / address",
+        type: "text",
+        value:
+          client.propertyAddress || ""
+      },
+
+      {
+        name: "status",
+        label: "Client status",
+        type: "select",
+        options: [
+          "Active",
+          "Completed",
+          "Archived"
+        ],
+        value:
+          client.status || "Active"
+      },
+
+      {
+        name: "notes",
+        label: "Notes",
+        type: "textarea",
+        value:
+          client.notes || ""
+      }
+
+    ],
+
+    submitLabel:
+      "Save Changes",
+
+    onSubmit:
+      async values => {
+
+        await updateDoc(
+          clientRef,
+          {
+
+            name:
+              values.name.trim(),
+
+            email:
+              values.email.trim(),
+
+            mobile:
+              values.mobile.trim(),
+
+            propertyAddress:
+              values.propertyAddress.trim(),
+
+            status:
+              values.status,
+
+            notes:
+              values.notes.trim(),
+
+            updatedAt:
+              serverTimestamp()
+
+          }
+        );
+
+        await refreshCRMData();
+
+        showCRMToast(
+          "Client updated."
+        );
+
+      }
+
+  });
+
+}
+
+
+// ======================================================
+// FIND CLIENT
+// ======================================================
+
+async function findClientByEmail(
+  email
+) {
+
+  if (!email) {
+    return null;
+  }
+
+  const snapshot =
+    await getDocs(
+      collection(db, "clients")
+    );
+
+  const target =
+    email.trim().toLowerCase();
+
+  const found =
+    snapshot.docs.find(
+      clientDoc => {
+
+        const data =
+          clientDoc.data();
+
+        return (
+          String(
+            data.email || ""
+          )
+            .trim()
+            .toLowerCase() === target
+        );
+
+      }
+    );
+
+  if (!found) {
+    return null;
+  }
+
+  return {
+    id: found.id,
+    ...found.data()
+  };
+
+}
+
+
+// ======================================================
+// BOOKING → CLIENT
+// ======================================================
+
+function ensureBookingClientButton() {
+
+  const modal =
+    document.getElementById(
+      "bookingModal"
+    );
+
+  if (!modal ||
+      !activeBooking) {
+
+    return;
+
+  }
+
+  if (
+    modal.querySelector(
+      "#addBookingClientButton"
+    )
+  ) {
+
+    return;
+
+  }
+
+  const actions =
+    modal.querySelector(
+      ".booking-actions"
+    );
+
+  if (!actions) {
+    return;
+  }
+
+  const button =
+    document.createElement(
+      "button"
+    );
+
+  button.type =
+    "button";
+
+  button.id =
+    "addBookingClientButton";
+
+  button.className =
+    "booking-action crm-booking-client-button";
+
+  button.textContent =
+    "Add to Clients";
+
+  actions.parentNode.insertBefore(
+    button,
+    actions
+  );
+
+  button.addEventListener(
+    "click",
+    addActiveBookingToClient
+  );
+
+}
+
+
+// ======================================================
+// ADD BOOKING CUSTOMER TO CLIENTS
+// ======================================================
+
+async function addActiveBookingToClient() {
+
+  if (!activeBooking) {
+    return;
+  }
+
+  const button =
+    document.getElementById(
+      "addBookingClientButton"
+    );
+
+  if (button) {
+    button.disabled = true;
+    button.textContent =
+      "Checking...";
+  }
+
+  try {
+
+    const email =
+      activeBooking.email ||
+      "";
+
+    const existing =
+      await findClientByEmail(
+        email
+      );
+
+    if (existing) {
+
+      if (button) {
+        button.textContent =
+          "Already a Client";
+      }
+
+      showCRMToast(
+        "This customer is already in Clients."
+      );
+
+      return;
+    }
+
+    await addDoc(
+      collection(db, "clients"),
+      {
+
+        name:
+          activeBooking.name ||
+          activeBooking.clientName ||
+          "",
+
+        email:
+          activeBooking.email ||
+          "",
+
+        mobile:
+          activeBooking.mobile ||
+          "",
+
+        propertyAddress:
+          activeBooking.propertyAddress ||
+          "",
+
+        status:
+          "Active",
+
+        notes:
+          activeBooking.message ||
+          "",
+
+        source:
+          "Website booking",
+
+        bookingId:
+          activeBooking.id,
+
+        projectCount: 0,
+
+        quoteCount: 0,
+
+        createdAt:
+          serverTimestamp(),
+
+        updatedAt:
+          serverTimestamp()
+
+      }
+    );
+
+    if (button) {
+      button.textContent =
+        "Added to Clients";
+    }
+
+    showCRMToast(
+      "Customer added to Clients."
+    );
+
+    await refreshCRMData();
+
+  } catch (error) {
+
+    console.error(
+      "Unable to add booking customer:",
+      error
+    );
+
+    if (button) {
+      button.disabled = false;
+      button.textContent =
+        "Add to Clients";
+    }
+
+    showCRMToast(
+      error.message ||
+      "Unable to add client.",
+      true
+    );
+
+  }
+
+}
+
+
+// ======================================================
+// PROJECTS
+// ======================================================
+
+function renderEnhancedProjects(
+  snapshot
+) {
+
+  const container =
+    document.getElementById(
+      "projectsGrid"
+    );
+
+  if (!container) {
+    return;
+  }
+
+  if (snapshot.empty) {
+
+    container.innerHTML = `
+
+      <div class="large-empty crm-empty">
+
+        <span class="panel-eyebrow">
+          PROJECTS
+        </span>
+
+        <h3>
+          No projects yet
+        </h3>
+
+        <p>
+          Create a project and connect it
+          to one of your clients.
+        </p>
+
+        <button
+          type="button"
+          class="crm-inline-button"
+          id="emptyAddProjectButton"
+        >
+          + Add Project
+        </button>
+
+      </div>
+
+    `;
+
+    document
+      .getElementById(
+        "emptyAddProjectButton"
+      )
+      ?.addEventListener(
+        "click",
+        openAddProjectModal
+      );
+
+    return;
+  }
+
+  const projects =
+    snapshot.docs.map(projectDoc => ({
+
+      id:
+        projectDoc.id,
+
+      ...projectDoc.data()
+
+    }));
+
+  container.innerHTML =
+    projects
+      .map(project => {
+
+        return `
+
+          <article
+            class="project-card crm-record-card"
+          >
+
+            <div class="crm-record-top">
+
+              <span class="panel-eyebrow">
+                PROJECT
+              </span>
+
+              <span class="crm-status">
+                ${escapeHTML(
+                  project.status ||
+                  "Upcoming"
+                )}
+              </span>
+
+            </div>
+
+            <h3>
+              ${escapeHTML(
+                project.name ||
+                project.propertyName ||
+                "Unnamed project"
+              )}
+            </h3>
+
+            <p>
+              ${escapeHTML(
+                project.clientName ||
+                ""
+              )}
+            </p>
+
+            <p>
+              ${escapeHTML(
+                project.propertyAddress ||
+                ""
+              )}
+            </p>
+
+            <div class="crm-record-meta">
+
+              <span>
+                ${escapeHTML(
+                  project.startDate ||
+                  "No start date"
+                )}
+              </span>
+
+              <span>
+                ${escapeHTML(
+                  project.dueDate ||
+                  "No due date"
+                )}
+              </span>
+
+            </div>
+
+          </article>
+
+        `;
+
+      })
+      .join("");
+
+}
+
+
+// ======================================================
+// ADD PROJECT
+// ======================================================
+
+async function openAddProjectModal(
+  clientId = ""
+) {
+
+  const clients =
+    await getClientOptions();
+
+  if (!clients.length) {
+
+    showCRMToast(
+      "Add a client before creating a project.",
+      true
+    );
+
+    return;
+
+  }
+
+  openCRMFormModal({
+
+    title: "Add Project",
+
+    eyebrow: "PROJECT",
+
+    fields: [
+
+      {
+        name: "clientId",
+        label: "Client",
+        type: "select",
+        options:
+          clients.map(
+            client => ({
+              value:
+                client.id,
+              label:
+                client.name ||
+                client.email
+            })
+          ),
+        value:
+          clientId
+      },
+
+      {
+        name: "name",
+        label: "Project name",
+        type: "text",
+        required: true
+      },
+
+      {
+        name: "propertyAddress",
+        label: "Property / address",
+        type: "text"
+      },
+
+      {
+        name: "services",
+        label: "Services",
+        type: "multiselect",
+        options:
+          FLO_SERVICES
+      },
+
+      {
+        name: "startDate",
+        label: "Start date",
+        type: "date"
+      },
+
+      {
+        name: "dueDate",
+        label: "Due date",
+        type: "date"
+      },
+
+      {
+        name: "status",
+        label: "Project status",
+        type: "select",
+        options: [
+          "Upcoming",
+          "In Progress",
+          "Awaiting Client",
+          "Completed",
+          "Cancelled"
+        ],
+        value:
+          "Upcoming"
+      },
+
+      {
+        name: "notes",
+        label: "Project notes",
+        type: "textarea"
+      }
+
+    ],
+
+    submitLabel:
+      "Create Project",
+
+    onSubmit:
+      async values => {
+
+        const client =
+          clients.find(
+            item =>
+              item.id ===
+              values.clientId
+          );
+
+        await addDoc(
+          collection(db, "projects"),
+          {
+
+            clientId:
+              values.clientId,
+
+            clientName:
+              client?.name || "",
+
+            name:
+              values.name.trim(),
+
+            propertyAddress:
+              values.propertyAddress.trim(),
+
+            services:
+              values.services || [],
+
+            startDate:
+              values.startDate || "",
+
+            dueDate:
+              values.dueDate || "",
+
+            status:
+              values.status,
+
+            notes:
+              values.notes.trim(),
+
+            createdAt:
+              serverTimestamp(),
+
+            updatedAt:
+              serverTimestamp()
+
+          }
+        );
+
+        await refreshCRMData();
+
+        showCRMToast(
+          "Project created."
+        );
+
+      }
+
+  });
+
+}
+
+
+// ======================================================
+// CLIENT OPTIONS
+// ======================================================
+
+async function getClientOptions() {
+
+  const snapshot =
+    await getDocs(
+      collection(db, "clients")
+    );
+
+  return snapshot.docs.map(
+    clientDoc => ({
+
+      id:
+        clientDoc.id,
+
+      ...clientDoc.data()
+
+    })
+  );
+
+}
+
+
+// ======================================================
+// QUOTES
+// ======================================================
+
+function renderEnhancedQuotes(
+  snapshot
+) {
+
+  const container =
+    document.getElementById(
+      "quotesGrid"
+    );
+
+  if (!container) {
+    return;
+  }
+
+  if (snapshot.empty) {
+
+    container.innerHTML = `
+
+      <div class="large-empty crm-empty">
+
+        <span class="panel-eyebrow">
+          QUOTES
+        </span>
+
+        <h3>
+          No quotes yet
+        </h3>
+
+        <p>
+          Create a tailored quote for a
+          client and calculate the total.
+        </p>
+
+        <button
+          type="button"
+          class="crm-inline-button"
+          id="emptyCreateQuoteButton"
+        >
+          + Create Quote
+        </button>
+
+      </div>
+
+    `;
+
+    document
+      .getElementById(
+        "emptyCreateQuoteButton"
+      )
+      ?.addEventListener(
+        "click",
+        openCreateQuoteModal
+      );
+
+    return;
+  }
+
+  const quotes =
+    snapshot.docs.map(
+      quoteDoc => ({
+
+        id:
+          quoteDoc.id,
+
+        ...quoteDoc.data()
+
+      })
+    );
+
+  container.innerHTML =
+    quotes
+      .map(quote => {
+
+        return `
+
+          <article
+            class="quote-card crm-record-card"
+          >
+
+            <div class="crm-record-top">
+
+              <span class="panel-eyebrow">
+                QUOTE
+              </span>
+
+              <span class="crm-status">
+                ${escapeHTML(
+                  quote.status ||
+                  "Draft"
+                )}
+              </span>
+
+            </div>
+
+            <h3>
+              ${escapeHTML(
+                quote.clientName ||
+                quote.name ||
+                "Unnamed client"
+              )}
+            </h3>
+
+            <p>
+              ${escapeHTML(
+                quote.propertyAddress ||
+                ""
+              )}
+            </p>
+
+            <div class="crm-quote-total">
+
+              $${Number(
+                quote.total || 0
+              ).toFixed(2)}
+
+            </div>
+
+            <div class="crm-card-actions">
+
+              <button
+                type="button"
+                class="crm-small-button"
+                data-view-quote="${escapeHTML(
+                  quote.id
+                )}"
+              >
+                View
+              </button>
+
+            </div>
+
+          </article>
+
+        `;
+
+      })
+      .join("");
+
+  container
+    .querySelectorAll(
+      "[data-view-quote]"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          openQuoteViewModal(
+            button.dataset.viewQuote
+          );
+
+        }
+      );
+
+    });
+
+}
+
+
+// ======================================================
+// CREATE CUSTOM QUOTE
+// ======================================================
+
+async function openCreateQuoteModal(
+  clientId = ""
+) {
+
+  const clients =
+    await getClientOptions();
+
+  if (!clients.length) {
+
+    showCRMToast(
+      "Add a client before creating a quote.",
+      true
+    );
+
+    return;
+
+  }
+
+  const modal =
+    createCRMModalShell(
+      "Custom Quote",
+      "QUOTE"
+    );
+
+  const body =
+    modal.querySelector(
+      ".crm-modal-body"
+    );
+
+  body.innerHTML = `
+
+    <div class="crm-form-grid">
+
+      <label class="crm-field">
+
+        <span>Client</span>
+
+        <select
+          id="customQuoteClient"
+          required
+        >
+
+          ${clients
+            .map(
+              client => `
+                <option
+                  value="${escapeHTML(client.id)}"
+                  ${
+                    client.id === clientId
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  ${escapeHTML(
+                    client.name ||
+                    client.email
+                  )}
+                </option>
+              `
+            )
+            .join("")}
+
+        </select>
+
+      </label>
+
+      <label class="crm-field">
+
+        <span>Property / address</span>
+
+        <input
+          id="customQuoteAddress"
+          type="text"
+          placeholder="Property address"
+        >
+
+      </label>
+
+    </div>
+
+    <div class="crm-quote-builder">
+
+      <div class="crm-quote-builder-header">
+
+        <div>
+
+          <span class="panel-eyebrow">
+            SERVICES
+          </span>
+
+          <h3>
+            Build your quote
+          </h3>
+
+        </div>
+
+        <button
+          type="button"
+          class="crm-small-button"
+          id="addQuoteOther"
+        >
+          + Other
+        </button>
+
+      </div>
+
+      <div
+        id="quoteServiceRows"
+        class="quote-service-rows"
+      >
+
+      </div>
+
+      <div
+        id="quoteOtherRows"
+        class="quote-other-rows"
+      >
+
+      </div>
+
+    </div>
+
+    <div class="crm-form-grid">
+
+      <label class="crm-field">
+
+        <span>Discount</span>
+
+        <input
+          id="customQuoteDiscount"
+          type="number"
+          min="0"
+          step="0.01"
+          value="0"
+        >
+
+      </label>
+
+      <label class="crm-field">
+
+        <span>GST</span>
+
+        <select
+          id="customQuoteGST"
+        >
+
+          <option value="0">
+            No GST
+          </option>
+
+          <option value="10" selected>
+            10% GST
+          </option>
+
+        </select>
+
+      </label>
+
+    </div>
+
+    <div
+      class="crm-quote-summary"
+      id="customQuoteSummary"
+    >
+
+      <div>
+        <span>Subtotal</span>
+        <strong id="quoteSubtotal">$0.00</strong>
+      </div>
+
+      <div>
+        <span>GST</span>
+        <strong id="quoteGST">$0.00</strong>
+      </div>
+
+      <div>
+        <span>Total</span>
+        <strong id="quoteTotal">$0.00</strong>
+      </div>
+
+    </div>
+
+    <label class="crm-field">
+
+      <span>Quote notes</span>
+
+      <textarea
+        id="customQuoteNotes"
+        rows="4"
+        placeholder="Optional notes for this quote"
+      ></textarea>
+
+    </label>
+
+  `;
+
+  const footer =
+    modal.querySelector(
+      ".crm-modal-footer"
+    );
+
+  const saveButton =
+    document.createElement(
+      "button"
+    );
+
+  saveButton.type =
+    "button";
+
+  saveButton.className =
+    "crm-modal-submit";
+
+  saveButton.textContent =
+    "Save Quote";
+
+  footer.appendChild(
+    saveButton
+  );
+
+  const serviceRows =
+    document.getElementById(
+      "quoteServiceRows"
+    );
+
+  const otherRows =
+    document.getElementById(
+      "quoteOtherRows"
+    );
+
+  FLO_SERVICES.forEach(
+    service => {
+
+      const row =
+        document.createElement(
+          "div"
+        );
+
+      row.className =
+        "quote-service-row";
+
+      row.innerHTML = `
+
+        <label>
+
+          <input
+            type="checkbox"
+            value="${escapeHTML(service)}"
+          >
+
+          <span>
+            ${escapeHTML(service)}
+          </span>
+
+        </label>
+
+        <input
+          class="quote-service-price"
+          type="number"
+          min="0"
+          step="0.01"
+          value="0"
+          disabled
+          aria-label="${escapeHTML(service)} price"
+        >
+
+      `;
+
+      const checkbox =
+        row.querySelector(
+          "input[type='checkbox']"
+        );
+
+      const price =
+        row.querySelector(
+          ".quote-service-price"
+        );
+
+      checkbox.addEventListener(
+        "change",
+        () => {
+
+          price.disabled =
+            !checkbox.checked;
+
+          if (
+            checkbox.checked &&
+            Number(price.value) === 0
+          ) {
+
+            const packagePreset =
+              FLO_PACKAGES.find(
+                item =>
+                  item.name ===
+                  service
+              );
+
+            if (packagePreset) {
+              price.value =
+                packagePreset.price;
+            }
+
+          }
+
+          calculateCustomQuote();
+
+        }
+      );
+
+      price.addEventListener(
+        "input",
+        calculateCustomQuote
+      );
+
+      serviceRows.appendChild(
+        row
+      );
+
+    }
+  );
+
+  document
+    .getElementById(
+      "addQuoteOther"
+    )
+    .addEventListener(
+      "click",
+      () => {
+
+        addOtherQuoteRow(
+          otherRows
+        );
+
+      }
+    );
+
+  document
+    .getElementById(
+      "customQuoteDiscount"
+    )
+    .addEventListener(
+      "input",
+      calculateCustomQuote
+    );
+
+  document
+    .getElementById(
+      "customQuoteGST"
+    )
+    .addEventListener(
+      "change",
+      calculateCustomQuote
+    );
+
+  saveButton.addEventListener(
+    "click",
+    async () => {
+
+      try {
+
+        saveButton.disabled =
+          true;
+
+        saveButton.textContent =
+          "Saving...";
+
+        const selectedServices =
+          [];
+
+        serviceRows
+          .querySelectorAll(
+            ".quote-service-row"
+          )
+          .forEach(row => {
+
+            const checkbox =
+              row.querySelector(
+                "input[type='checkbox']"
+              );
+
+            const price =
+              row.querySelector(
+                ".quote-service-price"
+              );
+
+            if (
+              checkbox.checked
+            ) {
+
+              selectedServices.push({
+
+                name:
+                  checkbox.value,
+
+                price:
+                  Number(
+                    price.value || 0
+                  )
+
+              });
+
+            }
+
+          });
+
+        otherRows
+          .querySelectorAll(
+            ".quote-other-row"
+          )
+          .forEach(row => {
+
+            const name =
+              row.querySelector(
+                ".quote-other-name"
+              );
+
+            const price =
+              row.querySelector(
+                ".quote-other-price"
+              );
+
+            if (
+              name.value.trim()
+            ) {
+
+              selectedServices.push({
+
+                name:
+                  name.value.trim(),
+
+                price:
+                  Number(
+                    price.value || 0
+                  ),
+
+                custom:
+                  true
+
+              });
+
+            }
+
+          });
+
+        if (
+          !selectedServices.length
+        ) {
+
+          throw new Error(
+            "Select at least one service."
+          );
+
+        }
+
+        const selectedClient =
+          document.getElementById(
+            "customQuoteClient"
+          ).value;
+
+        const client =
+          clients.find(
+            item =>
+              item.id ===
+              selectedClient
+          );
+
+        const subtotal =
+          selectedServices.reduce(
+            (
+              total,
+              item
+            ) =>
+              total +
+              Number(
+                item.price || 0
+              ),
+            0
+          );
+
+        const discount =
+          Number(
+            document.getElementById(
+              "customQuoteDiscount"
+            ).value || 0
+          );
+
+        const taxable =
+          Math.max(
+            subtotal -
+            discount,
+            0
+          );
+
+        const gstRate =
+          Number(
+            document.getElementById(
+              "customQuoteGST"
+            ).value || 0
+          );
+
+        const gst =
+          taxable *
+          (gstRate / 100);
+
+        const total =
+          taxable +
+          gst;
+
+        await addDoc(
+          collection(db, "quotes"),
+          {
+
+            clientId:
+              selectedClient,
+
+            clientName:
+              client?.name || "",
+
+            clientEmail:
+              client?.email || "",
+
+            propertyAddress:
+              document.getElementById(
+                "customQuoteAddress"
+              ).value.trim(),
+
+            services:
+              selectedServices,
+
+            subtotal:
+              Number(
+                subtotal.toFixed(2)
+              ),
+
+            discount:
+              Number(
+                discount.toFixed(2)
+              ),
+
+            gstRate,
+
+            gst:
+              Number(
+                gst.toFixed(2)
+              ),
+
+            total:
+              Number(
+                total.toFixed(2)
+              ),
+
+            status:
+              "Draft",
+
+            notes:
+              document.getElementById(
+                "customQuoteNotes"
+              ).value.trim(),
+
+            createdAt:
+              serverTimestamp(),
+
+            updatedAt:
+              serverTimestamp()
+
+          }
+        );
+
+        closeCRMModal();
+
+        await refreshCRMData();
+
+        showCRMToast(
+          "Custom quote saved."
+        );
+
+      } catch (error) {
+
+        console.error(
+          "Quote error:",
+          error
+        );
+
+        saveButton.disabled =
+          false;
+
+        saveButton.textContent =
+          "Save Quote";
+
+        showCRMToast(
+          error.message ||
+          "Unable to save quote.",
+          true
+        );
+
+      }
+
+    }
+  );
+
+  calculateCustomQuote();
+
+}
+
+
+// ======================================================
+// OTHER QUOTE ROW
+// ======================================================
+
+function addOtherQuoteRow(
+  container
+) {
+
+  const row =
+    document.createElement(
+      "div"
+    );
+
+  row.className =
+    "quote-other-row";
+
+  row.innerHTML = `
+
+    <input
+      class="quote-other-name"
+      type="text"
+      placeholder="Other service"
+    >
+
+    <input
+      class="quote-other-price"
+      type="number"
+      min="0"
+      step="0.01"
+      value="0"
+      placeholder="Price"
+    >
+
+    <button
+      type="button"
+      class="crm-small-button"
+    >
+      Remove
+    </button>
+
+  `;
+
+  row
+    .querySelector(
+      "button"
+    )
+    .addEventListener(
+      "click",
+      () => {
+
+        row.remove();
+
+        calculateCustomQuote();
+
+      }
+    );
+
+  row
+    .querySelector(
+      ".quote-other-price"
+    )
+    .addEventListener(
+      "input",
+      calculateCustomQuote
+    );
+
+  container.appendChild(
+    row
+  );
+
+}
+
+
+// ======================================================
+// QUOTE CALCULATION
+// ======================================================
+
+function calculateCustomQuote() {
+
+  const serviceRows =
+    document.querySelectorAll(
+      "#quoteServiceRows .quote-service-row"
+    );
+
+  const otherRows =
+    document.querySelectorAll(
+      "#quoteOtherRows .quote-other-row"
+    );
+
+  let subtotal = 0;
+
+  serviceRows.forEach(
+    row => {
+
+      const checkbox =
+        row.querySelector(
+          "input[type='checkbox']"
+        );
+
+      const price =
+        row.querySelector(
+          ".quote-service-price"
+        );
+
+      if (
+        checkbox &&
+        checkbox.checked
+      ) {
+
+        subtotal +=
+          Number(
+            price.value || 0
+          );
+
+      }
+
+    }
+  );
+
+  otherRows.forEach(
+    row => {
+
+      const price =
+        row.querySelector(
+          ".quote-other-price"
+        );
+
+      subtotal +=
+        Number(
+          price?.value || 0
+        );
+
+    }
+  );
+
+  const discount =
+    Number(
+      document.getElementById(
+        "customQuoteDiscount"
+      )?.value || 0
+    );
+
+  const taxable =
+    Math.max(
+      subtotal -
+      discount,
+      0
+    );
+
+  const gstRate =
+    Number(
+      document.getElementById(
+        "customQuoteGST"
+      )?.value || 0
+    );
+
+  const gst =
+    taxable *
+    gstRate /
+    100;
+
+  const total =
+    taxable +
+    gst;
+
+  const subtotalElement =
+    document.getElementById(
+      "quoteSubtotal"
+    );
+
+  const gstElement =
+    document.getElementById(
+      "quoteGST"
+    );
+
+  const totalElement =
+    document.getElementById(
+      "quoteTotal"
+    );
+
+  if (subtotalElement) {
+    subtotalElement.textContent =
+      `$${subtotal.toFixed(2)}`;
+  }
+
+  if (gstElement) {
+    gstElement.textContent =
+      `$${gst.toFixed(2)}`;
+  }
+
+  if (totalElement) {
+    totalElement.textContent =
+      `$${total.toFixed(2)}`;
+  }
+
+}
+
+
+// ======================================================
+// QUOTE VIEW
+// ======================================================
+
+async function openQuoteViewModal(
+  quoteId
+) {
+
+  const snapshot =
+    await getDocs(
+      collection(db, "quotes")
+    );
+
+  const found =
+    snapshot.docs.find(
+      item =>
+        item.id === quoteId
+    );
+
+  if (!found) {
+    return;
+  }
+
+  const quote =
+    found.data();
+
+  const services =
+    Array.isArray(
+      quote.services
+    )
+      ? quote.services
+      : [];
+
+  openCRMFormModal({
+
+    title:
+      "Quote Details",
+
+    eyebrow:
+      "QUOTE",
+
+    readOnly:
+      true,
+
+    fields: [
+
+      {
+        name:
+          "clientName",
+
+        label:
+          "Client",
+
+        type:
+          "text",
+
+        value:
+          quote.clientName ||
+          ""
+
+      },
+
+      {
+        name:
+          "propertyAddress",
+
+        label:
+          "Property",
+
+        type:
+          "text",
+
+        value:
+          quote.propertyAddress ||
+          ""
+
+      },
+
+      {
+        name:
+          "services",
+
+        label:
+          "Services",
+
+        type:
+          "textarea",
+
+        value:
+          services
+            .map(
+              item =>
+                `${item.name} — $${Number(
+                  item.price || 0
+                ).toFixed(2)}`
+            )
+            .join("\n")
+
+      },
+
+      {
+        name:
+          "subtotal",
+
+        label:
+          "Subtotal",
+
+        type:
+          "text",
+
+        value:
+          `$${Number(
+            quote.subtotal || 0
+          ).toFixed(2)}`
+
+      },
+
+      {
+        name:
+          "gst",
+
+        label:
+          "GST",
+
+        type:
+          "text",
+
+        value:
+          `$${Number(
+            quote.gst || 0
+          ).toFixed(2)}`
+
+      },
+
+      {
+        name:
+          "total",
+
+        label:
+          "Total",
+
+        type:
+          "text",
+
+        value:
+          `$${Number(
+            quote.total || 0
+          ).toFixed(2)}`
+
+      }
+
+    ],
+
+    submitLabel:
+      null
+
+  });
+
+}
+
+
+// ======================================================
+// GENERIC CRM FORM MODAL
+// ======================================================
+
+function createCRMModalShell(
+  title,
+  eyebrow
+) {
+
+  closeCRMModal();
+
+  const modal =
+    document.createElement(
+      "div"
+    );
+
+  modal.id =
+    "crmModal";
+
+  modal.className =
+    "crm-modal";
+
+  modal.innerHTML = `
+
+    <div
+      class="crm-modal-overlay"
+      data-crm-close
+    ></div>
+
+    <div class="crm-modal-card">
+
+      <button
+        type="button"
+        class="crm-modal-close"
+        data-crm-close
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+      <div class="crm-modal-header">
+
+        <span class="panel-eyebrow">
+          ${escapeHTML(eyebrow)}
+        </span>
+
+        <h2>
+          ${escapeHTML(title)}
+        </h2>
+
+      </div>
+
+      <div class="crm-modal-body">
+      </div>
+
+      <div class="crm-modal-footer">
+      </div>
+
+    </div>
+
+  `;
+
+  document.body.appendChild(
+    modal
+  );
+
+  modal
+    .querySelectorAll(
+      "[data-crm-close]"
+    )
+    .forEach(
+      element => {
+
+        element.addEventListener(
+          "click",
+          closeCRMModal
+        );
+
+      }
+    );
+
+  return modal;
+
+}
+
+
+function openCRMFormModal(
+  config
+) {
+
+  const modal =
+    createCRMModalShell(
+      config.title,
+      config.eyebrow
+    );
+
+  const body =
+    modal.querySelector(
+      ".crm-modal-body"
+    );
+
+  const footer =
+    modal.querySelector(
+      ".crm-modal-footer"
+    );
+
+  const form =
+    document.createElement(
+      "form"
+    );
+
+  form.className =
+    "crm-form";
+
+  config.fields.forEach(
+    field => {
+
+      const wrapper =
+        document.createElement(
+          "label"
+        );
+
+      wrapper.className =
+        "crm-field";
+
+      const label =
+        document.createElement(
+          "span"
+        );
+
+      label.textContent =
+        field.label;
+
+      wrapper.appendChild(
+        label
+      );
+
+      let input;
+
+      if (
+        field.type ===
+        "textarea"
+      ) {
+
+        input =
+          document.createElement(
+            "textarea"
+          );
+
+        input.rows = 4;
+
+      } else if (
+        field.type ===
+        "select"
+      ) {
+
+        input =
+          document.createElement(
+            "select"
+          );
+
+        field.options
+          .forEach(
+            option => {
+
+              const optionElement =
+                document.createElement(
+                  "option"
+                );
+
+              if (
+                typeof option ===
+                "string"
+              ) {
+
+                optionElement.value =
+                  option;
+
+                optionElement.textContent =
+                  option;
+
+              } else {
+
+                optionElement.value =
+                  option.value;
+
+                optionElement.textContent =
+                  option.label;
+
+              }
+
+              if (
+                optionElement.value ===
+                field.value
+              ) {
+
+                optionElement.selected =
+                  true;
+
+              }
+
+              input.appendChild(
+                optionElement
+              );
+
+            }
+          );
+
+      } else if (
+        field.type ===
+        "multiselect"
+      ) {
+
+        input =
+          document.createElement(
+            "div"
+          );
+
+        input.className =
+          "crm-multiselect";
+
+        field.options
+          .forEach(
+            option => {
+
+              const label =
+                document.createElement(
+                  "label"
+                );
+
+              label.className =
+                "crm-check-option";
+
+              label.innerHTML = `
+
+                <input
+                  type="checkbox"
+                  value="${escapeHTML(option)}"
+                >
+
+                <span>
+                  ${escapeHTML(option)}
+                </span>
+
+              `;
+
+              input.appendChild(
+                label
+              );
+
+            }
+          );
+
+      } else {
+
+        input =
+          document.createElement(
+            "input"
+          );
+
+        input.type =
+          field.type || "text";
+
+      }
+
+      input.name =
+        field.name;
+
+      if (
+        field.type !==
+        "multiselect"
+      ) {
+
+        input.value =
+          field.value || "";
+
+      }
+
+      if (
+        field.required
+      ) {
+
+        input.required =
+          true;
+
+      }
+
+      if (
+        config.readOnly
+      ) {
+
+        input.disabled =
+          true;
+
+      }
+
+      wrapper.appendChild(
+        input
+      );
+
+      form.appendChild(
+        wrapper
+      );
+
+    }
+  );
+
+  body.appendChild(
+    form
+  );
+
+  if (
+    config.submitLabel
+  ) {
+
+    const submitButton =
+      document.createElement(
+        "button"
+      );
+
+    submitButton.type =
+      "submit";
+
+    submitButton.className =
+      "crm-modal-submit";
+
+    submitButton.textContent =
+      config.submitLabel;
+
+    footer.appendChild(
+      submitButton
+    );
+
+    form.addEventListener(
+      "submit",
+      async event => {
+
+        event.preventDefault();
+
+        submitButton.disabled =
+          true;
+
+        submitButton.textContent =
+          "Saving...";
+
+        try {
+
+          const values =
+            {};
+
+          config.fields.forEach(
+            field => {
+
+              if (
+                field.type ===
+                "multiselect"
+              ) {
+
+                values[field.name] =
+                  Array.from(
+                    form.querySelectorAll(
+                      `input[name="${field.name}"]`
+                    )
+                  )
+                    .filter(
+                      checkbox =>
+                        checkbox.checked
+                    )
+                    .map(
+                      checkbox =>
+                        checkbox.value
+                    );
+
+              } else {
+
+                values[field.name] =
+                  form
+                    .querySelector(
+                      `[name="${field.name}"]`
+                    )
+                    ?.value || "";
+
+              }
+
+            }
+          );
+
+          await config.onSubmit(
+            values
+          );
+
+          closeCRMModal();
+
+        } catch (error) {
+
+          console.error(
+            "CRM form error:",
+            error
+          );
+
+          submitButton.disabled =
+            false;
+
+          submitButton.textContent =
+            config.submitLabel;
+
+          showCRMToast(
+            error.message ||
+            "Unable to save.",
+            true
+          );
+
+        }
+
+      }
+    );
+
+  }
+
+  return modal;
+
+}
+
+
+// ======================================================
+// CLOSE CRM MODAL
+// ======================================================
+
+function closeCRMModal() {
+
+  const modal =
+    document.getElementById(
+      "crmModal"
+    );
+
+  if (modal) {
+    modal.remove();
+  }
+
+}
+
+
+// ======================================================
+// TOAST
+// ======================================================
+
+function showCRMToast(
+  message,
+  isError = false
+) {
+
+  let toast =
+    document.getElementById(
+      "crmToast"
+    );
+
+  if (!toast) {
+
+    toast =
+      document.createElement(
+        "div"
+      );
+
+    toast.id =
+      "crmToast";
+
+    toast.className =
+      "crm-toast";
+
+    document.body.appendChild(
+      toast
+    );
+
+  }
+
+  toast.textContent =
+    message;
+
+  toast.classList.toggle(
+    "error",
+    isError
+  );
+
+  toast.classList.add(
+    "visible"
+  );
+
+  clearTimeout(
+    window.floCRMToastTimer
+  );
+
+  window.floCRMToastTimer =
+    setTimeout(
+      () => {
+
+        toast.classList.remove(
+          "visible"
+        );
+
+      },
+      3500
+    );
+
+}
+
+      }
+
+    }
+  );
+
 }
