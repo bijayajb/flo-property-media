@@ -824,16 +824,11 @@ groups.forEach(group => {
       return group.status === status;
 
     })
-    .sort(
+        .sort(
       (a, b) =>
         getBookingDate(a) -
         getBookingDate(b)
     );
-        .sort(
-          (a, b) =>
-            getBookingDate(a) -
-            getBookingDate(b)
-        );
 
 
     if (!groupBookings.length) {
