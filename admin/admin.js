@@ -2537,28 +2537,28 @@ async function initCRMFeatures() {
   crmInitialised = true;
 
   injectCRMToolbar("clientsSection", "clientsGrid", "CLIENTS", [
-    {
-      label: "Add Client",
-      action: openAddClientModal,
-      primary: true
-    }
-  ]);
+  {
+    label: "Add Client",
+    action: openAddClientModal,
+    primary: true
+  }
+]);
 
-  injectCRMToolbar("projectsSection", "projectsGrid", "PROJECTS", [
-    {
-      label: "Add Project",
-      action: openAddProjectModal,
-      primary: true
-    }
-  ]);
+injectCRMToolbar("projectsSection", "projectsGrid", "PROJECTS", [
+  {
+    label: "Add Project",
+    action: openAddProjectModal,
+    primary: true
+  }
+]);
 
-  injectCRMToolbar("quotesSection", "quotesGrid", "QUOTES", [
-    {
-      label: "Calculate Quote",
-      action: openCreateQuoteModal,
-      primary: true
-    }
-  ]);
+injectCRMToolbar("quotesSection", "quotesGrid", "QUOTES", [
+  {
+    label: "Calculate Quote",
+    action: openCreateQuoteModal,
+    primary: true
+  }
+]);
 
   await refreshCRMData();
 
