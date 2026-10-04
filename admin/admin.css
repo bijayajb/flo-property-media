@@ -2529,3 +2529,381 @@ body.modal-open {
 .crm-project-status-cancelled {
   opacity: .52;
 }
+
+/* ======================================================
+   FLO — FINAL CRM BUTTON SYSTEM
+   ====================================================== */
+
+/* ------------------------------------------------------
+   MAIN CRM BUTTONS
+   Add Client / Add Project / Calculate Quote
+   ------------------------------------------------------ */
+
+.crm-toolbar-button,
+.crm-inline-button,
+.crm-modal-submit {
+  position: relative;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  min-width: 164px;
+  height: 44px;
+
+  padding: 0 20px;
+
+  border: 1px solid rgba(198, 177, 132, 0.72);
+  border-radius: 4px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(42, 37, 29, 0.82),
+      rgba(24, 22, 19, 0.94)
+    ) !important;
+
+  color: #d8c7a3 !important;
+
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 600;
+
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+
+  cursor: pointer;
+  pointer-events: auto;
+
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.20),
+    0 0 0 1px rgba(198, 177, 132, 0.025);
+
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+
+/* Champagne plus */
+
+.crm-toolbar-button::before,
+.crm-inline-button::before,
+.crm-modal-submit::before {
+  content: "＋";
+
+  display: inline-block;
+
+  color: #c6b184;
+
+  font-size: 13px;
+  font-weight: 300;
+
+  line-height: 1;
+
+  transition:
+    transform 0.3s ease,
+    color 0.25s ease;
+}
+
+
+/* Soft ambient glow */
+
+.crm-toolbar-button::after,
+.crm-inline-button::after,
+.crm-modal-submit::after {
+  content: "";
+
+  position: absolute;
+
+  inset: -6px;
+
+  z-index: -1;
+
+  border-radius: 5px;
+
+  background:
+    radial-gradient(
+      ellipse,
+      rgba(198, 177, 132, 0.24),
+      transparent 70%
+    );
+
+  filter: blur(10px);
+
+  opacity: 0.30;
+
+  pointer-events: none;
+
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+
+/* Hover */
+
+.crm-toolbar-button:hover,
+.crm-inline-button:hover,
+.crm-modal-submit:hover {
+  transform: translateY(-2px);
+
+  border-color:
+    rgba(230, 215, 184, 0.95);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(198, 177, 132, 0.13),
+      rgba(42, 37, 29, 0.92)
+    ) !important;
+
+  color: #eee4d0 !important;
+
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.32),
+    0 0 24px rgba(198, 177, 132, 0.13);
+}
+
+
+.crm-toolbar-button:hover::before,
+.crm-inline-button:hover::before,
+.crm-modal-submit:hover::before {
+  color: #eee4d0;
+
+  transform: rotate(90deg);
+}
+
+
+.crm-toolbar-button:hover::after,
+.crm-inline-button:hover::after,
+.crm-modal-submit:hover::after {
+  opacity: 0.8;
+
+  transform: scale(1.08);
+}
+
+
+/* Click */
+
+.crm-toolbar-button:active,
+.crm-inline-button:active,
+.crm-modal-submit:active {
+  transform: translateY(0);
+}
+
+
+/* Remove old PRIMARY gold fill */
+
+.crm-toolbar-button.primary {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(42, 37, 29, 0.82),
+      rgba(24, 22, 19, 0.94)
+    ) !important;
+
+  color: #d8c7a3 !important;
+
+  border-color:
+    rgba(198, 177, 132, 0.72) !important;
+}
+
+
+/* ------------------------------------------------------
+   MINI CARD BUTTONS
+   Edit / + Project / + Quote / Archive / Delete
+   ------------------------------------------------------ */
+
+.crm-card-actions {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  margin-top: 20px;
+
+  padding-top: 16px;
+
+  border-top:
+    1px solid rgba(255, 255, 255, 0.07);
+}
+
+
+.crm-small-button {
+  position: relative;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 34px;
+
+  padding: 0 13px;
+
+  border:
+    1px solid rgba(216, 199, 163, 0.34);
+
+  border-radius: 3px;
+
+  background: transparent !important;
+
+  color:
+    rgba(216, 199, 163, 0.78);
+
+  font-family: inherit;
+
+  font-size: 8px;
+  font-weight: 600;
+
+  letter-spacing: 0.13em;
+
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  overflow: hidden;
+
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
+}
+
+
+/* Animated line */
+
+.crm-small-button::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  bottom: 0;
+
+  width: 0;
+  height: 1px;
+
+  background:
+    #d8c7a3;
+
+  transition:
+    width 0.3s ease;
+}
+
+
+/* Mini button hover */
+
+.crm-small-button:hover {
+  transform: translateY(-2px);
+
+  border-color:
+    rgba(216, 199, 163, 0.75);
+
+  background:
+    rgba(216, 199, 163, 0.045) !important;
+
+  color:
+    #eee4d0;
+
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.22),
+    0 0 14px rgba(216, 199, 163, 0.06);
+}
+
+
+.crm-small-button:hover::after {
+  width: 100%;
+}
+
+
+/* Click */
+
+.crm-small-button:active {
+  transform: translateY(0);
+}
+
+
+/* ------------------------------------------------------
+   DELETE BUTTON
+   Still border-only, slightly warmer/red on hover
+   ------------------------------------------------------ */
+
+.crm-small-button.crm-danger-button {
+  border-color:
+    rgba(190, 100, 100, 0.30);
+
+  color:
+    rgba(210, 145, 145, 0.75);
+
+  background: transparent !important;
+}
+
+
+.crm-small-button.crm-danger-button:hover {
+  border-color:
+    rgba(220, 120, 120, 0.65);
+
+  background:
+    rgba(150, 50, 50, 0.07) !important;
+
+  color:
+    #e4aaaa;
+
+  box-shadow:
+    0 6px 18px rgba(100, 20, 20, 0.14);
+}
+
+
+.crm-small-button.crm-danger-button::after {
+  background:
+    #c97d7d;
+}
+
+
+/* ------------------------------------------------------
+   DISABLED
+   ------------------------------------------------------ */
+
+.crm-toolbar-button:disabled,
+.crm-inline-button:disabled,
+.crm-modal-submit:disabled,
+.crm-small-button:disabled {
+  opacity: 0.45;
+
+  cursor: not-allowed;
+
+  transform: none;
+
+  box-shadow: none;
+}
+
+
+/* ------------------------------------------------------
+   MOBILE
+   ------------------------------------------------------ */
+
+@media (max-width: 700px) {
+
+  .crm-toolbar-button,
+  .crm-inline-button,
+  .crm-modal-submit {
+    width: 100%;
+  }
+
+  .crm-card-actions {
+    gap: 7px;
+  }
+
+  .crm-small-button {
+    flex: 1;
+  }
+
+}
