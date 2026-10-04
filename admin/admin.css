@@ -1526,3 +1526,169 @@ body.modal-open {
   }
 
 }
+
+/* ======================================================
+   PHASE 3 — BOOKING STATUS GROUPS
+   ====================================================== */
+
+.booking-status-group {
+  margin-bottom: 32px;
+}
+
+.booking-status-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+
+  color: #f4f1eb;
+}
+
+.booking-status-group-header small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+
+  font-size: 10px;
+  letter-spacing: 0;
+
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.booking-group-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+
+/* ------------------------------------------------------
+   STATUS GROUP ACCENTS
+   ------------------------------------------------------ */
+
+.booking-group-new
+.booking-status-group-header {
+  color: #f4f1eb;
+}
+
+.booking-group-confirmed
+.booking-status-group-header {
+  color: #d8e8dc;
+}
+
+.booking-group-proposed
+.booking-status-group-header {
+  color: #e8dfc8;
+}
+
+.booking-group-declined
+.booking-status-group-header {
+  color: #e4d1d1;
+}
+
+.booking-group-completed
+.booking-status-group-header {
+  color: #d6ddd8;
+}
+
+
+/* ------------------------------------------------------
+   BOOKING ROWS
+   ------------------------------------------------------ */
+
+.booking-status-group .booking-row {
+  width: 100%;
+  min-height: 64px;
+
+  display: grid;
+  grid-template-columns:
+    minmax(140px, 1fr)
+    minmax(180px, 1.5fr)
+    minmax(110px, 0.8fr)
+    minmax(130px, 0.9fr)
+    130px;
+
+  align-items: center;
+  gap: 18px;
+
+  padding: 14px 18px;
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+
+  background: #111;
+
+  color: #f4f1eb;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.booking-status-group .booking-row:hover {
+  background: #151515;
+
+  border-color:
+    rgba(255, 255, 255, 0.15);
+
+  transform: translateY(-1px);
+}
+
+.booking-status-group .booking-row span {
+  min-width: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ------------------------------------------------------
+   MOBILE
+   ------------------------------------------------------ */
+
+@media (max-width: 700px) {
+
+  .booking-status-group {
+    margin-bottom: 26px;
+  }
+
+  .booking-status-group .booking-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    gap: 7px;
+
+    min-height: auto;
+
+    padding: 16px;
+  }
+
+  .booking-status-group .booking-row span {
+    width: 100%;
+    white-space: normal;
+  }
+
+}
