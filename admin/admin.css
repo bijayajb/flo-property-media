@@ -2431,3 +2431,101 @@ body.modal-open {
     flex: 1;
   }
 }
+
+/* ======================================================
+   FLO CRM — FINAL PROJECT / ACTION OVERRIDES
+====================================================== */
+
+/* Remove the small PROJECTS / CLIENTS / QUOTES label
+   beside the action button. The page title already does this job. */
+.crm-section-toolbar .crm-toolbar-title {
+  display: none !important;
+}
+
+.crm-section-toolbar {
+  justify-content: flex-end !important;
+  margin-bottom: 28px;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* More architectural FLO button — not the bright gold block. */
+.crm-toolbar-button,
+.crm-inline-button {
+  min-width: 164px;
+  height: 42px;
+  padding: 0 20px;
+
+  border: 1px solid rgba(184, 160, 116, .55);
+  border-radius: 3px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(55, 48, 37, .96),
+    rgba(31, 28, 23, .96)
+  ) !important;
+
+  color: #d9c8a4 !important;
+
+  letter-spacing: .17em;
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+.crm-toolbar-button::before,
+.crm-inline-button::before {
+  color: #cdb789 !important;
+}
+
+.crm-toolbar-button::after {
+  background: radial-gradient(
+    ellipse,
+    rgba(205,183,137,.24),
+    transparent 70%
+  );
+  opacity: .42;
+}
+
+.crm-toolbar-button:hover,
+.crm-inline-button:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(
+    135deg,
+    rgba(83, 71, 52, .98),
+    rgba(42, 37, 30, .98)
+  ) !important;
+  border-color: rgba(224, 207, 170, .85);
+  color: #f0e5d0 !important;
+  box-shadow:
+    0 12px 30px rgba(0,0,0,.34),
+    0 0 24px rgba(205,183,137,.12);
+}
+
+/* Project action row */
+.crm-card-actions {
+  align-items: center;
+}
+
+/* Archive is quiet; delete is deliberately restrained. */
+.crm-danger-button {
+  border-color: rgba(190, 105, 105, .25) !important;
+  color: rgba(225, 157, 157, .82) !important;
+}
+
+.crm-danger-button:hover {
+  border-color: rgba(220, 125, 125, .55) !important;
+  background: rgba(150, 65, 65, .08) !important;
+  color: #efb1b1 !important;
+}
+
+/* Project status colours */
+.crm-project-status-completed {
+  border-color: rgba(140, 190, 145, .45) !important;
+}
+
+.crm-project-status-archived,
+.crm-project-status-cancelled {
+  opacity: .52;
+}
