@@ -47,9 +47,7 @@ const app = initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
 
-const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true
-});
+const db = getFirestore(app);
 
 window.floAuth = auth;
 window.floDb = db;
