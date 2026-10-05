@@ -1875,6 +1875,152 @@ function closeBookingModal() {
 
 }
 // ======================================================
+// ACCEPT BOOKING
+// ======================================================
+
+async function acceptBooking() {
+
+  if (!activeBooking) {
+    return;
+  }
+
+
+  // Prevent duplicate confirmation emails
+
+  if (activeBooking.confirmationEmailSentAt) {
+
+    showBookingActionMessage(
+      "The customer confirmation email has already been sent.",
+      "info"
+    );
+
+    return;
+  }
+
+
+  const confirmed =
+    confirm(
+      "Accept this booking?\n\nThis will confirm the booking and send a confirmation email to the customer."
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  const button =
+    document.getElementById(
+      "acceptBookingButton"
+    );
+
+
+  if (button) {
+
+    button.disabled = true;
+
+    button.textContent =
+      "Accepting…";
+
+  }
+
+
+  try {
+
+    // --------------------------------------------------
+    // 1. Update booking status
+    // --------------------------------------------------
+
+    await updateDoc(
+      doc(
+        db,
+        "bookings",
+        activeBooking.id
+      ),
+      {
+        status:
+          "Confirmed",
+
+        confirmedAt:
+          serverTimestamp(),
+
+        confirmationEmailSentAt:
+          serverTimestamp()
+      }
+    );
+
+
+    // --------------------------------------------------
+    // 2. Send customer confirmation email
+    // --------------------------------------------------
+
+    await sendCustomerBookingEmail(
+      activeBooking,
+      {
+        status:
+          "Confirmed"
+      }
+    );
+
+
+    // --------------------------------------------------
+    // 3. Update local booking
+    // --------------------------------------------------
+
+    activeBooking.status =
+      "Confirmed";
+
+    activeBooking.confirmedAt =
+      new Date();
+
+    activeBooking.confirmationEmailSentAt =
+      new Date();
+
+
+    // --------------------------------------------------
+    // 4. Refresh dashboard
+    // --------------------------------------------------
+
+    await loadDashboard();
+
+
+    closeBookingModal();
+
+
+    showBookingActionMessage(
+      "Booking accepted successfully. Customer confirmation email sent.",
+      "success"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Accept booking error:",
+      error
+    );
+
+
+    showBookingActionMessage(
+      error.message ||
+      "Unable to accept this booking.",
+      "error"
+    );
+
+
+    if (button) {
+
+      button.disabled = false;
+
+      button.textContent =
+        "Accept booking";
+
+    }
+
+  }
+
+}
+// ======================================================
 // COMPLETE BOOKING
 // ======================================================
 
