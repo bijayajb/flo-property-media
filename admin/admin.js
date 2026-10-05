@@ -5816,11 +5816,9 @@ function renderEnhancedQuotes(
       "quotesGrid"
     );
 
-
   if (!container) {
     return;
   }
-
 
   if (snapshot.empty) {
 
@@ -5853,7 +5851,6 @@ function renderEnhancedQuotes(
 
     `;
 
-
     document
       .getElementById(
         "emptyCreateQuoteButton"
@@ -5862,7 +5859,6 @@ function renderEnhancedQuotes(
         "click",
         openCreateQuoteModal
       );
-
 
     return;
   }
@@ -5884,102 +5880,168 @@ function renderEnhancedQuotes(
   container.innerHTML =
     quotes
       .map(
-        quote => `
+        quote => {
 
-          <article
-            class="quote-card crm-record-card"
-          >
+          const status =
+            quote.status ||
+            "Draft";
 
-            <div class="crm-record-top">
 
-              <span class="panel-eyebrow">
-                QUOTE
-              </span>
+          return `
 
-              <span class="crm-status">
+            <article
+              class="quote-card crm-record-card"
+            >
+
+              <div class="crm-record-top">
+
+                <span class="panel-eyebrow">
+                  QUOTE
+                </span>
+
+                <span class="crm-status">
+                  ${escapeHTML(status)}
+                </span>
+
+              </div>
+
+
+              <h3>
                 ${escapeHTML(
-                  quote.status ||
-                  "Draft"
+                  quote.clientName ||
+                  quote.name ||
+                  "Unnamed client"
                 )}
-              </span>
-
-            </div>
+              </h3>
 
 
-            <h3>
-              ${escapeHTML(
-                quote.clientName ||
-                quote.name ||
-                "Unnamed client"
-              )}
-            </h3>
+              <p>
+                ${escapeHTML(
+                  quote.propertyAddress ||
+                  ""
+                )}
+              </p>
 
-
-            <p>
-              ${escapeHTML(
-                quote.propertyAddress ||
-                ""
-              )}
-            </p>
-
-
-            <div class="crm-quote-total">
-
-              $${Number(
-                quote.total ||
-                0
-              ).toFixed(2)}
-
-            </div>
-
-
-            <div class="crm-card-actions">
-
-              <button
-                type="button"
-                class="crm-small-button"
-                data-view-quote="${escapeHTML(
-                  quote.id
-                )}"
-              >
-                View
-              </button>
 
               ${
-                quote.status !==
-                "Archived"
+                quote.packageName
                   ? `
-                    <button
-                      type="button"
-                      class="crm-small-button"
-                      data-archive-quote="${escapeHTML(
-                        quote.id
-                      )}"
-                    >
-                      Archive
-                    </button>
+                    <p>
+                      Package:
+                      ${escapeHTML(
+                        quote.packageName
+                      )}
+                    </p>
                   `
                   : ""
               }
 
-              <button
-                type="button"
-                class="crm-small-button crm-danger-button"
-                data-delete-quote="${escapeHTML(
-                  quote.id
-                )}"
-              >
-                Delete
-              </button>
 
-            </div>
+              <div class="crm-quote-total">
 
-          </article>
+                $${Number(
+                  quote.total ||
+                  0
+                ).toFixed(2)}
 
-        `
+              </div>
+
+
+              <div class="crm-card-actions">
+
+                <!-- EDIT -->
+                <button
+                  type="button"
+                  class="crm-small-button"
+                  data-edit-quote="${escapeHTML(
+                    quote.id
+                  )}"
+                >
+                  Edit
+                </button>
+
+
+                <!-- VIEW -->
+                <button
+                  type="button"
+                  class="crm-small-button"
+                  data-view-quote="${escapeHTML(
+                    quote.id
+                  )}"
+                >
+                  View
+                </button>
+
+
+                <!-- ARCHIVE -->
+                ${
+                  status !== "Archived"
+                    ? `
+                      <button
+                        type="button"
+                        class="crm-small-button"
+                        data-archive-quote="${escapeHTML(
+                          quote.id
+                        )}"
+                      >
+                        Archive
+                      </button>
+                    `
+                    : ""
+                }
+
+
+                <!-- DELETE -->
+                <button
+                  type="button"
+                  class="crm-small-button crm-danger-button"
+                  data-delete-quote="${escapeHTML(
+                    quote.id
+                  )}"
+                >
+                  Delete
+                </button>
+
+              </div>
+
+            </article>
+
+          `;
+
+        }
       )
       .join("");
 
+
+  // -----------------------------------------
+  // EDIT
+  // -----------------------------------------
+
+  container
+    .querySelectorAll(
+      "[data-edit-quote]"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            openEditQuoteModal(
+              button.dataset.editQuote
+            );
+
+          }
+        );
+
+      }
+    );
+
+
+  // -----------------------------------------
+  // VIEW
+  // -----------------------------------------
 
   container
     .querySelectorAll(
@@ -6003,6 +6065,10 @@ function renderEnhancedQuotes(
     );
 
 
+  // -----------------------------------------
+  // ARCHIVE
+  // -----------------------------------------
+
   container
     .querySelectorAll(
       "[data-archive-quote]"
@@ -6012,15 +6078,22 @@ function renderEnhancedQuotes(
 
         button.addEventListener(
           "click",
-          () =>
+          () => {
+
             archiveQuote(
               button.dataset.archiveQuote
-            )
+            );
+
+          }
         );
 
       }
     );
 
+
+  // -----------------------------------------
+  // DELETE
+  // -----------------------------------------
 
   container
     .querySelectorAll(
@@ -6031,10 +6104,13 @@ function renderEnhancedQuotes(
 
         button.addEventListener(
           "click",
-          () =>
+          () => {
+
             deleteQuoteRecord(
               button.dataset.deleteQuote
-            )
+            );
+
+          }
         );
 
       }
