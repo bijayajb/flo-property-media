@@ -3163,20 +3163,10 @@ function renderProjects(
 // QUOTES
 // ======================================================
 
-function renderQuotes(
-  snapshot
-) {
+function renderQuotes(snapshot) {
 
   const container =
-    document.getElementById(
-      "quotesGrid"
-    );
-
-
-  if (!container) {
-    return;
-  }
-
+    document.getElementById("quotesGrid");
 
   if (snapshot.empty) {
 
@@ -3189,47 +3179,174 @@ function renderQuotes(
     return;
   }
 
+  const quotes =
+    snapshot.docs.map(quoteDoc => ({
+      id: quoteDoc.id,
+      ...quoteDoc.data()
+    }));
 
   container.innerHTML =
-    snapshot.docs
-      .map(
-        documentSnapshot => {
+    quotes
+      .map(quote => {
 
-          const quote =
-            documentSnapshot.data();
+        const status =
+          quote.status || "Draft";
 
+        return `
 
-          return `
+          <article class="quote-card crm-record-card">
 
-            <div class="quote-card">
+            <div class="crm-record-top">
 
               <span class="panel-eyebrow">
                 QUOTE
               </span>
 
-              <h3>
-                ${escapeHTML(
-                  quote.clientName ||
-                  quote.name ||
-                  "Unnamed client"
-                )}
-              </h3>
-
-              <p>
-                ${escapeHTML(
-                  quote.amount ||
-                  quote.total ||
-                  ""
-                )}
-              </p>
+              <span class="crm-status">
+                ${escapeHTML(status)}
+              </span>
 
             </div>
 
-          `;
+            <h3>
+              ${escapeHTML(
+                quote.clientName ||
+                quote.name ||
+                "Unnamed client"
+              )}
+            </h3>
 
-        }
-      )
+            <p>
+              ${escapeHTML(
+                quote.propertyAddress || ""
+              )}
+            </p>
+
+            ${
+              quote.packageName
+                ? `
+                  <p>
+                    Package:
+                    ${escapeHTML(quote.packageName)}
+                  </p>
+                `
+                : ""
+            }
+
+            <div class="crm-quote-total">
+              $${Number(
+                quote.total || 0
+              ).toFixed(2)}
+            </div>
+
+            <div class="crm-card-actions">
+
+              <button
+                type="button"
+                class="crm-small-button"
+                data-edit-quote="${escapeHTML(quote.id)}"
+              >
+                Edit
+              </button>
+
+              <button
+                type="button"
+                class="crm-small-button"
+                data-view-quote="${escapeHTML(quote.id)}"
+              >
+                View
+              </button>
+
+              ${
+                status !== "Archived"
+                  ? `
+                    <button
+                      type="button"
+                      class="crm-small-button"
+                      data-archive-quote="${escapeHTML(quote.id)}"
+                    >
+                      Archive
+                    </button>
+                  `
+                  : ""
+              }
+
+              <button
+                type="button"
+                class="crm-small-button crm-danger-button"
+                data-delete-quote="${escapeHTML(quote.id)}"
+              >
+                Delete
+              </button>
+
+            </div>
+
+          </article>
+
+        `;
+
+      })
       .join("");
+
+  container
+    .querySelectorAll("[data-edit-quote]")
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+          openEditQuoteModal(
+            button.dataset.editQuote
+          );
+        }
+      );
+
+    });
+
+  container
+    .querySelectorAll("[data-view-quote]")
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+          openQuoteViewModal(
+            button.dataset.viewQuote
+          );
+        }
+      );
+
+    });
+
+  container
+    .querySelectorAll("[data-archive-quote]")
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+          archiveQuote(
+            button.dataset.archiveQuote
+          );
+        }
+      );
+
+    });
+
+  container
+    .querySelectorAll("[data-delete-quote]")
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        () => {
+          deleteQuoteRecord(
+            button.dataset.deleteQuote
+          );
+        }
+      );
+
+    });
 
 }
 
@@ -6146,12 +6263,12 @@ async function deleteQuoteRecord(
 // ======================================================
 
 async function openCreateQuoteModal(
-  clientId = ""
+  clientId = "",
+  quoteId = ""
 ) {
 
   const clients =
     await getClientOptions();
-
 
   if (!clients.length) {
 
@@ -6163,19 +6280,69 @@ async function openCreateQuoteModal(
     return;
   }
 
+  let existingQuote = null;
+
+  if (quoteId) {
+
+    const snapshot =
+      await getDocs(
+        collection(db, "quotes")
+      );
+
+    const found =
+      snapshot.docs.find(
+        item =>
+          item.id === quoteId
+      );
+
+    if (!found) {
+
+      showCRMToast(
+        "Quote could not be found.",
+        true
+      );
+
+      return;
+    }
+
+    existingQuote = {
+      id: found.id,
+      ...found.data()
+    };
+
+    clientId =
+      existingQuote.clientId || "";
+
+  }
 
   const modal =
     createCRMModalShell(
-      "Custom Quote",
+      existingQuote
+        ? "Edit Quote"
+        : "Create Quote",
       "QUOTE"
     );
-
 
   const body =
     modal.querySelector(
       ".crm-modal-body"
     );
 
+  const selectedPackage =
+    existingQuote?.packageName || "";
+
+  const existingServices =
+    Array.isArray(
+      existingQuote?.services
+    )
+      ? existingQuote.services
+      : [];
+
+  const packageService =
+    existingServices.find(
+      item =>
+        item.package === true
+    );
 
   body.innerHTML = `
 
@@ -6197,12 +6364,9 @@ async function openCreateQuoteModal(
               client => `
 
                 <option
-                  value="${escapeHTML(
-                    client.id
-                  )}"
+                  value="${escapeHTML(client.id)}"
                   ${
-                    client.id ===
-                    clientId
+                    client.id === clientId
                       ? "selected"
                       : ""
                   }
@@ -6221,7 +6385,6 @@ async function openCreateQuoteModal(
 
       </label>
 
-
       <label class="crm-field">
 
         <span>
@@ -6232,6 +6395,9 @@ async function openCreateQuoteModal(
           id="customQuoteAddress"
           type="text"
           placeholder="Property address"
+          value="${escapeHTML(
+            existingQuote?.propertyAddress || ""
+          )}"
         >
 
       </label>
@@ -6246,11 +6412,91 @@ async function openCreateQuoteModal(
         <div>
 
           <span class="panel-eyebrow">
-            SERVICES
+            PACKAGE
           </span>
 
           <h3>
-            Build your quote
+            Choose a package
+          </h3>
+
+        </div>
+
+      </div>
+
+
+      <label class="crm-field">
+
+        <span>
+          Package
+        </span>
+
+        <select id="customQuotePackage">
+
+          <option value="">
+            Custom quote — no package
+          </option>
+
+          ${FLO_PACKAGES
+            .map(
+              item => `
+
+                <option
+                  value="${escapeHTML(item.name)}"
+                  ${
+                    item.name === selectedPackage
+                      ? "selected"
+                      : ""
+                  }
+                >
+                  ${escapeHTML(item.name)}
+                  — $${Number(
+                    item.price
+                  ).toFixed(2)}
+                </option>
+
+              `
+            )
+            .join("")}
+
+        </select>
+
+      </label>
+
+
+      <div
+        id="packagePricePreview"
+        class="crm-quote-summary"
+      >
+
+        <div>
+
+          <span>
+            Package
+          </span>
+
+          <strong id="selectedPackagePrice">
+            $0.00
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="crm-quote-builder">
+
+      <div class="crm-quote-builder-header">
+
+        <div>
+
+          <span class="panel-eyebrow">
+            ADDITIONAL SERVICES
+          </span>
+
+          <h3>
+            Customise the quote
           </h3>
 
         </div>
@@ -6269,13 +6515,15 @@ async function openCreateQuoteModal(
       <div
         id="quoteServiceRows"
         class="quote-service-rows"
-      ></div>
+      >
+      </div>
 
 
       <div
         id="quoteOtherRows"
         class="quote-other-rows"
-      ></div>
+      >
+      </div>
 
     </div>
 
@@ -6293,7 +6541,9 @@ async function openCreateQuoteModal(
           type="number"
           min="0"
           step="0.01"
-          value="0"
+          value="${Number(
+            existingQuote?.discount || 0
+          )}"
         >
 
       </label>
@@ -6305,17 +6555,30 @@ async function openCreateQuoteModal(
           GST
         </span>
 
-        <select
-          id="customQuoteGST"
-        >
+        <select id="customQuoteGST">
 
-          <option value="0">
+          <option
+            value="0"
+            ${
+              Number(
+                existingQuote?.gstRate || 10
+              ) === 0
+                ? "selected"
+                : ""
+            }
+          >
             No GST
           </option>
 
           <option
             value="10"
-            selected
+            ${
+              Number(
+                existingQuote?.gstRate || 10
+              ) === 10
+                ? "selected"
+                : ""
+            }
           >
             10% GST
           </option>
@@ -6366,7 +6629,9 @@ async function openCreateQuoteModal(
         id="customQuoteNotes"
         rows="4"
         placeholder="Optional notes for this quote"
-      ></textarea>
+      >${escapeHTML(
+        existingQuote?.notes || ""
+      )}</textarea>
 
     </label>
 
@@ -6392,7 +6657,9 @@ async function openCreateQuoteModal(
     "crm-modal-submit";
 
   saveButton.textContent =
-    "Save Quote";
+    existingQuote
+      ? "Save Changes"
+      : "Save Quote";
 
 
   footer.appendChild(
@@ -6412,18 +6679,27 @@ async function openCreateQuoteModal(
     );
 
 
+  /*
+   * ADDITIONAL SERVICES
+   */
+
   FLO_SERVICES.forEach(
     service => {
+
+      const existing =
+        existingServices.find(
+          item =>
+            item.name === service &&
+            item.package !== true
+        );
 
       const row =
         document.createElement(
           "div"
         );
 
-
       row.className =
         "quote-service-row";
-
 
       row.innerHTML = `
 
@@ -6431,9 +6707,12 @@ async function openCreateQuoteModal(
 
           <input
             type="checkbox"
-            value="${escapeHTML(
-              service
-            )}"
+            value="${escapeHTML(service)}"
+            ${
+              existing
+                ? "checked"
+                : ""
+            }
           >
 
           <span>
@@ -6442,14 +6721,23 @@ async function openCreateQuoteModal(
 
         </label>
 
-
         <input
           class="quote-service-price"
           type="number"
           min="0"
           step="0.01"
-          value="0"
-          disabled
+          value="${
+            existing
+              ? Number(
+                  existing.price || 0
+                )
+              : 0
+          }"
+          ${
+            existing
+              ? ""
+              : "disabled"
+          }
           aria-label="${escapeHTML(
             service
           )} price"
@@ -6477,30 +6765,6 @@ async function openCreateQuoteModal(
           price.disabled =
             !checkbox.checked;
 
-
-          if (
-            checkbox.checked &&
-            Number(price.value) === 0
-          ) {
-
-            const packagePreset =
-              FLO_PACKAGES.find(
-                item =>
-                  item.name ===
-                  service
-              );
-
-
-            if (packagePreset) {
-
-              price.value =
-                packagePreset.price;
-
-            }
-
-          }
-
-
           calculateCustomQuote();
 
         }
@@ -6521,18 +6785,67 @@ async function openCreateQuoteModal(
   );
 
 
+  /*
+   * LOAD CUSTOM "OTHER" SERVICES
+   */
+
+  existingServices
+    .filter(
+      item =>
+        item.custom === true
+    )
+    .forEach(
+      item => {
+
+        addOtherQuoteRow(
+          otherRows,
+          item.name,
+          item.price
+        );
+
+      }
+    );
+
+
+  /*
+   * PACKAGE
+   */
+
+  const packageSelect =
+    document.getElementById(
+      "customQuotePackage"
+    );
+
+
+  packageSelect.addEventListener(
+    "change",
+    calculateCustomQuote
+  );
+
+
+  /*
+   * OTHER SERVICE BUTTON
+   */
+
   document
     .getElementById(
       "addQuoteOther"
     )
     .addEventListener(
       "click",
-      () =>
+      () => {
+
         addOtherQuoteRow(
           otherRows
-        )
+        );
+
+      }
     );
 
+
+  /*
+   * DISCOUNT / GST
+   */
 
   document
     .getElementById(
@@ -6554,6 +6867,10 @@ async function openCreateQuoteModal(
     );
 
 
+  /*
+   * SAVE
+   */
+
   saveButton.addEventListener(
     "click",
     async () => {
@@ -6571,6 +6888,53 @@ async function openCreateQuoteModal(
           [];
 
 
+        /*
+         * PACKAGE
+         */
+
+        const packageName =
+          document
+            .getElementById(
+              "customQuotePackage"
+            )
+            .value;
+
+
+        if (packageName) {
+
+          const packageItem =
+            FLO_PACKAGES.find(
+              item =>
+                item.name ===
+                packageName
+            );
+
+          if (packageItem) {
+
+            selectedServices.push({
+
+              name:
+                packageItem.name,
+
+              price:
+                Number(
+                  packageItem.price
+                ),
+
+              package:
+                true
+
+            });
+
+          }
+
+        }
+
+
+        /*
+         * ADDITIONAL STANDARD SERVICES
+         */
+
         serviceRows
           .querySelectorAll(
             ".quote-service-row"
@@ -6583,12 +6947,10 @@ async function openCreateQuoteModal(
                   "input[type='checkbox']"
                 );
 
-
               const price =
                 row.querySelector(
                   ".quote-service-price"
                 );
-
 
               if (
                 checkbox.checked
@@ -6601,8 +6963,7 @@ async function openCreateQuoteModal(
 
                   price:
                     Number(
-                      price.value ||
-                      0
+                      price.value || 0
                     )
 
                 });
@@ -6611,6 +6972,12 @@ async function openCreateQuoteModal(
 
             }
           );
+
+
+        /*
+         * CUSTOM SERVICES
+         */
+
         otherRows
           .querySelectorAll(
             ".quote-other-row"
@@ -6623,12 +6990,10 @@ async function openCreateQuoteModal(
                   ".quote-other-name"
                 );
 
-
               const price =
                 row.querySelector(
                   ".quote-other-price"
                 );
-
 
               if (
                 name.value.trim()
@@ -6641,8 +7006,7 @@ async function openCreateQuoteModal(
 
                   price:
                     Number(
-                      price.value ||
-                      0
+                      price.value || 0
                     ),
 
                   custom:
@@ -6661,16 +7025,18 @@ async function openCreateQuoteModal(
         ) {
 
           throw new Error(
-            "Select at least one service."
+            "Choose a package or add at least one service."
           );
 
         }
 
 
         const selectedClient =
-          document.getElementById(
-            "customQuoteClient"
-          ).value;
+          document
+            .getElementById(
+              "customQuoteClient"
+            )
+            .value;
 
 
         const client =
@@ -6689,8 +7055,7 @@ async function openCreateQuoteModal(
             ) =>
               total +
               Number(
-                item.price ||
-                0
+                item.price || 0
               ),
             0
           );
@@ -6698,10 +7063,11 @@ async function openCreateQuoteModal(
 
         const discount =
           Number(
-            document.getElementById(
-              "customQuoteDiscount"
-            ).value ||
-            0
+            document
+              .getElementById(
+                "customQuoteDiscount"
+              )
+              .value || 0
           );
 
 
@@ -6715,16 +7081,20 @@ async function openCreateQuoteModal(
 
         const gstRate =
           Number(
-            document.getElementById(
-              "customQuoteGST"
-            ).value ||
-            0
+            document
+              .getElementById(
+                "customQuoteGST"
+              )
+              .value || 0
           );
 
 
         const gst =
           taxable *
-          (gstRate / 100);
+          (
+            gstRate /
+            100
+          );
 
 
         const total =
@@ -6732,80 +7102,105 @@ async function openCreateQuoteModal(
           gst;
 
 
-        await addDoc(
-          collection(
-            db,
-            "quotes"
-          ),
-          {
+        const quoteData = {
 
-            clientId:
-              selectedClient,
+          clientId:
+            selectedClient,
 
-            clientName:
-              client?.name ||
-              "",
+          clientName:
+            client?.name || "",
 
-            clientEmail:
-              client?.email ||
-              "",
+          clientEmail:
+            client?.email || "",
 
-            propertyAddress:
-              document.getElementById(
+          propertyAddress:
+            document
+              .getElementById(
                 "customQuoteAddress"
-              ).value.trim(),
+              )
+              .value.trim(),
 
-            services:
-              selectedServices,
+          packageName:
+            packageName || "",
 
-            subtotal:
-              Number(
-                subtotal.toFixed(2)
-              ),
+          services:
+            selectedServices,
 
-            discount:
-              Number(
-                discount.toFixed(2)
-              ),
+          subtotal:
+            Number(
+              subtotal.toFixed(2)
+            ),
 
-            gstRate,
+          discount:
+            Number(
+              discount.toFixed(2)
+            ),
 
-            gst:
-              Number(
-                gst.toFixed(2)
-              ),
+          gstRate,
 
-            total:
-              Number(
-                total.toFixed(2)
-              ),
+          gst:
+            Number(
+              gst.toFixed(2)
+            ),
 
-            status:
-              "Draft",
+          total:
+            Number(
+              total.toFixed(2)
+            ),
 
-            notes:
-              document.getElementById(
+          status:
+            existingQuote?.status ||
+            "Draft",
+
+          notes:
+            document
+              .getElementById(
                 "customQuoteNotes"
-              ).value.trim(),
+              )
+              .value.trim(),
 
-            createdAt:
-              serverTimestamp(),
+          updatedAt:
+            serverTimestamp()
 
-            updatedAt:
-              serverTimestamp()
+        };
 
-          }
-        );
+
+        if (existingQuote) {
+
+          await updateDoc(
+            doc(
+              db,
+              "quotes",
+              existingQuote.id
+            ),
+            quoteData
+          );
+
+        } else {
+
+          await addDoc(
+            collection(
+              db,
+              "quotes"
+            ),
+            {
+              ...quoteData,
+              createdAt:
+                serverTimestamp()
+            }
+          );
+
+        }
 
 
         closeCRMModal();
 
-
         await refreshCRMData();
 
-
         showCRMToast(
-          "Custom quote saved."
+          existingQuote
+            ? "Quote updated successfully."
+            : "Quote saved successfully."
         );
 
 
@@ -6816,13 +7211,13 @@ async function openCreateQuoteModal(
           error
         );
 
-
         saveButton.disabled =
           false;
 
         saveButton.textContent =
-          "Save Quote";
-
+          existingQuote
+            ? "Save Changes"
+            : "Save Quote";
 
         showCRMToast(
           error.message ||
@@ -6841,12 +7236,34 @@ async function openCreateQuoteModal(
 }
 
 
+/*
+ * EDIT EXISTING QUOTE
+ */
+
+async function openEditQuoteModal(
+  quoteId
+) {
+
+  if (!quoteId) {
+    return;
+  }
+
+  await openCreateQuoteModal(
+    "",
+    quoteId
+  );
+
+}
+
+
 // ======================================================
 // OTHER QUOTE ROW
 // ======================================================
 
 function addOtherQuoteRow(
-  container
+  container,
+  existingName = "",
+  existingPrice = 0
 ) {
 
   const row =
@@ -6854,10 +7271,8 @@ function addOtherQuoteRow(
       "div"
     );
 
-
   row.className =
     "quote-other-row";
-
 
   row.innerHTML = `
 
@@ -6865,6 +7280,9 @@ function addOtherQuoteRow(
       class="quote-other-name"
       type="text"
       placeholder="Other service"
+      value="${escapeHTML(
+        existingName
+      )}"
     >
 
     <input
@@ -6872,7 +7290,9 @@ function addOtherQuoteRow(
       type="number"
       min="0"
       step="0.01"
-      value="0"
+      value="${Number(
+        existingPrice || 0
+      )}"
       placeholder="Price"
     >
 
@@ -6912,6 +7332,16 @@ function addOtherQuoteRow(
     );
 
 
+  row
+    .querySelector(
+      ".quote-other-name"
+    )
+    .addEventListener(
+      "input",
+      calculateCustomQuote
+    );
+
+
   container.appendChild(
     row
   );
@@ -6925,11 +7355,15 @@ function addOtherQuoteRow(
 
 function calculateCustomQuote() {
 
+  const packageSelect =
+    document.getElementById(
+      "customQuotePackage"
+    );
+
   const serviceRows =
     document.querySelectorAll(
       "#quoteServiceRows .quote-service-row"
     );
-
 
   const otherRows =
     document.querySelectorAll(
@@ -6940,6 +7374,39 @@ function calculateCustomQuote() {
   let subtotal = 0;
 
 
+  /*
+   * PACKAGE
+   */
+
+  const packageName =
+    packageSelect?.value || "";
+
+
+  if (packageName) {
+
+    const packageItem =
+      FLO_PACKAGES.find(
+        item =>
+          item.name ===
+          packageName
+      );
+
+    if (packageItem) {
+
+      subtotal +=
+        Number(
+          packageItem.price || 0
+        );
+
+    }
+
+  }
+
+
+  /*
+   * ADDITIONAL SERVICES
+   */
+
   serviceRows.forEach(
     row => {
 
@@ -6948,12 +7415,10 @@ function calculateCustomQuote() {
           "input[type='checkbox']"
         );
 
-
       const price =
         row.querySelector(
           ".quote-service-price"
         );
-
 
       if (
         checkbox &&
@@ -6962,8 +7427,7 @@ function calculateCustomQuote() {
 
         subtotal +=
           Number(
-            price.value ||
-            0
+            price?.value || 0
           );
 
       }
@@ -6971,6 +7435,10 @@ function calculateCustomQuote() {
     }
   );
 
+
+  /*
+   * CUSTOM SERVICES
+   */
 
   otherRows.forEach(
     row => {
@@ -6980,11 +7448,9 @@ function calculateCustomQuote() {
           ".quote-other-price"
         );
 
-
       subtotal +=
         Number(
-          price?.value ||
-          0
+          price?.value || 0
         );
 
     }
@@ -6995,8 +7461,7 @@ function calculateCustomQuote() {
     Number(
       document.getElementById(
         "customQuoteDiscount"
-      )?.value ||
-      0
+      )?.value || 0
     );
 
 
@@ -7012,8 +7477,7 @@ function calculateCustomQuote() {
     Number(
       document.getElementById(
         "customQuoteGST"
-      )?.value ||
-      0
+      )?.value || 0
     );
 
 
@@ -7026,6 +7490,12 @@ function calculateCustomQuote() {
   const total =
     taxable +
     gst;
+
+
+  const packagePriceElement =
+    document.getElementById(
+      "selectedPackagePrice"
+    );
 
 
   const subtotalElement =
@@ -7044,6 +7514,25 @@ function calculateCustomQuote() {
     document.getElementById(
       "quoteTotal"
     );
+
+
+  if (packagePriceElement) {
+
+    const packageItem =
+      FLO_PACKAGES.find(
+        item =>
+          item.name ===
+          packageName
+      );
+
+    packagePriceElement.textContent =
+      packageItem
+        ? `$${Number(
+            packageItem.price
+          ).toFixed(2)}`
+        : "$0.00";
+
+  }
 
 
   if (subtotalElement) {
