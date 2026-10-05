@@ -3164,192 +3164,109 @@ function renderProjects(
 // ======================================================
 
 function renderQuotes(snapshot) {
-
-  const container =
-    document.getElementById("quotesGrid");
+  const container = document.getElementById("quotesGrid");
 
   if (snapshot.empty) {
-
-    container.innerHTML = `
-      <div class="large-empty">
-        No quotes yet.
-      </div>
-    `;
-
+    container.innerHTML = `<div class="large-empty">No quotes yet.</div>`;
     return;
   }
 
-  const quotes =
-    snapshot.docs.map(quoteDoc => ({
-      id: quoteDoc.id,
-      ...quoteDoc.data()
-    }));
+  const quotes = snapshot.docs.map(quoteDoc => ({
+    id: quoteDoc.id,
+    ...quoteDoc.data()
+  }));
 
-  container.innerHTML =
-    quotes
-      .map(quote => {
+  container.innerHTML = quotes.map(quote => {
+    const status = quote.status || "Draft";
 
-        const status =
-          quote.status || "Draft";
+    return `
+      <article class="quote-card crm-record-card">
+        <div class="crm-record-top">
+          <span class="panel-eyebrow">QUOTE</span>
+          <span class="crm-status">${escapeHTML(status)}</span>
+        </div>
 
-        return `
+        <h3>${escapeHTML(
+          quote.clientName || quote.name || "Unnamed client"
+        )}</h3>
 
-          <article class="quote-card crm-record-card">
+        <p>${escapeHTML(quote.propertyAddress || "")}</p>
 
-            <div class="crm-record-top">
-
-              <span class="panel-eyebrow">
-                QUOTE
-              </span>
-
-              <span class="crm-status">
-                ${escapeHTML(status)}
-              </span>
-
-            </div>
-
-            <h3>
-              ${escapeHTML(
-                quote.clientName ||
-                quote.name ||
-                "Unnamed client"
-              )}
-            </h3>
-
-            <p>
-              ${escapeHTML(
-                quote.propertyAddress || ""
-              )}
-            </p>
-
-            ${
-              quote.packageName
-                ? `
-                  <p>
-                    Package:
-                    ${escapeHTML(quote.packageName)}
-                  </p>
-                `
-                : ""
-            }
-
-            <div class="crm-quote-total">
-              $${Number(
-                quote.total || 0
-              ).toFixed(2)}
-            </div>
-
-            <div class="crm-card-actions">
-
-              <button
-                type="button"
-                class="crm-small-button"
-                data-edit-quote="${escapeHTML(quote.id)}"
-              >
-                Edit
-              </button>
-
-              <button
-                type="button"
-                class="crm-small-button"
-                data-view-quote="${escapeHTML(quote.id)}"
-              >
-                View
-              </button>
-
-              ${
-                status !== "Archived"
-                  ? `
-                    <button
-                      type="button"
-                      class="crm-small-button"
-                      data-archive-quote="${escapeHTML(quote.id)}"
-                    >
-                      Archive
-                    </button>
-                  `
-                  : ""
-              }
-
-              <button
-                type="button"
-                class="crm-small-button crm-danger-button"
-                data-delete-quote="${escapeHTML(quote.id)}"
-              >
-                Delete
-              </button>
-
-            </div>
-
-          </article>
-
-        `;
-
-      })
-      .join("");
-
-  container
-    .querySelectorAll("[data-edit-quote]")
-    .forEach(button => {
-
-      button.addEventListener(
-        "click",
-        () => {
-          openEditQuoteModal(
-            button.dataset.editQuote
-          );
+        ${
+          quote.packageName
+            ? `<p>Package: ${escapeHTML(quote.packageName)}</p>`
+            : ""
         }
-      );
 
+        <div class="crm-quote-total">
+          $${Number(quote.total || 0).toFixed(2)}
+        </div>
+
+        <div class="crm-card-actions">
+
+          <button
+            type="button"
+            class="crm-small-button"
+            data-edit-quote="${escapeHTML(quote.id)}">
+            Edit
+          </button>
+
+          <button
+            type="button"
+            class="crm-small-button"
+            data-view-quote="${escapeHTML(quote.id)}">
+            View
+          </button>
+
+          ${
+            status !== "Archived"
+              ? `
+                <button
+                  type="button"
+                  class="crm-small-button"
+                  data-archive-quote="${escapeHTML(quote.id)}">
+                  Archive
+                </button>
+              `
+              : ""
+          }
+
+          <button
+            type="button"
+            class="crm-small-button crm-danger-button"
+            data-delete-quote="${escapeHTML(quote.id)}">
+            Delete
+          </button>
+
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  container.querySelectorAll("[data-edit-quote]").forEach(button => {
+    button.addEventListener("click", () => {
+      openEditQuoteModal(button.dataset.editQuote);
     });
+  });
 
-  container
-    .querySelectorAll("[data-view-quote]")
-    .forEach(button => {
-
-      button.addEventListener(
-        "click",
-        () => {
-          openQuoteViewModal(
-            button.dataset.viewQuote
-          );
-        }
-      );
-
+  container.querySelectorAll("[data-view-quote]").forEach(button => {
+    button.addEventListener("click", () => {
+      openQuoteViewModal(button.dataset.viewQuote);
     });
+  });
 
-  container
-    .querySelectorAll("[data-archive-quote]")
-    .forEach(button => {
-
-      button.addEventListener(
-        "click",
-        () => {
-          archiveQuote(
-            button.dataset.archiveQuote
-          );
-        }
-      );
-
+  container.querySelectorAll("[data-archive-quote]").forEach(button => {
+    button.addEventListener("click", () => {
+      archiveQuote(button.dataset.archiveQuote);
     });
+  });
 
-  container
-    .querySelectorAll("[data-delete-quote]")
-    .forEach(button => {
-
-      button.addEventListener(
-        "click",
-        () => {
-          deleteQuoteRecord(
-            button.dataset.deleteQuote
-          );
-        }
-      );
-
+  container.querySelectorAll("[data-delete-quote]").forEach(button => {
+    button.addEventListener("click", () => {
+      deleteQuoteRecord(button.dataset.deleteQuote);
     });
-
+  });
 }
-
 
 // ======================================================
 // HTML SAFETY
@@ -7240,19 +7157,10 @@ async function openCreateQuoteModal(
  * EDIT EXISTING QUOTE
  */
 
-async function openEditQuoteModal(
-  quoteId
-) {
+async function openEditQuoteModal(quoteId) {
+  if (!quoteId) return;
 
-  if (!quoteId) {
-    return;
-  }
-
-  await openCreateQuoteModal(
-    "",
-    quoteId
-  );
-
+  await openCreateQuoteModal("", quoteId);
 }
 
 
