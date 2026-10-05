@@ -1884,53 +1884,36 @@ async function acceptBooking() {
     return;
   }
 
-
-  // Prevent duplicate confirmation emails
-
   if (activeBooking.confirmationEmailSentAt) {
 
     showBookingActionMessage(
-      "The customer confirmation email has already been sent.",
+      "This booking has already been accepted and the customer has already been notified.",
       "info"
     );
 
     return;
   }
 
-
-  const confirmed =
-    confirm(
-      "Accept this booking?\n\nThis will confirm the booking and send a confirmation email to the customer."
-    );
-
+  const confirmed = confirm(
+    "Accept this booking?\n\nThis will confirm the booking and send a confirmation email to the customer."
+  );
 
   if (!confirmed) {
     return;
   }
 
-
-  const button =
-    document.getElementById(
-      "acceptBookingButton"
-    );
-
+  const button = document.getElementById(
+    "acceptBookingButton"
+  );
 
   if (button) {
-
     button.disabled = true;
-
-    button.textContent =
-      "Accepting…";
-
+    button.textContent = "Accepting...";
   }
-
 
   try {
 
-    // --------------------------------------------------
-    // 1. Update booking status
-    // --------------------------------------------------
-
+    // Update booking status
     await updateDoc(
       doc(
         db,
@@ -1938,60 +1921,42 @@ async function acceptBooking() {
         activeBooking.id
       ),
       {
-        status:
-          "Confirmed",
-
-        confirmedAt:
-          serverTimestamp(),
-
-        confirmationEmailSentAt:
-          serverTimestamp()
+        status: "Confirmed",
+        confirmedAt: serverTimestamp()
       }
     );
 
-
-    // --------------------------------------------------
-    // 2. Send customer confirmation email
-    // --------------------------------------------------
-
+    // Send confirmation email
     await sendCustomerBookingEmail(
       activeBooking,
       {
-        status:
-          "Confirmed"
+        status: "Confirmed"
       }
     );
 
+    // Mark confirmation email as sent
+    await updateDoc(
+      doc(
+        db,
+        "bookings",
+        activeBooking.id
+      ),
+      {
+        confirmationEmailSentAt: serverTimestamp()
+      }
+    );
 
-    // --------------------------------------------------
-    // 3. Update local booking
-    // --------------------------------------------------
-
-    activeBooking.status =
-      "Confirmed";
-
-    activeBooking.confirmedAt =
-      new Date();
-
-    activeBooking.confirmationEmailSentAt =
-      new Date();
-
-
-    // --------------------------------------------------
-    // 4. Refresh dashboard
-    // --------------------------------------------------
+    activeBooking.status = "Confirmed";
+    activeBooking.confirmationEmailSentAt = true;
 
     await loadDashboard();
 
-
     closeBookingModal();
-
 
     showBookingActionMessage(
       "Booking accepted successfully. Customer confirmation email sent.",
       "success"
     );
-
 
   } catch (error) {
 
@@ -2000,21 +1965,15 @@ async function acceptBooking() {
       error
     );
 
-
     showBookingActionMessage(
-      error.message ||
-      "Unable to accept this booking.",
+      "The booking could not be accepted. " +
+      (error.message || ""),
       "error"
     );
 
-
     if (button) {
-
       button.disabled = false;
-
-      button.textContent =
-        "Accept booking";
-
+      button.textContent = "Accept booking";
     }
 
   }
