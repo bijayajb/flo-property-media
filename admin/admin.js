@@ -29,9 +29,9 @@ import {
 
 const firebaseConfig = {
   apiKey: "AIzaSyBQCqtKKHXUdBrSvKvQFN1hHct119Yp-Yo",
-  authDomain: "flo-property-media-fbb4.firebaseapp.com",
-  projectId: "flo-property-media-fbb4",
-  storageBucket: "flo-property-media-fbb4.firebasestorage.app",
+  authDomain: "flo-property-media-fbbf4.firebaseapp.com",
+  projectId: "flo-property-media-fbbf4",
+  storageBucket: "flo-property-media-fbbf4.firebasestorage.app",
   messagingSenderId: "779116796984",
   appId: "1:779116796984:web:23a54ccbbee15491611acd",
   measurementId: "G-52R9RP4JWM"
