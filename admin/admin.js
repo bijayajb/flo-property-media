@@ -5972,6 +5972,16 @@ function renderEnhancedQuotes(
                   View
                 </button>
 
+                <!-- SEND QUOTE -->
+                <button
+                  type="button"
+                  class="crm-small-button crm-primary-button"
+                  data-send-quote="${escapeHTML(
+                    quote.id
+                  )}"
+                >
+                  Send Quote
+                </button>
 
                 <!-- ARCHIVE -->
                 ${
@@ -6037,7 +6047,26 @@ function renderEnhancedQuotes(
 
       }
     );
+container
+  .querySelectorAll(
+    "[data-send-quote]"
+  )
+  .forEach(
+    button => {
 
+      button.addEventListener(
+        "click",
+        () => {
+
+          openSendQuoteModal(
+            button.dataset.sendQuote
+          );
+
+        }
+      );
+
+    }
+  );
 
   // -----------------------------------------
   // VIEW
@@ -6117,7 +6146,254 @@ function renderEnhancedQuotes(
     );
 
 }
+async function openSendQuoteModal(quoteId) {
 
+  if (!quoteId) {
+    return;
+  }
+
+  const snapshot =
+    await getDocs(
+      collection(
+        db,
+        "quotes"
+      )
+    );
+
+  const quoteDoc =
+    snapshot.docs.find(
+      item =>
+        item.id === quoteId
+    );
+
+  if (!quoteDoc) {
+
+    showCRMToast(
+      "Quote could not be found.",
+      true
+    );
+
+    return;
+  }
+
+  const quote = {
+    id: quoteDoc.id,
+    ...quoteDoc.data()
+  };
+
+
+  if (!quote.clientEmail) {
+
+    showCRMToast(
+      "This client does not have an email address.",
+      true
+    );
+
+    return;
+  }
+
+
+  const modal =
+    createCRMModalShell(
+      "Send Quote",
+      "QUOTE"
+    );
+
+  const body =
+    modal.querySelector(
+      ".crm-modal-body"
+    );
+
+
+  const services =
+    Array.isArray(
+      quote.services
+    )
+      ? quote.services
+      : [];
+
+
+  body.innerHTML = `
+
+    <div class="crm-form-section">
+
+      <div class="panel-eyebrow">
+        RECIPIENT
+      </div>
+
+      <h3>
+        ${escapeHTML(
+          quote.clientName ||
+          "Client"
+        )}
+      </h3>
+
+      <p>
+        ${escapeHTML(
+          quote.clientEmail
+        )}
+      </p>
+
+    </div>
+
+
+    <div class="crm-form-section">
+
+      <div class="panel-eyebrow">
+        PROPERTY
+      </div>
+
+      <p>
+        ${escapeHTML(
+          quote.propertyAddress ||
+          "No property address"
+        )}
+      </p>
+
+    </div>
+
+
+    <div class="crm-form-section">
+
+      <div class="panel-eyebrow">
+        QUOTE
+      </div>
+
+      ${
+        quote.packageName
+          ? `
+            <p>
+              <strong>
+                ${escapeHTML(
+                  quote.packageName
+                )}
+              </strong>
+            </p>
+          `
+          : ""
+      }
+
+
+      ${
+        services.length
+          ? `
+            <div class="crm-quote-service-list">
+
+              ${services
+                .map(
+                  service => `
+                    <div class="crm-quote-service-line">
+
+                      <span>
+                        ${escapeHTML(
+                          service.name ||
+                          ""
+                        )}
+                      </span>
+
+                      <span>
+                        $${Number(
+                          service.price ||
+                          0
+                        ).toFixed(2)}
+                      </span>
+
+                    </div>
+                  `
+                )
+                .join("")}
+
+            </div>
+          `
+          : ""
+      }
+
+
+      <div class="crm-quote-total">
+
+        $${Number(
+          quote.total ||
+          0
+        ).toFixed(2)}
+
+      </div>
+
+    </div>
+
+
+    <div class="crm-form-section">
+
+      <label class="crm-field">
+
+        <span>
+          Message
+        </span>
+
+        <textarea
+          id="sendQuoteMessage"
+          rows="5"
+          placeholder="Add a personal message to the client..."
+        >Hi ${escapeHTML(
+          quote.clientName ||
+          ""
+        )},
+
+Please find your quote for ${
+          escapeHTML(
+            quote.propertyAddress ||
+            "your property"
+          )
+        } below.
+
+If you have any questions, please feel free to get in touch.
+
+Kind regards,
+FLO Property Media</textarea>
+
+      </label>
+
+    </div>
+
+
+    <div class="crm-modal-actions">
+
+      <button
+        type="button"
+        class="crm-small-button"
+        data-close-modal
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="crm-small-button crm-primary-button"
+        id="confirmSendQuoteButton"
+      >
+        Send Quote
+      </button>
+
+    </div>
+
+  `;
+
+
+  body
+    .querySelector(
+      "#confirmSendQuoteButton"
+    )
+    .addEventListener(
+      "click",
+      async () => {
+
+        showCRMToast(
+          "Quote email system is being connected next."
+        );
+
+      }
+    );
+
+}
 
 // ======================================================
 // QUOTE ARCHIVE / DELETE
