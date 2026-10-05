@@ -2905,3 +2905,627 @@ body.modal-open {
   }
 
 }
+
+/* ======================================================
+   FLO BOOKINGS — PREMIUM STATUS GROUPS
+   Final visual override
+====================================================== */
+
+/* ------------------------------------------------------
+   BOOKING TABLE
+------------------------------------------------------ */
+
+.table-panel {
+  position: relative;
+
+  border: 1px solid rgba(217,183,122,.14);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.018),
+      rgba(255,255,255,.006)
+    ),
+    #0d0d0d;
+
+  box-shadow:
+    0 25px 80px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.018);
+
+  overflow: hidden;
+}
+
+
+/* ------------------------------------------------------
+   TABLE HEADER
+------------------------------------------------------ */
+
+.table-header {
+  position: relative;
+
+  padding: 18px 28px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.025),
+      rgba(255,255,255,.008)
+    );
+
+  border-bottom: 1px solid rgba(217,183,122,.10);
+
+  color: rgba(217,183,122,.82);
+
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 2px;
+}
+
+
+/* ------------------------------------------------------
+   STATUS GROUP
+------------------------------------------------------ */
+
+.booking-status-group {
+  position: relative;
+
+  margin-bottom: 34px;
+
+  isolation: isolate;
+}
+
+.booking-status-group:last-child {
+  margin-bottom: 0;
+}
+
+
+/* ------------------------------------------------------
+   STATUS GROUP HEADER
+------------------------------------------------------ */
+
+.booking-status-group-header {
+  position: relative;
+
+  min-height: 78px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  margin: 0;
+
+  padding: 0 26px 0 28px;
+
+  border: 0 !important;
+
+  background:
+    radial-gradient(
+      ellipse 360px 90px at 12% 50%,
+      rgba(217,183,122,.14),
+      rgba(217,183,122,.045) 35%,
+      transparent 72%
+    );
+
+  color: #eeeae2;
+
+  font-size: 16px;
+  font-weight: 500;
+
+  letter-spacing: .32em;
+
+  text-transform: uppercase;
+
+  overflow: hidden;
+}
+
+
+/* ------------------------------------------------------
+   LEFT ACCENT
+------------------------------------------------------ */
+
+.booking-status-group-header::before {
+  content: "";
+
+  display: block;
+
+  flex: 0 0 3px;
+
+  width: 3px;
+  height: 46px;
+
+  margin-right: 22px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #f3dfb2,
+      #c8a76a
+    );
+
+  box-shadow:
+    0 0 10px rgba(217,183,122,.55),
+    0 0 28px rgba(217,183,122,.22);
+
+  border-radius: 2px;
+}
+
+
+/* ------------------------------------------------------
+   REMOVE OLD HEADER LINE EFFECT
+------------------------------------------------------ */
+
+.booking-status-group-header {
+  border-bottom: 0 !important;
+}
+
+
+/* ------------------------------------------------------
+   COUNT
+------------------------------------------------------ */
+
+.booking-status-group-header small {
+  position: relative;
+
+  flex-shrink: 0;
+
+  width: 34px;
+  height: 34px;
+
+  min-width: 34px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid rgba(255,255,255,.16);
+
+  border-radius: 50%;
+
+  background:
+    rgba(255,255,255,.015);
+
+  color: rgba(255,255,255,.72);
+
+  font-size: 9px;
+  font-weight: 500;
+
+  letter-spacing: 0;
+
+  box-shadow:
+    inset 0 0 12px rgba(255,255,255,.015);
+}
+
+
+/* ------------------------------------------------------
+   NEW
+------------------------------------------------------ */
+
+.booking-group-new .booking-status-group-header {
+  color: #f1e0bd;
+
+  background:
+    radial-gradient(
+      ellipse 390px 100px at 12% 50%,
+      rgba(217,183,122,.19),
+      rgba(217,183,122,.055) 38%,
+      transparent 72%
+    );
+}
+
+.booking-group-new .booking-status-group-header::before {
+  background:
+    linear-gradient(
+      180deg,
+      #fff0c9,
+      #caa766
+    );
+
+  box-shadow:
+    0 0 12px rgba(217,183,122,.75),
+    0 0 35px rgba(217,183,122,.30);
+}
+
+.booking-group-new .booking-status-group-header small {
+  border-color: rgba(217,183,122,.28);
+
+  box-shadow:
+    0 0 18px rgba(217,183,122,.07);
+}
+
+
+/* ------------------------------------------------------
+   ACCEPTED / CONFIRMED
+------------------------------------------------------ */
+
+.booking-group-confirmed .booking-status-group-header {
+  color: #d9e9dc;
+
+  background:
+    radial-gradient(
+      ellipse 390px 100px at 12% 50%,
+      rgba(120,180,125,.16),
+      rgba(120,180,125,.045) 38%,
+      transparent 72%
+    );
+}
+
+.booking-group-confirmed .booking-status-group-header::before {
+  background:
+    linear-gradient(
+      180deg,
+      #e2f2e4,
+      #91b99a
+    );
+
+  box-shadow:
+    0 0 12px rgba(145,185,154,.70),
+    0 0 35px rgba(120,180,125,.28);
+}
+
+.booking-group-confirmed .booking-status-group-header small {
+  border-color: rgba(145,185,154,.30);
+
+  box-shadow:
+    0 0 18px rgba(120,180,125,.08);
+}
+
+
+/* ------------------------------------------------------
+   DATE PROPOSED
+------------------------------------------------------ */
+
+.booking-group-proposed .booking-status-group-header {
+  color: #e9dfc7;
+
+  background:
+    radial-gradient(
+      ellipse 390px 100px at 12% 50%,
+      rgba(217,183,122,.13),
+      rgba(217,183,122,.035) 38%,
+      transparent 72%
+    );
+}
+
+.booking-group-proposed .booking-status-group-header::before {
+  background:
+    linear-gradient(
+      180deg,
+      #f1dfb4,
+      #bd9b60
+    );
+
+  box-shadow:
+    0 0 12px rgba(217,183,122,.60),
+    0 0 30px rgba(217,183,122,.20);
+}
+
+
+/* ------------------------------------------------------
+   DECLINED
+------------------------------------------------------ */
+
+.booking-group-declined .booking-status-group-header {
+  color: #e2cfcf;
+
+  background:
+    radial-gradient(
+      ellipse 390px 100px at 12% 50%,
+      rgba(190,90,90,.10),
+      transparent 72%
+    );
+}
+
+.booking-group-declined .booking-status-group-header::before {
+  background:
+    linear-gradient(
+      180deg,
+      #e5b0b0,
+      #a66565
+    );
+
+  box-shadow:
+    0 0 12px rgba(190,90,90,.45),
+    0 0 30px rgba(190,90,90,.16);
+}
+
+
+/* ------------------------------------------------------
+   COMPLETED
+------------------------------------------------------ */
+
+.booking-group-completed .booking-status-group-header {
+  color: #d6ddd8;
+
+  background:
+    radial-gradient(
+      ellipse 390px 100px at 12% 50%,
+      rgba(150,170,160,.08),
+      transparent 72%
+    );
+}
+
+.booking-group-completed .booking-status-group-header::before {
+  background:
+    linear-gradient(
+      180deg,
+      #d8e0da,
+      #7f9084
+    );
+
+  box-shadow:
+    0 0 10px rgba(150,170,160,.35);
+}
+
+
+/* ------------------------------------------------------
+   CLOSED / ARCHIVED
+------------------------------------------------------ */
+
+.booking-group-closed .booking-status-group-header {
+  color: #aaa69e;
+
+  background:
+    radial-gradient(
+      ellipse 390px 100px at 12% 50%,
+      rgba(160,160,160,.045),
+      transparent 72%
+    );
+}
+
+.booking-group-closed .booking-status-group-header::before {
+  background: #77736d;
+
+  box-shadow:
+    0 0 8px rgba(160,160,160,.15);
+}
+
+
+/* ------------------------------------------------------
+   BOOKING LIST
+------------------------------------------------------ */
+
+.booking-group-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+
+  padding: 0 12px 12px;
+}
+
+
+/* ------------------------------------------------------
+   BOOKING ROW
+------------------------------------------------------ */
+
+.booking-status-group .booking-row {
+  position: relative;
+
+  width: 100%;
+
+  min-height: 76px;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(140px, 1fr)
+    minmax(180px, 1.5fr)
+    minmax(110px, .8fr)
+    minmax(130px, .9fr)
+    130px;
+
+  align-items: center;
+
+  gap: 18px;
+
+  padding: 16px 18px;
+
+  border: 1px solid rgba(255,255,255,.065);
+
+  border-radius: 9px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.018),
+      rgba(255,255,255,.006)
+    );
+
+  color: #d8d7d1;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.018);
+
+  transition:
+    background .35s ease,
+    border-color .35s ease,
+    transform .35s ease,
+    box-shadow .35s ease;
+}
+
+
+/* ------------------------------------------------------
+   ROW HOVER
+------------------------------------------------------ */
+
+.booking-status-group .booking-row:hover {
+  transform: translateY(-2px);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.035),
+      rgba(255,255,255,.012)
+    );
+
+  border-color:
+    rgba(217,183,122,.20);
+
+  box-shadow:
+    0 12px 35px rgba(0,0,0,.25),
+    0 0 22px rgba(217,183,122,.025);
+}
+
+
+/* ------------------------------------------------------
+   ROW TEXT
+------------------------------------------------------ */
+
+.booking-status-group .booking-row > span {
+  color: #c9c8c2;
+
+  font-size: 11px;
+
+  transition:
+    color .3s ease;
+}
+
+.booking-status-group .booking-row:hover > span {
+  color: #f4f2ec;
+}
+
+
+/* ------------------------------------------------------
+   STATUS BADGES
+------------------------------------------------------ */
+
+.booking-status-group .status-badge {
+  justify-self: start;
+
+  min-width: 58px;
+
+  padding: 7px 11px;
+
+  border-radius: 2px;
+
+  font-size: 7px;
+
+  font-weight: 600;
+
+  letter-spacing: 1.5px;
+
+  background: rgba(217,183,122,.045);
+
+  border: 1px solid rgba(217,183,122,.22);
+
+  color: #d9b77a;
+
+  box-shadow:
+    0 0 14px rgba(217,183,122,.035);
+}
+
+
+/* Confirmed */
+
+.booking-status-group .status-confirmed {
+  border-color: rgba(145,185,154,.30);
+
+  background: rgba(120,180,125,.045);
+
+  color: #b9d5bf;
+
+  box-shadow:
+    0 0 18px rgba(120,180,125,.055);
+}
+
+
+/* Proposed */
+
+.booking-status-group .status-date-proposed {
+  border-color: rgba(217,183,122,.28);
+
+  background: rgba(217,183,122,.055);
+
+  color: #e0c795;
+}
+
+
+/* Declined */
+
+.booking-status-group .status-declined {
+  border-color: rgba(200,90,90,.22);
+
+  background: rgba(150,50,50,.035);
+
+  color: #d59696;
+}
+
+
+/* ------------------------------------------------------
+   SUBTLE STATUS AMBIENT GLOW ON ROW
+------------------------------------------------------ */
+
+.booking-group-new .booking-row:first-child::before,
+.booking-group-confirmed .booking-row:first-child::before {
+  content: "";
+
+  position: absolute;
+
+  left: -1px;
+  top: 14px;
+  bottom: 14px;
+
+  width: 2px;
+
+  border-radius: 2px;
+
+  opacity: .65;
+}
+
+.booking-group-new .booking-row:first-child::before {
+  background: #d9b77a;
+
+  box-shadow:
+    0 0 12px rgba(217,183,122,.55);
+}
+
+.booking-group-confirmed .booking-row:first-child::before {
+  background: #8fb99a;
+
+  box-shadow:
+    0 0 12px rgba(120,180,125,.45);
+}
+
+
+/* ------------------------------------------------------
+   MOBILE
+------------------------------------------------------ */
+
+@media (max-width: 700px) {
+
+  .booking-status-group-header {
+    min-height: 68px;
+
+    padding: 0 18px;
+  }
+
+  .booking-status-group-header::before {
+    height: 38px;
+
+    margin-right: 16px;
+  }
+
+  .booking-status-group-header {
+    font-size: 13px;
+
+    letter-spacing: .25em;
+  }
+
+  .booking-group-list {
+    padding: 0 8px 8px;
+  }
+
+  .booking-status-group .booking-row {
+    min-height: auto;
+
+    padding: 18px;
+
+    border-radius: 8px;
+  }
+
+}
