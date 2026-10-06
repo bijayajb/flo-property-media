@@ -1398,7 +1398,26 @@
 
             </div>
 
+<div class="form-row">
 
+    <div class="form-group">
+
+        <label>
+            BUSINESS NAME
+            <span style="opacity:0.55;">
+                (OPTIONAL)
+            </span>
+        </label>
+
+        <input
+            type="text"
+            name="business_name"
+            placeholder="Business name"
+        >
+
+    </div>
+
+</div>
         </div>
 
 
@@ -1427,26 +1446,74 @@
                     PROPERTY ADDRESS *
                 </label>
 
-                <input
-                    type="text"
-                    name="property_address"
-                    placeholder="Property address, Melbourne VIC"
-                    required
-                >
+                <div class="form-group">
 
+    <label>
+        PROPERTY ADDRESS *
+    </label>
+
+    <div
+        id="propertyAddressAutocomplete"
+        class="property-address-autocomplete"
+    ></div>
+
+    <!-- Actual selected address saved/submitted -->
+    <input
+        type="hidden"
+        id="propertyAddress"
+        name="property_address"
+    >
+
+    <input
+        type="hidden"
+        id="selectedPlaceId"
+        name="selected_place_id"
+    >
+
+    <input
+        type="hidden"
+        id="propertyLatitude"
+        name="property_latitude"
+    >
+
+    <input
+        type="hidden"
+        id="propertyLongitude"
+        name="property_longitude"
+    >
+
+</div>
             </div>
 
         </div>
 
 
         <div
-            class="address-note"
-            id="travelNotice"
-        >
-            South East Melbourne, Australia service area.
-            Properties beyond 25 km may incur a
-            $1 travel surcharge.
-        </div>
+    class="address-note"
+    id="travelNotice"
+>
+    South East Melbourne, Australia service area.
+    Properties beyond 25 km may incur a
+    $1 travel surcharge per kilometer.
+</div>
+
+<div
+    id="travelChargeDisplay"
+    class="travel-charge-display"
+>
+</div>
+
+<input
+    type="hidden"
+    id="travelDistanceKm"
+    name="travel_distance_km"
+>
+
+<input
+    type="hidden"
+    id="travelCharge"
+    name="travel_charge"
+>
 
 
         <div class="form-group">
@@ -1789,7 +1856,346 @@
 </body>
 
 <script src="script.js"></script>
+<!-- =====================================================
+     GOOGLE MAPS
+     ===================================================== -->
 
+<script>
+    window.initFLOGoogleMaps = async function () {
+
+        try {
+
+            const {
+                PlaceAutocompleteElement
+            } = await google.maps.importLibrary("places");
+
+            const {
+                Route
+            } = await google.maps.importLibrary("routes");
+
+
+            const autocompleteContainer =
+                document.getElementById(
+                    "propertyAddressAutocomplete"
+                );
+
+            if (!autocompleteContainer) {
+                return;
+            }
+
+
+            const placeAutocomplete =
+                new PlaceAutocompleteElement({
+
+                    includedRegionCodes: ["au"]
+
+                });
+
+
+            placeAutocomplete.placeholder =
+                "Search property address";
+
+
+            autocompleteContainer.appendChild(
+                placeAutocomplete
+            );
+
+
+            window.floPlaceAutocomplete =
+                placeAutocomplete;
+
+            window.floRoute =
+                Route;
+
+
+            placeAutocomplete.addEventListener(
+                "gmp-select",
+                async function (event) {
+
+                    const place =
+                        event.placePrediction.toPlace();
+
+
+                    await place.fetchFields({
+                        fields: [
+                            "formattedAddress",
+                            "location"
+                        ]
+                    });
+
+
+                    if (
+                        !place.formattedAddress ||
+                        !place.location
+                    ) {
+                        return;
+                    }
+
+
+                    const address =
+                        place.formattedAddress;
+
+
+                    const latitude =
+                        place.location.lat();
+
+
+                    const longitude =
+                        place.location.lng();
+
+
+                    const addressInput =
+                        document.getElementById(
+                            "propertyAddress"
+                        );
+
+
+                    const selectedPlaceInput =
+                        document.getElementById(
+                            "selectedPlaceId"
+                        );
+
+
+                    const latitudeInput =
+                        document.getElementById(
+                            "propertyLatitude"
+                        );
+
+
+                    const longitudeInput =
+                        document.getElementById(
+                            "propertyLongitude"
+                        );
+
+
+                    if (addressInput) {
+                        addressInput.value =
+                            address;
+                    }
+
+
+                    if (selectedPlaceInput) {
+                        selectedPlaceInput.value =
+                            place.id || "";
+                    }
+
+
+                    if (latitudeInput) {
+                        latitudeInput.value =
+                            latitude;
+                    }
+
+
+                    if (longitudeInput) {
+                        longitudeInput.value =
+                            longitude;
+                    }
+
+
+                    await calculateFLOTravelCharge(
+                        place.location
+                    );
+
+                }
+
+            );
+
+        } catch (error) {
+
+            console.error(
+                "FLO Google Maps error:",
+                error
+            );
+
+        }
+
+    };
+
+
+    async function calculateFLOTravelCharge(
+        destination
+    ) {
+
+        const notice =
+            document.getElementById(
+                "travelNotice"
+            );
+
+        const chargeDisplay =
+            document.getElementById(
+                "travelChargeDisplay"
+            );
+
+        const chargeInput =
+            document.getElementById(
+                "travelCharge"
+            );
+
+        const distanceInput =
+            document.getElementById(
+                "travelDistanceKm"
+            );
+
+
+        if (
+            !notice ||
+            !chargeDisplay ||
+            !chargeInput ||
+            !distanceInput
+        ) {
+            return;
+        }
+
+
+        try {
+
+            notice.textContent =
+                "Calculating travel distance…";
+
+
+            notice.classList.remove(
+                "service-unavailable"
+            );
+
+
+            const Route =
+                window.floRoute;
+
+
+            const routeResult =
+                await Route.computeRoutes({
+
+                    origin: {
+                        lat: -37.9368,
+                        lng: 145.2088
+                    },
+
+                    destination:
+                        destination,
+
+                    travelMode: "DRIVING",
+
+                    routingPreference:
+                        "TRAFFIC_UNAWARE",
+
+                    fields: [
+                        "distanceMeters"
+                    ]
+
+                });
+
+
+            if (
+                !routeResult.routes ||
+                !routeResult.routes.length
+            ) {
+                throw new Error(
+                    "No driving route found."
+                );
+            }
+
+
+            const distanceMeters =
+                routeResult.routes[0]
+                    .distanceMeters;
+
+
+            const distanceKm =
+                distanceMeters / 1000;
+
+
+            const roundedDistance =
+                Math.ceil(
+                    distanceKm
+                );
+
+
+            distanceInput.value =
+                roundedDistance;
+
+
+            /*
+             * FLO pricing:
+             *
+             * First 25 km = free
+             * Every km beyond 25 km = $1
+             * Maximum service distance = 150 km
+             */
+
+
+            if (distanceKm > 150) {
+
+                chargeInput.value =
+                    "";
+
+                chargeDisplay.textContent =
+                    "Unfortunately we do not service this area.";
+
+                notice.textContent =
+                    "Unfortunately we do not service this area.";
+
+                notice.classList.add(
+                    "service-unavailable"
+                );
+
+                return;
+
+            }
+
+
+            const travelCharge =
+                distanceKm > 25
+                    ? Math.ceil(
+                        distanceKm - 25
+                    )
+                    : 0;
+
+
+            chargeInput.value =
+                travelCharge;
+
+
+            if (travelCharge > 0) {
+
+                chargeDisplay.textContent =
+                    `Travel surcharge: $${travelCharge}`;
+
+                notice.textContent =
+                    `${roundedDistance} km driving distance from Dandenong North. Travel surcharge: $${travelCharge}.`;
+
+            } else {
+
+                chargeDisplay.textContent =
+                    "No travel surcharge";
+
+                notice.textContent =
+                    `${roundedDistance} km driving distance from Dandenong North. No travel surcharge.`;
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Travel calculation error:",
+                error
+            );
+
+
+            notice.textContent =
+                "We couldn't calculate the travel distance. Please select the property address again.";
+
+        }
+
+    }
+
+</script>
+
+
+<script
+    async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyALZJ55ATrQjdqFRbMmYdHjaLKtvuBnDY4&loading=async&callback=initFLOGoogleMaps"
+></script>
+    
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 
@@ -1848,17 +2254,92 @@
                     )
                 ).map(checkbox => checkbox.value);
 
-
+                const selectedAddress =
+                    document.getElementById(
+                        "propertyAddress"
+                    )?.value.trim();
+                
+                const selectedPlaceId =
+                    document.getElementById(
+                        "selectedPlaceId"
+                    )?.value.trim();
+                
+                const travelCharge =
+                    Number(
+                        document.getElementById(
+                            "travelCharge"
+                        )?.value
+                    ) || 0;
+                
+                const travelDistance =
+                    Number(
+                        document.getElementById(
+                            "travelDistanceKm"
+                        )?.value
+                    ) || 0;
+                
+                
+                if (
+                    !selectedAddress ||
+                    !selectedPlaceId
+                ) {
+                
+                    alert(
+                        "Please search for your property address and select the correct address from the suggestions."
+                    );
+                
+                    throw new Error(
+                        "Property address was not selected from Google Places."
+                    );
+                
+                }
+                
+                
+                if (travelDistance > 150) {
+                
+                    alert(
+                        "Unfortunately we do not service this area."
+                    );
+                
+                    throw new Error(
+                        "Property is outside FLO's 150 km service area."
+                    );
+                
+                }
                 await addDoc(
                     collection(db, "bookings"),
                     {
                         name: formData.get("name") || "",
                         email: formData.get("email") || "",
                         mobile: formData.get("mobile") || "",
+                        businessName:
+                            formData.get("business_name") || "",
 
                         propertyAddress:
                             formData.get("property_address") || "",
 
+                                            travelDistanceKm:
+                            Number(
+                                formData.get("travel_distance_km")
+                            ) || 0,
+                        
+                        travelCharge:
+                            Number(
+                                formData.get("travel_charge")
+                            ) || 0,
+                        
+                        propertyLatitude:
+                            Number(
+                                formData.get("property_latitude")
+                            ) || null,
+                        
+                        propertyLongitude:
+                            Number(
+                                formData.get("property_longitude")
+                            ) || null,
+                        
+                        selectedPlaceId:
+                            formData.get("selected_place_id") || "",
                         services: services,
 
                         preferredDate:
