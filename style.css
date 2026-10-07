@@ -2415,3 +2415,235 @@ footer>a{
   position: static !important;
   margin-top: 40px !important;
 }
+
+/* =========================================================
+   BOOKING FORM — CLEAN LAYOUT
+   ========================================================= */
+
+.booking-form,
+.booking-form *,
+.booking-form *::before,
+.booking-form *::after {
+    box-sizing: border-box;
+}
+
+
+/* Two-column rows */
+
+.form-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+    width: 100%;
+}
+
+
+/* Individual fields */
+
+.form-group {
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 28px;
+}
+
+
+/* Labels */
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    line-height: 1.4;
+}
+
+
+/* Optional text */
+
+.optional-label {
+    opacity: 0.5;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+
+/* Inputs */
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    box-sizing: border-box;
+
+    border: 1px solid #d3d2cc;
+    background: transparent;
+
+    padding: 17px;
+
+    font-size: 14px;
+    line-height: 1.4;
+
+    outline: none;
+    color: #222;
+
+    border-radius: 0;
+
+    transition:
+        border-color .3s,
+        box-shadow .3s;
+}
+
+
+/* Google address field */
+
+.property-address-group {
+    width: 100%;
+}
+
+
+.property-address-autocomplete {
+    width: 100%;
+    max-width: 100%;
+}
+
+
+/*
+ * Google Places custom element
+ */
+
+.property-address-autocomplete
+gmp-place-autocomplete {
+    display: block;
+    width: 100%;
+}
+
+
+/* Travel notice */
+
+.address-note {
+    width: 100%;
+    box-sizing: border-box;
+
+    margin: -6px 0 30px;
+
+    padding: 13px 15px;
+
+    background: #ebe9e2;
+
+    border-left: 2px solid #b89a62;
+
+    color: #666;
+
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+
+/* Travel charge */
+
+.travel-charge-display {
+    margin: -15px 0 25px;
+
+    font-size: 12px;
+    font-weight: 600;
+    color: #222;
+}
+
+
+/* Service buttons */
+
+.service-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+}
+
+
+/* Prevent service buttons from causing overflow */
+
+.option {
+    max-width: 100%;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .booking-form {
+        padding: 25px 20px;
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+        width: 100%;
+    }
+
+
+    .form-group {
+        width: 100%;
+        min-width: 0;
+        margin-bottom: 25px;
+    }
+
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+
+    .property-address-group {
+        width: 100%;
+    }
+
+
+    .property-address-autocomplete {
+        width: 100%;
+        max-width: 100%;
+    }
+
+
+    .property-address-autocomplete
+    gmp-place-autocomplete {
+        width: 100%;
+        max-width: 100%;
+    }
+
+
+    .address-note {
+        margin-top: -2px;
+        margin-bottom: 28px;
+
+        font-size: 11px;
+        line-height: 1.55;
+    }
+
+
+    .service-options {
+        gap: 8px;
+    }
+
+
+    .option span {
+        padding: 12px 14px;
+        font-size: 11px;
+    }
+
+}
