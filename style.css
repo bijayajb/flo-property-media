@@ -3036,74 +3036,42 @@ gmp-place-autocomplete {
 }
 
 /* =========================================================
-   FLO — PREMIUM MOBILE MENU TYPOGRAPHY
+   FLO — FINAL MOBILE MENU TYPOGRAPHY
    ========================================================= */
 
 @media (max-width: 900px) {
 
     .mobile-menu-links {
-        gap: 18px !important;
+        gap: 14px !important;
     }
 
     .mobile-menu-links a {
         font-family: var(--serif) !important;
-
-        font-size: 28px !important;
-
+        font-size: 21px !important;
         font-weight: 400 !important;
-
         line-height: 1.15 !important;
-
-        letter-spacing: -0.4px !important;
-
+        letter-spacing: -0.2px !important;
         color: rgba(255,255,255,.94) !important;
-
         text-decoration: none !important;
-
-        transition:
-            opacity .25s ease,
-            transform .25s ease !important;
     }
-
-    .mobile-menu-links a:hover {
-        opacity: .55 !important;
-        transform: translateX(3px) !important;
-    }
-
-
-    /* GET A QUOTE */
 
     .mobile-menu-cta {
-        margin-top: 26px !important;
-
+        margin-top: 20px !important;
         font-family: var(--sans) !important;
-
-        font-size: 9px !important;
-
-        font-weight: 500 !important;
-
-        letter-spacing: 2.5px !important;
-
-        text-transform: uppercase !important;
-
-        color: rgba(255,255,255,.78) !important;
-
-        padding-bottom: 8px !important;
-
-        border-bottom: 1px solid rgba(255,255,255,.3) !important;
+        font-size: 8px !important;
+        letter-spacing: 2.2px !important;
     }
-
 }
 
 
 @media (max-width: 600px) {
 
     .mobile-menu-links {
-        gap: 16px !important;
+        gap: 13px !important;
     }
 
     .mobile-menu-links a {
-        font-size: 26px !important;
+        font-size: 20px !important;
     }
 
 }
