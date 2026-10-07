@@ -2739,3 +2739,84 @@ gmp-place-autocomplete {
     }
 
 }
+
+/* =========================================================
+   MOBILE MENU — FINAL
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .menu-toggle {
+        display: flex !important;
+
+        position: relative;
+        z-index: 99999;
+
+        width: 48px;
+        height: 48px;
+
+        cursor: pointer;
+
+        touch-action: manipulation;
+    }
+
+
+    .mobile-menu {
+        position: fixed !important;
+
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+
+        width: 100vw !important;
+        height: 100dvh !important;
+
+        z-index: 99998 !important;
+
+        background: #090909 !important;
+
+        transform: translateY(-100%) !important;
+
+        visibility: hidden;
+        pointer-events: none;
+
+        overflow-y: auto;
+
+        transition:
+            transform .4s ease,
+            visibility 0s linear .4s;
+    }
+
+
+    .mobile-menu.open {
+        transform: translateY(0) !important;
+
+        visibility: visible;
+        pointer-events: auto;
+
+        transition:
+            transform .4s ease,
+            visibility 0s;
+    }
+
+
+    .mobile-menu a {
+        display: block;
+
+        position: relative;
+        z-index: 1;
+
+        color: #fff !important;
+
+        pointer-events: auto;
+
+        -webkit-tap-highlight-color: transparent;
+    }
+
+
+    .menu-toggle span {
+        pointer-events: none;
+    }
+
+}
