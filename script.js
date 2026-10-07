@@ -6,49 +6,76 @@
 document.addEventListener("DOMContentLoaded", function () {
 
     /* =========================================================
-       MOBILE MENU — RUN FIRST
+       MOBILE MENU
        ========================================================= */
-
-    document.addEventListener("DOMContentLoaded", () => {
 
     const menuToggle = document.getElementById("menuToggle");
     const mobileMenu = document.getElementById("mobileMenu");
 
-    if (!menuToggle || !mobileMenu) return;
+    if (menuToggle && mobileMenu) {
 
-    function openMenu() {
-        mobileMenu.classList.add("open");
-        menuToggle.classList.add("active");
-        menuToggle.setAttribute("aria-label", "Close menu");
-        document.body.classList.add("menu-open");
+        function openMenu() {
+            mobileMenu.classList.add("open");
+            menuToggle.classList.add("active");
+            menuToggle.setAttribute("aria-label", "Close menu");
+            document.body.classList.add("menu-open");
+        }
+
+        function closeMenu() {
+            mobileMenu.classList.remove("open");
+            menuToggle.classList.remove("active");
+            menuToggle.setAttribute("aria-label", "Open menu");
+            document.body.classList.remove("menu-open");
+        }
+
+        menuToggle.addEventListener("click", function () {
+
+            if (mobileMenu.classList.contains("open")) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+
+        });
+
+        /* Close when clicking a menu link */
+        mobileMenu.querySelectorAll("a").forEach(function (link) {
+            link.addEventListener("click", closeMenu);
+        });
+
+        /* Close with phone/browser keyboard Escape */
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                closeMenu();
+            }
+        });
+
     }
 
-    function closeMenu() {
-        mobileMenu.classList.remove("open");
-        menuToggle.classList.remove("active");
-        menuToggle.setAttribute("aria-label", "Open menu");
-        document.body.classList.remove("menu-open");
-    }
 
-    menuToggle.addEventListener("click", () => {
-        if (mobileMenu.classList.contains("open")) {
-            closeMenu();
-        } else {
-            openMenu();
+    /* =====================================================
+       NAVIGATION — STAYS VISIBLE
+       ===================================================== */
+
+    const nav = document.querySelector(".nav");
+
+    window.addEventListener(
+        "scroll",
+        function () {
+
+            if (!nav) return;
+
+            if (window.scrollY > 40) {
+                nav.classList.add("scrolled");
+            } else {
+                nav.classList.remove("scrolled");
+            }
+
+        },
+        {
+            passive: true
         }
-    });
-
-    mobileMenu.querySelectorAll("a").forEach(link => {
-        link.addEventListener("click", closeMenu);
-    });
-
-    document.addEventListener("keydown", event => {
-        if (event.key === "Escape") {
-            closeMenu();
-        }
-    });
-
-});
+    );
 
     /* =====================================================
    NAVIGATION — STAYS VISIBLE
