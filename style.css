@@ -3036,25 +3036,25 @@ gmp-place-autocomplete {
 }
 
 /* =========================================================
-   PREMIUM MOBILE MENU TYPOGRAPHY
+   FLO — PREMIUM MOBILE MENU TYPOGRAPHY
    ========================================================= */
 
 @media (max-width: 900px) {
 
     .mobile-menu-links {
-        gap: 17px !important;
+        gap: 18px !important;
     }
 
     .mobile-menu-links a {
         font-family: var(--serif) !important;
 
-        font-size: 27px !important;
+        font-size: 28px !important;
 
         font-weight: 400 !important;
 
-        line-height: 1.2 !important;
+        line-height: 1.15 !important;
 
-        letter-spacing: -0.3px !important;
+        letter-spacing: -0.4px !important;
 
         color: rgba(255,255,255,.94) !important;
 
@@ -3067,7 +3067,6 @@ gmp-place-autocomplete {
 
     .mobile-menu-links a:hover {
         opacity: .55 !important;
-
         transform: translateX(3px) !important;
     }
 
@@ -3075,7 +3074,7 @@ gmp-place-autocomplete {
     /* GET A QUOTE */
 
     .mobile-menu-cta {
-        margin-top: 24px !important;
+        margin-top: 26px !important;
 
         font-family: var(--sans) !important;
 
@@ -3087,7 +3086,7 @@ gmp-place-autocomplete {
 
         text-transform: uppercase !important;
 
-        color: rgba(255,255,255,.8) !important;
+        color: rgba(255,255,255,.78) !important;
 
         padding-bottom: 8px !important;
 
@@ -3100,7 +3099,7 @@ gmp-place-autocomplete {
 @media (max-width: 600px) {
 
     .mobile-menu-links {
-        gap: 15px !important;
+        gap: 16px !important;
     }
 
     .mobile-menu-links a {
