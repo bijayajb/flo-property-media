@@ -75,80 +75,37 @@
 
 <div class="mobile-menu" id="mobileMenu">
 
-    <a href="#services">
-        Services
-    </a>
+    <button
+        class="mobile-menu-close"
+        id="mobileMenuClose"
+        type="button"
+        aria-label="Close menu"
+    >
+        <span></span>
+        <span></span>
+    </button>
 
-    <a href="#packages">
-        Packages
-    </a>
+    <nav class="mobile-menu-links">
 
-    <a href="#work">
-        Work
-    </a>
+        <a href="#services">Services</a>
 
-    <a href="#turnaround">
-        Turnaround
-    </a>
+        <a href="#packages">Packages</a>
 
-    <a href="#faq">
-        FAQ
-    </a>
+        <a href="#work">Work</a>
 
-    <a href="#contact">
-        Contact
-    </a>
+        <a href="#turnaround">Turnaround</a>
+
+        <a href="#faq">FAQ</a>
+
+        <a href="#contact">Contact</a>
+
+    </nav>
 
     <a href="#contact" class="mobile-menu-cta">
         Get a Quote →
     </a>
 
 </div>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const menuToggle = document.getElementById("menuToggle");
-    const mobileMenu = document.getElementById("mobileMenu");
-
-    if (!menuToggle || !mobileMenu) {
-        console.log("FLO mobile menu elements not found");
-        return;
-    }
-
-    menuToggle.onclick = function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-
-        mobileMenu.classList.toggle("open");
-        menuToggle.classList.toggle("active");
-
-        const isOpen = mobileMenu.classList.contains("open");
-
-        menuToggle.setAttribute(
-            "aria-label",
-            isOpen ? "Close menu" : "Open menu"
-        );
-
-        document.body.classList.toggle("menu-open", isOpen);
-    };
-
-    mobileMenu.querySelectorAll("a").forEach(function (link) {
-        link.onclick = function () {
-            mobileMenu.classList.remove("open");
-            menuToggle.classList.remove("active");
-            document.body.classList.remove("menu-open");
-
-            menuToggle.setAttribute(
-                "aria-label",
-                "Open menu"
-            );
-        };
-    });
-
-});
-</script>
-<main>
 
 
 <!-- =====================================================
