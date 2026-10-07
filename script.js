@@ -5,43 +5,41 @@
 
 document.addEventListener("DOMContentLoaded", function () {
 
-
-    /* =====================================================
-       MOBILE MENU
-       ===================================================== */
+    /* =========================================================
+       MOBILE MENU — RUN FIRST
+       ========================================================= */
 
     const menuToggle = document.getElementById("menuToggle");
     const mobileMenu = document.getElementById("mobileMenu");
 
     if (menuToggle && mobileMenu) {
 
-        menuToggle.addEventListener("click", function () {
+        menuToggle.onclick = function (event) {
 
-            const isOpen =
+            event.preventDefault();
+            event.stopPropagation();
+
+            const open =
                 mobileMenu.classList.toggle("open");
 
             menuToggle.classList.toggle(
                 "active",
-                isOpen
+                open
             );
 
             menuToggle.setAttribute(
                 "aria-label",
-                isOpen ? "Close menu" : "Open menu"
+                open ? "Close menu" : "Open menu"
             );
 
-        });
+        };
 
 
-        const mobileLinks =
-            mobileMenu.querySelectorAll("a");
+        mobileMenu.querySelectorAll("a").forEach(function (link) {
 
-        mobileLinks.forEach(function (link) {
-
-            link.addEventListener("click", function () {
+            link.onclick = function () {
 
                 mobileMenu.classList.remove("open");
-
                 menuToggle.classList.remove("active");
 
                 menuToggle.setAttribute(
@@ -49,12 +47,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     "Open menu"
                 );
 
-            });
+            };
 
         });
 
     }
-
 
     /* =====================================================
        CLOSE MENU WITH ESCAPE
@@ -706,110 +703,4 @@ window.addEventListener(
 
 });
 
-/* =========================================================
-   MOBILE MENU
-   ========================================================= */
 
-document.addEventListener("DOMContentLoaded", function () {
-
-    const menuToggle =
-        document.getElementById("menuToggle");
-
-    const mobileMenu =
-        document.getElementById("mobileMenu");
-
-
-    if (!menuToggle || !mobileMenu) {
-        return;
-    }
-
-
-    /* OPEN / CLOSE MENU */
-
-    menuToggle.addEventListener(
-        "click",
-        function () {
-
-            menuToggle.classList.toggle("active");
-
-            mobileMenu.classList.toggle("open");
-
-
-            const isOpen =
-                mobileMenu.classList.contains("open");
-
-
-            menuToggle.setAttribute(
-                "aria-label",
-                isOpen
-                    ? "Close menu"
-                    : "Open menu"
-            );
-
-        }
-    );
-
-
-    /* CLOSE MENU WHEN A LINK IS CLICKED */
-
-    const mobileLinks =
-        mobileMenu.querySelectorAll("a");
-
-
-    mobileLinks.forEach(
-        function (link) {
-
-            link.addEventListener(
-                "click",
-                function () {
-
-                    mobileMenu.classList.remove(
-                        "open"
-                    );
-
-                    menuToggle.classList.remove(
-                        "active"
-                    );
-
-                    menuToggle.setAttribute(
-                        "aria-label",
-                        "Open menu"
-                    );
-
-                }
-            );
-
-        }
-    );
-
-
-    /* CLOSE MENU IF USER PRESSES ESCAPE */
-
-    document.addEventListener(
-        "keydown",
-        function (event) {
-
-            if (
-                event.key === "Escape" &&
-                mobileMenu.classList.contains("open")
-            ) {
-
-                mobileMenu.classList.remove(
-                    "open"
-                );
-
-                menuToggle.classList.remove(
-                    "active"
-                );
-
-                menuToggle.setAttribute(
-                    "aria-label",
-                    "Open menu"
-                );
-
-            }
-
-        }
-    );
-
-});
