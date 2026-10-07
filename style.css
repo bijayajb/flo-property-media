@@ -2689,18 +2689,23 @@ gmp-place-autocomplete {
 }
 
 /* =========================================================
-   MOBILE MENU
+   FLO — MOBILE MENU FINAL
    ========================================================= */
 
 @media (max-width: 900px) {
 
+    /* HAMBURGER */
+
     .menu-toggle {
         display: flex;
         position: relative;
+
         width: 48px;
         height: 48px;
+
         border: 1px solid rgba(255,255,255,.5);
         background: rgba(0,0,0,.25);
+
         cursor: pointer;
 
         align-items: center;
@@ -2711,81 +2716,20 @@ gmp-place-autocomplete {
         z-index: 1002;
     }
 
+
     .menu-toggle span {
         display: block;
+
         width: 19px;
         height: 1px;
+
         background: #fff;
+
         pointer-events: none;
+
         transition: .3s ease;
     }
 
-    /* MENU */
-
-    .mobile-menu {
-        position: fixed;
-        inset: 0;
-
-        width: 100vw;
-        height: 100dvh;
-
-        background: #090909;
-        z-index: 1001;
-
-        display: flex;
-        flex-direction: column;
-        gap: 25px;
-
-        padding: 120px 30px 40px;
-
-        transform: translateY(-100%);
-        visibility: hidden;
-        pointer-events: none;
-
-        overflow-y: auto;
-
-        transition:
-            transform .35s ease,
-            visibility 0s linear .35s;
-    }
-
-    /* OPEN */
-
-    .mobile-menu.open {
-        transform: translateY(0);
-        visibility: visible;
-        pointer-events: auto;
-
-        transition:
-            transform .35s ease,
-            visibility 0s;
-    }
-
-    /* LINKS */
-
-    .mobile-menu a {
-        display: block;
-        color: #fff;
-        font-family: var(--serif);
-        font-size: 38px;
-        line-height: 1.1;
-        letter-spacing: -1px;
-        text-decoration: none;
-    }
-
-    .mobile-menu-cta {
-        margin-top: 15px;
-
-        font-family: var(--sans) !important;
-        font-size: 11px !important;
-        letter-spacing: 2px !important;
-        text-transform: uppercase;
-
-        width: max-content;
-
-        border-bottom: 1px solid #555;
-        padding-bottom: 10px;
-    }
 
     /* HAMBURGER → X */
 
@@ -2801,27 +2745,18 @@ gmp-place-autocomplete {
         transform: translateY(-7px) rotate(-45deg);
     }
 
-    /* STOP PAGE SCROLL */
 
-    body.menu-open {
-        overflow: hidden;
-    }
-}
-
-/* =========================================================
-   FLO — MOBILE MENU FINAL
-   ========================================================= */
-
-@media (max-width: 900px) {
+    /* =====================================================
+       MOBILE MENU
+       ===================================================== */
 
     .mobile-menu {
         position: fixed !important;
+
         inset: 0 !important;
 
         width: 100vw !important;
         height: 100dvh !important;
-
-        box-sizing: border-box !important;
 
         background: #090909 !important;
 
@@ -2830,7 +2765,9 @@ gmp-place-autocomplete {
         display: flex !important;
         flex-direction: column !important;
 
-        padding: 110px 30px 40px !important;
+        padding: 105px 25px 40px !important;
+
+        gap: 0 !important;
 
         transform: translateY(-100%) !important;
 
@@ -2838,12 +2775,12 @@ gmp-place-autocomplete {
         visibility: hidden !important;
         pointer-events: none !important;
 
+        overflow-y: auto !important;
+
         transition:
             transform .4s cubic-bezier(.77,0,.18,1),
             opacity .25s ease,
             visibility 0s linear .4s !important;
-
-        overflow-y: auto !important;
     }
 
 
@@ -2861,15 +2798,15 @@ gmp-place-autocomplete {
     }
 
 
-    /* -------------------------
-       CLOSE X
-       ------------------------- */
+    /* =====================================================
+       CLOSE BUTTON
+       ===================================================== */
 
     .mobile-menu-close {
         position: absolute !important;
 
-        top: 22px !important;
-        right: 25px !important;
+        top: 20px !important;
+        right: 20px !important;
 
         width: 48px !important;
         height: 48px !important;
@@ -2898,8 +2835,6 @@ gmp-place-autocomplete {
         height: 1px !important;
 
         background: #fff !important;
-
-        display: block !important;
     }
 
 
@@ -2913,16 +2848,16 @@ gmp-place-autocomplete {
     }
 
 
-    /* -------------------------
+    /* =====================================================
        MENU LINKS
-       ------------------------- */
+       ===================================================== */
 
     .mobile-menu-links {
         display: flex !important;
 
         flex-direction: column !important;
 
-        gap: 20px !important;
+        gap: 15px !important;
 
         margin: 0 !important;
         padding: 0 !important;
@@ -2932,22 +2867,21 @@ gmp-place-autocomplete {
     .mobile-menu-links a {
         display: block !important;
 
-        color: #fff !important;
-
         font-family: var(--serif) !important;
 
-        font-size: 32px !important;
+        font-size: 18px !important;
 
         font-weight: 400 !important;
 
-        line-height: 1.15 !important;
+        line-height: 1.2 !important;
 
-        letter-spacing: -0.5px !important;
+        letter-spacing: 0 !important;
+
+        color: rgba(255,255,255,.92) !important;
 
         text-decoration: none !important;
 
         padding: 0 !important;
-
         margin: 0 !important;
 
         transition:
@@ -2957,120 +2891,46 @@ gmp-place-autocomplete {
 
 
     .mobile-menu-links a:hover {
-        opacity: .6 !important;
+        opacity: .55 !important;
 
-        transform: translateX(4px) !important;
+        transform: translateX(3px) !important;
     }
 
 
-    /* -------------------------
+    /* =====================================================
        GET A QUOTE
-       ------------------------- */
+       ===================================================== */
 
     .mobile-menu-cta {
         display: inline-block !important;
 
-        margin-top: 28px !important;
-
         width: max-content !important;
 
-        color: #fff !important;
+        margin-top: 22px !important;
 
         font-family: var(--sans) !important;
 
-        font-size: 10px !important;
+        font-size: 8px !important;
 
         font-weight: 500 !important;
 
-        letter-spacing: 2px !important;
+        letter-spacing: 2.2px !important;
+
+        line-height: 1.2 !important;
 
         text-transform: uppercase !important;
 
-        text-decoration: none !important;
+        color: rgba(255,255,255,.78) !important;
 
-        padding-bottom: 9px !important;
+        padding-bottom: 8px !important;
 
-        border-bottom: 1px solid rgba(255,255,255,.45) !important;
+        border-bottom: 1px solid rgba(255,255,255,.35) !important;
     }
 
 
-    /* Hide the original hamburger while menu is open */
-
-    .mobile-menu.open ~ * {
-        pointer-events: none;
-    }
-
+    /* STOP PAGE SCROLL */
 
     body.menu-open {
         overflow: hidden !important;
     }
-
-}
-
-
-@media (max-width: 600px) {
-
-    .mobile-menu {
-        padding:
-            105px
-            25px
-            35px !important;
-    }
-
-
-    .mobile-menu-links {
-        gap: 18px !important;
-    }
-
-
-    .mobile-menu-links a {
-        font-size: 30px !important;
-    }
-
-
-    .mobile-menu-close {
-        top: 18px !important;
-        right: 20px !important;
-    }
-
-}
-
-/* =========================================================
-   FLO — FINAL MOBILE MENU SIZE
-   ========================================================= */
-
-@media (max-width: 900px) {
-
-    .mobile-menu > a:not(.mobile-menu-cta) {
-        font-family: var(--serif) !important;
-        font-size: 18px !important;
-        font-weight: 400 !important;
-        line-height: 1.2 !important;
-        letter-spacing: 0 !important;
-        color: rgba(255,255,255,.92) !important;
-        text-transform: uppercase !important;
-    }
-
-    .mobile-menu {
-        gap: 16px !important;
-    }
-
-    .mobile-menu-cta {
-        font-size: 8px !important;
-        letter-spacing: 2.2px !important;
-        margin-top: 18px !important;
-    }
-}
-
-
-@media (max-width: 600px) {
-
-    .mobile-menu > a:not(.mobile-menu-cta) {
-        font-size: 18px !important;
-    }
-
-    .mobile-menu {
-        gap: 14px !important;
-    }
-
 }
