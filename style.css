@@ -2687,3 +2687,55 @@ gmp-place-autocomplete {
 .booking-form textarea {
     box-sizing: border-box;
 }
+
+/* =========================================================
+   MOBILE MENU — FINAL FIX
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .menu-toggle {
+        display: flex;
+        position: relative;
+        z-index: 1003;
+    }
+
+
+    .mobile-menu {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
+        width: 100%;
+        height: 100dvh;
+
+        z-index: 1002;
+
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+
+        visibility: hidden;
+        pointer-events: none;
+
+        transform: translateY(-100%);
+
+        transition:
+            transform .45s cubic-bezier(.77, 0, .18, 1),
+            visibility 0s linear .45s;
+    }
+
+
+    .mobile-menu.open {
+        visibility: visible;
+        pointer-events: auto;
+
+        transform: translateY(0);
+
+        transition:
+            transform .45s cubic-bezier(.77, 0, .18, 1),
+            visibility 0s;
+    }
+
+}
