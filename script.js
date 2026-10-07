@@ -16,23 +16,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
         menuToggle.onclick = function (event) {
 
-            event.preventDefault();
-            event.stopPropagation();
+    event.preventDefault();
+    event.stopPropagation();
 
-            const open =
-                mobileMenu.classList.toggle("open");
+    const open =
+        mobileMenu.classList.toggle("open");
 
-            menuToggle.classList.toggle(
-                "active",
-                open
-            );
+    menuToggle.classList.toggle(
+        "active",
+        open
+    );
 
-            menuToggle.setAttribute(
-                "aria-label",
-                open ? "Close menu" : "Open menu"
-            );
+    document.body.classList.toggle(
+        "menu-open",
+        open
+    );
 
-        };
+    menuToggle.setAttribute(
+        "aria-label",
+        open ? "Close menu" : "Open menu"
+    );
+
+};
 
 
         mobileMenu.querySelectorAll("a").forEach(function (link) {
