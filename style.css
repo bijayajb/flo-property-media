@@ -2647,3 +2647,43 @@ gmp-place-autocomplete {
     }
 
 }
+
+/* =========================================================
+   MOBILE DATE FIELD FIX
+   ========================================================= */
+
+.booking-form input[type="date"] {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    display: block;
+}
+
+
+/* Prevent iPhone/Safari date input from overflowing */
+
+.booking-form input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+
+/* Mobile */
+
+@media (max-width: 700px) {
+
+    .booking-form input[type="date"] {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        display: block;
+    }
+
+}
+.booking-form input,
+.booking-form select,
+.booking-form textarea {
+    box-sizing: border-box;
+}
