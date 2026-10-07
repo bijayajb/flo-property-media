@@ -9,75 +9,46 @@ document.addEventListener("DOMContentLoaded", function () {
        MOBILE MENU — RUN FIRST
        ========================================================= */
 
+    document.addEventListener("DOMContentLoaded", () => {
+
     const menuToggle = document.getElementById("menuToggle");
     const mobileMenu = document.getElementById("mobileMenu");
 
-    if (menuToggle && mobileMenu) {
+    if (!menuToggle || !mobileMenu) return;
 
-        menuToggle.onclick = function (event) {
-
-            event.preventDefault();
-            event.stopPropagation();
-
-            const open =
-                mobileMenu.classList.toggle("open");
-
-            menuToggle.classList.toggle(
-                "active",
-                open
-            );
-
-            menuToggle.setAttribute(
-                "aria-label",
-                open ? "Close menu" : "Open menu"
-            );
-
-        };
-
-
-        mobileMenu.querySelectorAll("a").forEach(function (link) {
-
-            link.onclick = function () {
-
-                mobileMenu.classList.remove("open");
-                menuToggle.classList.remove("active");
-
-                menuToggle.setAttribute(
-                    "aria-label",
-                    "Open menu"
-                );
-
-            };
-
-        });
-
+    function openMenu() {
+        mobileMenu.classList.add("open");
+        menuToggle.classList.add("active");
+        menuToggle.setAttribute("aria-label", "Close menu");
+        document.body.classList.add("menu-open");
     }
 
-    /* =====================================================
-       CLOSE MENU WITH ESCAPE
-       ===================================================== */
+    function closeMenu() {
+        mobileMenu.classList.remove("open");
+        menuToggle.classList.remove("active");
+        menuToggle.setAttribute("aria-label", "Open menu");
+        document.body.classList.remove("menu-open");
+    }
 
-    document.addEventListener("keydown", function (event) {
-
-        if (event.key !== "Escape") {
-            return;
+    menuToggle.addEventListener("click", () => {
+        if (mobileMenu.classList.contains("open")) {
+            closeMenu();
+        } else {
+            openMenu();
         }
-
-        if (mobileMenu) {
-            mobileMenu.classList.remove("open");
-        }
-
-        if (menuToggle) {
-            menuToggle.classList.remove("active");
-
-            menuToggle.setAttribute(
-                "aria-label",
-                "Open menu"
-            );
-        }
-
     });
 
+    mobileMenu.querySelectorAll("a").forEach(link => {
+        link.addEventListener("click", closeMenu);
+    });
+
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+            closeMenu();
+        }
+    });
+
+});
 
     /* =====================================================
    NAVIGATION — STAYS VISIBLE
