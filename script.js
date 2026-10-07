@@ -6,90 +6,143 @@
 document.addEventListener("DOMContentLoaded", function () {
 
     /* =========================================================
-       MOBILE MENU — RUN FIRST
-       ========================================================= */
+   MOBILE MENU
+   ========================================================= */
 
-    const menuToggle = document.getElementById("menuToggle");
-    const mobileMenu = document.getElementById("mobileMenu");
+const menuToggle =
+    document.getElementById("menuToggle");
 
-    if (menuToggle && mobileMenu) {
+const mobileMenu =
+    document.getElementById("mobileMenu");
 
-        menuToggle.onclick = function (event) {
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const open =
-        mobileMenu.classList.toggle("open");
-
-    menuToggle.classList.toggle(
-        "active",
-        open
-    );
-
-    document.body.classList.toggle(
-        "menu-open",
-        open
-    );
-
-    menuToggle.setAttribute(
-        "aria-label",
-        open ? "Close menu" : "Open menu"
-    );
-
-};
+const mobileMenuClose =
+    document.getElementById("mobileMenuClose");
 
 
-        mobileMenu.querySelectorAll("a").forEach(function (link) {
+if (menuToggle && mobileMenu) {
 
-            link.onclick = function () {
+    /* -------------------------
+       OPEN / CLOSE MENU
+       ------------------------- */
 
-                mobileMenu.classList.remove("open");
-                menuToggle.classList.remove("active");
+    menuToggle.onclick = function (event) {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const isOpen =
+            mobileMenu.classList.toggle("open");
+
+        menuToggle.classList.toggle(
+            "active",
+            isOpen
+        );
+
+        document.body.classList.toggle(
+            "menu-open",
+            isOpen
+        );
+
+        menuToggle.setAttribute(
+            "aria-label",
+            isOpen
+                ? "Close menu"
+                : "Open menu"
+        );
+    };
+
+
+    /* -------------------------
+       CLOSE BUTTON — X
+       ------------------------- */
+
+    if (mobileMenuClose) {
+
+        mobileMenuClose.onclick =
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                mobileMenu.classList.remove(
+                    "open"
+                );
+
+                menuToggle.classList.remove(
+                    "active"
+                );
+
+                document.body.classList.remove(
+                    "menu-open"
+                );
 
                 menuToggle.setAttribute(
                     "aria-label",
                     "Open menu"
                 );
-
             };
-
-        });
-
     }
 
-        /* Close menu when a link is clicked */
 
-        const mobileLinks =
-            mobileMenu.querySelectorAll("a");
+    /* -------------------------
+       CLOSE WHEN LINK IS CLICKED
+       ------------------------- */
 
-        mobileLinks.forEach(function (link) {
+    mobileMenu
+        .querySelectorAll("a")
+        .forEach(function (link) {
 
-            link.addEventListener("click", function () {
+            link.addEventListener(
+                "click",
+                function () {
 
-                mobileMenu.classList.remove("open");
-                menuToggle.classList.remove("active");
-                document.body.classList.remove("menu-open");
+                    mobileMenu.classList.remove(
+                        "open"
+                    );
 
-                menuToggle.setAttribute(
-                    "aria-label",
-                    "Open menu"
-                );
+                    menuToggle.classList.remove(
+                        "active"
+                    );
 
-            });
+                    document.body.classList.remove(
+                        "menu-open"
+                    );
+
+                    menuToggle.setAttribute(
+                        "aria-label",
+                        "Open menu"
+                    );
+
+                }
+            );
 
         });
 
 
-        /* Close with Escape */
+    /* -------------------------
+       CLOSE WITH ESCAPE
+       ------------------------- */
 
-        document.addEventListener("keydown", function (event) {
+    document.addEventListener(
+        "keydown",
+        function (event) {
 
-            if (event.key === "Escape") {
+            if (
+                event.key === "Escape" &&
+                mobileMenu.classList.contains("open")
+            ) {
 
-                mobileMenu.classList.remove("open");
-                menuToggle.classList.remove("active");
-                document.body.classList.remove("menu-open");
+                mobileMenu.classList.remove(
+                    "open"
+                );
+
+                menuToggle.classList.remove(
+                    "active"
+                );
+
+                document.body.classList.remove(
+                    "menu-open"
+                );
 
                 menuToggle.setAttribute(
                     "aria-label",
@@ -98,9 +151,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
             }
 
-        });
+        }
+    );
 
-    }
+}
 
 
     /* =====================================================
