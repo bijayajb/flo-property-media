@@ -5,49 +5,53 @@
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    /* =====================================================
-       MOBILE MENU
-       ===================================================== */
+    /* =========================================================
+       MOBILE MENU — RUN FIRST
+       ========================================================= */
 
     const menuToggle = document.getElementById("menuToggle");
     const mobileMenu = document.getElementById("mobileMenu");
 
     if (menuToggle && mobileMenu) {
 
-        menuToggle.addEventListener("click", function (event) {
+        menuToggle.onclick = function (event) {
 
             event.preventDefault();
             event.stopPropagation();
 
-            const isOpen =
-                mobileMenu.classList.contains("open");
+            const open =
+                mobileMenu.classList.toggle("open");
 
-            if (isOpen) {
+            menuToggle.classList.toggle(
+                "active",
+                open
+            );
+
+            menuToggle.setAttribute(
+                "aria-label",
+                open ? "Close menu" : "Open menu"
+            );
+
+        };
+
+
+        mobileMenu.querySelectorAll("a").forEach(function (link) {
+
+            link.onclick = function () {
 
                 mobileMenu.classList.remove("open");
                 menuToggle.classList.remove("active");
-                document.body.classList.remove("menu-open");
 
                 menuToggle.setAttribute(
                     "aria-label",
                     "Open menu"
                 );
 
-            } else {
-
-                mobileMenu.classList.add("open");
-                menuToggle.classList.add("active");
-                document.body.classList.add("menu-open");
-
-                menuToggle.setAttribute(
-                    "aria-label",
-                    "Close menu"
-                );
-
-            }
+            };
 
         });
 
+    }
 
         /* Close menu when a link is clicked */
 
