@@ -1,63 +1,105 @@
 /* =========================================================
    FLO PROPERTY MEDIA
-   SAFE WEBSITE JAVASCRIPT
+   WEBSITE JAVASCRIPT
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    /* =========================================================
+    /* =====================================================
        MOBILE MENU
-       ========================================================= */
+       ===================================================== */
 
     const menuToggle = document.getElementById("menuToggle");
     const mobileMenu = document.getElementById("mobileMenu");
 
     if (menuToggle && mobileMenu) {
 
-        function openMenu() {
-            mobileMenu.classList.add("open");
-            menuToggle.classList.add("active");
-            menuToggle.setAttribute("aria-label", "Close menu");
-            document.body.classList.add("menu-open");
-        }
+        menuToggle.addEventListener("click", function (event) {
 
-        function closeMenu() {
-            mobileMenu.classList.remove("open");
-            menuToggle.classList.remove("active");
-            menuToggle.setAttribute("aria-label", "Open menu");
-            document.body.classList.remove("menu-open");
-        }
+            event.preventDefault();
+            event.stopPropagation();
 
-        menuToggle.addEventListener("click", function () {
+            const isOpen =
+                mobileMenu.classList.contains("open");
 
-            if (mobileMenu.classList.contains("open")) {
-                closeMenu();
+            if (isOpen) {
+
+                mobileMenu.classList.remove("open");
+                menuToggle.classList.remove("active");
+                document.body.classList.remove("menu-open");
+
+                menuToggle.setAttribute(
+                    "aria-label",
+                    "Open menu"
+                );
+
             } else {
-                openMenu();
+
+                mobileMenu.classList.add("open");
+                menuToggle.classList.add("active");
+                document.body.classList.add("menu-open");
+
+                menuToggle.setAttribute(
+                    "aria-label",
+                    "Close menu"
+                );
+
             }
 
         });
 
-        /* Close when clicking a menu link */
-        mobileMenu.querySelectorAll("a").forEach(function (link) {
-            link.addEventListener("click", closeMenu);
+
+        /* Close menu when a link is clicked */
+
+        const mobileLinks =
+            mobileMenu.querySelectorAll("a");
+
+        mobileLinks.forEach(function (link) {
+
+            link.addEventListener("click", function () {
+
+                mobileMenu.classList.remove("open");
+                menuToggle.classList.remove("active");
+                document.body.classList.remove("menu-open");
+
+                menuToggle.setAttribute(
+                    "aria-label",
+                    "Open menu"
+                );
+
+            });
+
         });
 
-        /* Close with phone/browser keyboard Escape */
+
+        /* Close with Escape */
+
         document.addEventListener("keydown", function (event) {
+
             if (event.key === "Escape") {
-                closeMenu();
+
+                mobileMenu.classList.remove("open");
+                menuToggle.classList.remove("active");
+                document.body.classList.remove("menu-open");
+
+                menuToggle.setAttribute(
+                    "aria-label",
+                    "Open menu"
+                );
+
             }
+
         });
 
     }
 
 
     /* =====================================================
-       NAVIGATION — STAYS VISIBLE
+       NAVIGATION
        ===================================================== */
 
-    const nav = document.querySelector(".nav");
+    const nav =
+        document.querySelector(".nav");
 
     window.addEventListener(
         "scroll",
@@ -66,9 +108,13 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!nav) return;
 
             if (window.scrollY > 40) {
+
                 nav.classList.add("scrolled");
+
             } else {
+
                 nav.classList.remove("scrolled");
+
             }
 
         },
@@ -77,33 +123,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     );
 
-    /* =====================================================
-   NAVIGATION — STAYS VISIBLE
-   ===================================================== */
 
-const nav = document.querySelector(".nav");
-
-window.addEventListener(
-    "scroll",
-    function () {
-
-        if (!nav) return;
-
-        if (window.scrollY > 40) {
-
-            nav.classList.add("scrolled");
-
-        } else {
-
-            nav.classList.remove("scrolled");
-
-        }
-
-    },
-    {
-        passive: true
-    }
-);
     /* =====================================================
        SMOOTH SCROLL
        ===================================================== */
@@ -119,7 +139,6 @@ window.addEventListener(
                     const targetID =
                         link.getAttribute("href");
 
-
                     if (
                         !targetID ||
                         targetID === "#"
@@ -127,30 +146,22 @@ window.addEventListener(
                         return;
                     }
 
-
                     const target =
-                        document.querySelector(
-                            targetID
-                        );
-
+                        document.querySelector(targetID);
 
                     if (!target) {
                         return;
                     }
 
-
                     event.preventDefault();
-
 
                     const navHeight =
                         nav
                             ? nav.offsetHeight
                             : 0;
 
-
                     const position =
-                        target.getBoundingClientRect()
-                            .top
+                        target.getBoundingClientRect().top
                         +
                         window.scrollY
                         -
@@ -158,18 +169,9 @@ window.addEventListener(
                         -
                         15;
 
-
                     window.scrollTo({
-
-                        top:
-                            Math.max(
-                                position,
-                                0
-                            ),
-
-                        behavior:
-                            "smooth"
-
+                        top: Math.max(position, 0),
+                        behavior: "smooth"
                     });
 
                 }
@@ -183,47 +185,31 @@ window.addEventListener(
        ===================================================== */
 
     const faqItems =
-        document.querySelectorAll(
-            ".faq-item"
-        );
-
+        document.querySelectorAll(".faq-item");
 
     faqItems.forEach(function (item) {
 
         const question =
-            item.querySelector(
-                ".faq-question"
-            );
+            item.querySelector(".faq-question");
 
-
-        if (!question) {
-            return;
-        }
-
+        if (!question) return;
 
         question.addEventListener(
             "click",
             function () {
 
                 const wasOpen =
-                    item.classList.contains(
-                        "open"
-                    );
-
+                    item.classList.contains("open");
 
                 faqItems.forEach(
                     function (otherItem) {
 
-                        otherItem.classList.remove(
-                            "open"
-                        );
-
+                        otherItem.classList.remove("open");
 
                         const otherQuestion =
                             otherItem.querySelector(
                                 ".faq-question"
                             );
-
 
                         if (otherQuestion) {
 
@@ -237,13 +223,9 @@ window.addEventListener(
                     }
                 );
 
-
                 if (!wasOpen) {
 
-                    item.classList.add(
-                        "open"
-                    );
-
+                    item.classList.add("open");
 
                     question.setAttribute(
                         "aria-expanded",
@@ -267,72 +249,51 @@ window.addEventListener(
             'input[name="preferred_date"]'
         );
 
-
     if (dateInput) {
 
-        const today =
-            new Date();
-
+        const today = new Date();
 
         const tomorrow =
             new Date(
-
                 today.getFullYear(),
-
                 today.getMonth(),
-
                 today.getDate() + 1
-
             );
-
 
         const year =
             tomorrow.getFullYear();
-
 
         const month =
             String(
                 tomorrow.getMonth() + 1
             ).padStart(2, "0");
 
-
         const day =
             String(
                 tomorrow.getDate()
             ).padStart(2, "0");
 
-
         dateInput.min =
             `${year}-${month}-${day}`;
-
 
         dateInput.addEventListener(
             "change",
             function () {
 
-                if (!dateInput.value) {
-                    return;
-                }
-
+                if (!dateInput.value) return;
 
                 const selected =
                     new Date(
-                        dateInput.value
-                        + "T00:00:00"
+                        dateInput.value +
+                        "T00:00:00"
                     );
-
 
                 const todayOnly =
                     new Date(
-
                         today.getFullYear(),
-
                         today.getMonth(),
-
                         today.getDate()
-
                     );
-
 
                 if (selected <= todayOnly) {
 
@@ -359,12 +320,10 @@ window.addEventListener(
             'select[name="package"]'
         );
 
-
     const packageButtons =
         document.querySelectorAll(
             ".package-button[data-package]"
         );
-
 
     packageButtons.forEach(
         function (button) {
@@ -375,7 +334,6 @@ window.addEventListener(
 
                     const packageName =
                         button.dataset.package;
-
 
                     if (
                         packageSelect &&
@@ -399,10 +357,7 @@ window.addEventListener(
        ===================================================== */
 
     const form =
-        document.querySelector(
-            ".booking-form"
-        );
-
+        document.querySelector(".booking-form");
 
     if (form) {
 
@@ -412,12 +367,8 @@ window.addEventListener(
 
                 let valid = true;
 
-
                 const requiredFields =
-                    form.querySelectorAll(
-                        "[required]"
-                    );
-
+                    form.querySelectorAll("[required]");
 
                 requiredFields.forEach(
                     function (field) {
@@ -425,7 +376,6 @@ window.addEventListener(
                         field.classList.remove(
                             "field-error"
                         );
-
 
                         if (
                             !field.value.trim()
@@ -442,23 +392,17 @@ window.addEventListener(
                     }
                 );
 
-
                 if (!valid) {
 
                     event.preventDefault();
-
 
                     alert(
                         "Please complete all required fields."
                     );
 
-
                     return;
 
                 }
-
-
-                /* Future-date check */
 
                 if (
                     dateInput &&
@@ -467,14 +411,12 @@ window.addEventListener(
 
                     const selected =
                         new Date(
-                            dateInput.value
-                            + "T00:00:00"
+                            dateInput.value +
+                            "T00:00:00"
                         );
-
 
                     const today =
                         new Date();
-
 
                     today.setHours(
                         0,
@@ -483,18 +425,13 @@ window.addEventListener(
                         0
                     );
 
-
-                    if (
-                        selected <= today
-                    ) {
+                    if (selected <= today) {
 
                         event.preventDefault();
-
 
                         alert(
                             "Please select a future booking date."
                         );
-
 
                         dateInput.focus();
 
@@ -519,12 +456,8 @@ window.addEventListener(
             'input[name="property_address"]'
         );
 
-
     const travelNotice =
-        document.querySelector(
-            "#travelNotice"
-        );
-
+        document.querySelector("#travelNotice");
 
     if (
         addressInput &&
@@ -538,7 +471,6 @@ window.addEventListener(
                 const address =
                     addressInput.value.trim();
 
-
                 if (!address) {
 
                     travelNotice.classList.remove(
@@ -549,11 +481,7 @@ window.addEventListener(
 
                 }
 
-
-                travelNotice.classList.add(
-                    "show"
-                );
-
+                travelNotice.classList.add("show");
 
                 travelNotice.textContent =
                     "Melbourne service area. Properties beyond 25 km may incur a $1 travel surcharge.";
@@ -573,7 +501,6 @@ window.addEventListener(
             ".service-card, .package, .project-image, .booking-form"
         );
 
-
     if (
         window.matchMedia(
             "(pointer: fine)"
@@ -590,7 +517,6 @@ window.addEventListener(
                         const rect =
                             card.getBoundingClientRect();
 
-
                         const x =
                             (
                                 (event.clientX -
@@ -598,7 +524,6 @@ window.addEventListener(
                                 /
                                 rect.width
                             ) * 100;
-
 
                         const y =
                             (
@@ -608,12 +533,10 @@ window.addEventListener(
                                 rect.height
                             ) * 100;
 
-
                         card.style.setProperty(
                             "--mouse-x",
                             `${x}%`
                         );
-
 
                         card.style.setProperty(
                             "--mouse-y",
@@ -623,7 +546,6 @@ window.addEventListener(
                     }
                 );
 
-
                 card.addEventListener(
                     "pointerleave",
                     function () {
@@ -631,7 +553,6 @@ window.addEventListener(
                         card.style.removeProperty(
                             "--mouse-x"
                         );
-
 
                         card.style.removeProperty(
                             "--mouse-y"
@@ -651,10 +572,7 @@ window.addEventListener(
        ===================================================== */
 
     const heroImage =
-        document.querySelector(
-            ".hero-image"
-        );
-
+        document.querySelector(".hero-image");
 
     if (
         heroImage &&
@@ -669,7 +587,6 @@ window.addEventListener(
 
                 const scroll =
                     window.scrollY;
-
 
                 if (
                     scroll <
@@ -689,16 +606,4 @@ window.addEventListener(
 
     }
 
-
-    /* =====================================================
-       IMPORTANT:
-       NO AUTOMATIC .REVEAL CLASS IS ADDED HERE.
-       
-       This prevents your website text from disappearing
-       if an animation script fails.
-       ===================================================== */
-
-
 });
-
-
