@@ -1366,37 +1366,30 @@
 
         <div class="form-row">
 
+    <div class="form-group">
+        <label>NAME *</label>
 
-            <div class="form-group">
-
-                <label>
-                    NAME *
-                </label>
-
-                <input
-                    type="text"
-                    name="name"
-                    placeholder="Your full name"
-                    required
-                >
-
-            </div>
+        <input
+            type="text"
+            name="name"
+            placeholder="Your full name"
+            required
+        >
+    </div>
 
 
-            <div class="form-group">
+    <div class="form-group">
+        <label>EMAIL *</label>
 
-                <label>
-                    EMAIL *
-                </label>
+        <input
+            type="email"
+            name="email"
+            placeholder="you@email.com"
+            required
+        >
+    </div>
 
-                <input
-                    type="email"
-                    name="email"
-                    placeholder="you@email.com"
-                    required
-                >
-
-            </div>
+</div>
 
 <div class="form-row">
 
@@ -1404,9 +1397,7 @@
 
         <label>
             BUSINESS NAME
-            <span style="opacity:0.55;">
-                (OPTIONAL)
-            </span>
+            <span class="optional-label">(OPTIONAL)</span>
         </label>
 
         <input
@@ -1417,36 +1408,25 @@
 
     </div>
 
+
+    <div class="form-group">
+
+        <label>
+            MOBILE *
+        </label>
+
+        <input
+            type="tel"
+            name="mobile"
+            placeholder="04XX XXX XXX"
+            required
+        >
+
+    </div>
+
 </div>
-        </div>
 
-
-        <div class="form-row">
-
-
-            <div class="form-group">
-
-                <label>
-                    MOBILE *
-                </label>
-
-                <input
-                    type="tel"
-                    name="mobile"
-                    placeholder="04XX XXX XXX"
-                    required
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label>
-                    PROPERTY ADDRESS *
-                </label>
-
-                <div class="form-group">
+           <div class="form-group property-address-group">
 
     <label>
         PROPERTY ADDRESS *
@@ -1457,7 +1437,6 @@
         class="property-address-autocomplete"
     ></div>
 
-    <!-- Actual selected address saved/submitted -->
     <input
         type="hidden"
         id="propertyAddress"
@@ -1494,7 +1473,7 @@
 >
     South East Melbourne, Australia service area.
     Properties beyond 25 km may incur a
-    $1 travel surcharge per kilometer.
+    $1 travel surcharge per kilometre.
 </div>
 
 <div
