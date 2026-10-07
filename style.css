@@ -2688,13 +2688,122 @@ gmp-place-autocomplete {
     box-sizing: border-box;
 }
 
-/* ---------------------------------------------------------
+/* =========================================================
    MOBILE MENU
-   --------------------------------------------------------- */
+   ========================================================= */
 
-const menuToggle = document.getElementById("menuToggle");
-const mobileMenu = document.getElementById("mobileMenu");
+@media (max-width: 900px) {
 
-if (menuToggle && mobileMenu) {
-    ...
+    .menu-toggle {
+        display: flex;
+        position: relative;
+        width: 48px;
+        height: 48px;
+        border: 1px solid rgba(255,255,255,.5);
+        background: rgba(0,0,0,.25);
+        cursor: pointer;
+
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 6px;
+
+        z-index: 1002;
+    }
+
+    .menu-toggle span {
+        display: block;
+        width: 19px;
+        height: 1px;
+        background: #fff;
+        pointer-events: none;
+        transition: .3s ease;
+    }
+
+    /* MENU */
+
+    .mobile-menu {
+        position: fixed;
+        inset: 0;
+
+        width: 100vw;
+        height: 100dvh;
+
+        background: #090909;
+        z-index: 1001;
+
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+
+        padding: 120px 30px 40px;
+
+        transform: translateY(-100%);
+        visibility: hidden;
+        pointer-events: none;
+
+        overflow-y: auto;
+
+        transition:
+            transform .35s ease,
+            visibility 0s linear .35s;
+    }
+
+    /* OPEN */
+
+    .mobile-menu.open {
+        transform: translateY(0);
+        visibility: visible;
+        pointer-events: auto;
+
+        transition:
+            transform .35s ease,
+            visibility 0s;
+    }
+
+    /* LINKS */
+
+    .mobile-menu a {
+        display: block;
+        color: #fff;
+        font-family: var(--serif);
+        font-size: 38px;
+        line-height: 1.1;
+        letter-spacing: -1px;
+        text-decoration: none;
+    }
+
+    .mobile-menu-cta {
+        margin-top: 15px;
+
+        font-family: var(--sans) !important;
+        font-size: 11px !important;
+        letter-spacing: 2px !important;
+        text-transform: uppercase;
+
+        width: max-content;
+
+        border-bottom: 1px solid #555;
+        padding-bottom: 10px;
+    }
+
+    /* HAMBURGER → X */
+
+    .menu-toggle.active span:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+    }
+
+    .menu-toggle.active span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .menu-toggle.active span:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+    }
+
+    /* STOP PAGE SCROLL */
+
+    body.menu-open {
+        overflow: hidden;
+    }
 }
