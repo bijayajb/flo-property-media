@@ -3042,16 +3042,16 @@ gmp-place-autocomplete {
 @media (max-width: 900px) {
 
     .mobile-menu-links {
-        gap: 14px !important;
+        gap: 16px !important;
     }
 
     .mobile-menu-links a {
         font-family: var(--serif) !important;
-        font-size: 21px !important;
+        font-size: 18px !important;
         font-weight: 400 !important;
-        line-height: 1.15 !important;
-        letter-spacing: -0.2px !important;
-        color: rgba(255,255,255,.94) !important;
+        line-height: 1.2 !important;
+        letter-spacing: 0 !important;
+        color: rgba(255,255,255,.92) !important;
         text-decoration: none !important;
     }
 
@@ -3067,11 +3067,11 @@ gmp-place-autocomplete {
 @media (max-width: 600px) {
 
     .mobile-menu-links {
-        gap: 13px !important;
+        gap: 15px !important;
     }
 
     .mobile-menu-links a {
-        font-size: 20px !important;
+        font-size: 18px !important;
     }
 
 }
