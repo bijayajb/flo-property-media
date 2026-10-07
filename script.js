@@ -705,3 +705,111 @@ window.addEventListener(
 
 
 });
+
+/* =========================================================
+   MOBILE MENU
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const menuToggle =
+        document.getElementById("menuToggle");
+
+    const mobileMenu =
+        document.getElementById("mobileMenu");
+
+
+    if (!menuToggle || !mobileMenu) {
+        return;
+    }
+
+
+    /* OPEN / CLOSE MENU */
+
+    menuToggle.addEventListener(
+        "click",
+        function () {
+
+            menuToggle.classList.toggle("active");
+
+            mobileMenu.classList.toggle("open");
+
+
+            const isOpen =
+                mobileMenu.classList.contains("open");
+
+
+            menuToggle.setAttribute(
+                "aria-label",
+                isOpen
+                    ? "Close menu"
+                    : "Open menu"
+            );
+
+        }
+    );
+
+
+    /* CLOSE MENU WHEN A LINK IS CLICKED */
+
+    const mobileLinks =
+        mobileMenu.querySelectorAll("a");
+
+
+    mobileLinks.forEach(
+        function (link) {
+
+            link.addEventListener(
+                "click",
+                function () {
+
+                    mobileMenu.classList.remove(
+                        "open"
+                    );
+
+                    menuToggle.classList.remove(
+                        "active"
+                    );
+
+                    menuToggle.setAttribute(
+                        "aria-label",
+                        "Open menu"
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    /* CLOSE MENU IF USER PRESSES ESCAPE */
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key === "Escape" &&
+                mobileMenu.classList.contains("open")
+            ) {
+
+                mobileMenu.classList.remove(
+                    "open"
+                );
+
+                menuToggle.classList.remove(
+                    "active"
+                );
+
+                menuToggle.setAttribute(
+                    "aria-label",
+                    "Open menu"
+                );
+
+            }
+
+        }
+    );
+
+});
