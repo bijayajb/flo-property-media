@@ -6,95 +6,135 @@
 document.addEventListener("DOMContentLoaded", function () {
 
     /* =========================================================
-   MOBILE MENU
-   ========================================================= */
+       MOBILE MENU
+       ========================================================= */
 
-const menuToggle =
-    document.getElementById("menuToggle");
+    const menuToggle =
+        document.getElementById("menuToggle");
 
-const mobileMenu =
-    document.getElementById("mobileMenu");
+    const mobileMenu =
+        document.getElementById("mobileMenu");
 
-const mobileMenuClose =
-    document.getElementById("mobileMenuClose");
-
-
-if (menuToggle && mobileMenu) {
-
-    /* -------------------------
-       OPEN / CLOSE MENU
-       ------------------------- */
-
-    menuToggle.onclick = function (event) {
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        const isOpen =
-            mobileMenu.classList.toggle("open");
-
-        menuToggle.classList.toggle(
-            "active",
-            isOpen
-        );
-
-        document.body.classList.toggle(
-            "menu-open",
-            isOpen
-        );
-
-        menuToggle.setAttribute(
-            "aria-label",
-            isOpen
-                ? "Close menu"
-                : "Open menu"
-        );
-    };
+    const mobileMenuClose =
+        document.getElementById("mobileMenuClose");
 
 
-    /* -------------------------
-       CLOSE BUTTON — X
-       ------------------------- */
+    if (menuToggle && mobileMenu) {
 
-    if (mobileMenuClose) {
 
-        mobileMenuClose.onclick =
+        /* =====================================================
+           OPEN / CLOSE MENU
+           ===================================================== */
+
+        menuToggle.onclick = function (event) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const isOpen =
+                mobileMenu.classList.toggle("open");
+
+            menuToggle.classList.toggle(
+                "active",
+                isOpen
+            );
+
+            document.body.classList.toggle(
+                "menu-open",
+                isOpen
+            );
+
+            menuToggle.setAttribute(
+                "aria-label",
+                isOpen
+                    ? "Close menu"
+                    : "Open menu"
+            );
+
+        };
+
+
+        /* =====================================================
+           CLOSE BUTTON — X
+           ===================================================== */
+
+        if (mobileMenuClose) {
+
+            mobileMenuClose.onclick =
+                function (event) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    mobileMenu.classList.remove(
+                        "open"
+                    );
+
+                    menuToggle.classList.remove(
+                        "active"
+                    );
+
+                    document.body.classList.remove(
+                        "menu-open"
+                    );
+
+                    menuToggle.setAttribute(
+                        "aria-label",
+                        "Open menu"
+                    );
+
+                };
+
+        }
+
+
+        /* =====================================================
+           CLOSE WHEN MENU LINK IS CLICKED
+           ===================================================== */
+
+        mobileMenu
+            .querySelectorAll("a")
+            .forEach(function (link) {
+
+                link.addEventListener(
+                    "click",
+                    function () {
+
+                        mobileMenu.classList.remove(
+                            "open"
+                        );
+
+                        menuToggle.classList.remove(
+                            "active"
+                        );
+
+                        document.body.classList.remove(
+                            "menu-open"
+                        );
+
+                        menuToggle.setAttribute(
+                            "aria-label",
+                            "Open menu"
+                        );
+
+                    }
+                );
+
+            });
+
+
+        /* =====================================================
+           CLOSE WITH ESCAPE
+           ===================================================== */
+
+        document.addEventListener(
+            "keydown",
             function (event) {
 
-                event.preventDefault();
-                event.stopPropagation();
-
-                mobileMenu.classList.remove(
-                    "open"
-                );
-
-                menuToggle.classList.remove(
-                    "active"
-                );
-
-                document.body.classList.remove(
-                    "menu-open"
-                );
-
-                menuToggle.setAttribute(
-                    "aria-label",
-                    "Open menu"
-                );
-            };
-    }
-
-
-    /* -------------------------
-       CLOSE WHEN LINK IS CLICKED
-       ------------------------- */
-
-    mobileMenu
-        .querySelectorAll("a")
-        .forEach(function (link) {
-
-            link.addEventListener(
-                "click",
-                function () {
+                if (
+                    event.key === "Escape" &&
+                    mobileMenu.classList.contains("open")
+                ) {
 
                     mobileMenu.classList.remove(
                         "open"
@@ -114,47 +154,11 @@ if (menuToggle && mobileMenu) {
                     );
 
                 }
-            );
-
-        });
-
-
-    /* -------------------------
-       CLOSE WITH ESCAPE
-       ------------------------- */
-
-    document.addEventListener(
-        "keydown",
-        function (event) {
-
-            if (
-                event.key === "Escape" &&
-                mobileMenu.classList.contains("open")
-            ) {
-
-                mobileMenu.classList.remove(
-                    "open"
-                );
-
-                menuToggle.classList.remove(
-                    "active"
-                );
-
-                document.body.classList.remove(
-                    "menu-open"
-                );
-
-                menuToggle.setAttribute(
-                    "aria-label",
-                    "Open menu"
-                );
 
             }
+        );
 
-        }
-    );
-
-}
+    }
 
 
     /* =====================================================
