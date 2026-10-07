@@ -3036,42 +3036,41 @@ gmp-place-autocomplete {
 }
 
 /* =========================================================
-   FLO — FINAL MOBILE MENU TYPOGRAPHY
+   FLO — FINAL MOBILE MENU SIZE
    ========================================================= */
 
 @media (max-width: 900px) {
 
-    .mobile-menu-links {
-        gap: 16px !important;
-    }
-
-    .mobile-menu-links a {
+    .mobile-menu > a:not(.mobile-menu-cta) {
         font-family: var(--serif) !important;
         font-size: 18px !important;
         font-weight: 400 !important;
         line-height: 1.2 !important;
         letter-spacing: 0 !important;
         color: rgba(255,255,255,.92) !important;
-        text-decoration: none !important;
+        text-transform: uppercase !important;
+    }
+
+    .mobile-menu {
+        gap: 16px !important;
     }
 
     .mobile-menu-cta {
-        margin-top: 20px !important;
-        font-family: var(--sans) !important;
         font-size: 8px !important;
         letter-spacing: 2.2px !important;
+        margin-top: 18px !important;
     }
 }
 
 
 @media (max-width: 600px) {
 
-    .mobile-menu-links {
-        gap: 15px !important;
+    .mobile-menu > a:not(.mobile-menu-cta) {
+        font-size: 18px !important;
     }
 
-    .mobile-menu-links a {
-        font-size: 18px !important;
+    .mobile-menu {
+        gap: 14px !important;
     }
 
 }
