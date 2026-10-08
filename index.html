@@ -1794,60 +1794,51 @@
      ===================================================== -->
 
 <script>
-    window.initFLOGoogleMaps = async function () {
+    window.initFLOGoogleMaps = async function () {<script>
+window.initFLOGoogleMaps = async function () {
+    const autocompleteContainer =
+        document.getElementById("propertyAddressAutocomplete");
 
-        try {
+    if (!autocompleteContainer) {
+        console.error("FLO: Property address autocomplete container not found.");
+        return;
+    }
 
-            const {
-                PlaceAutocompleteElement
-            } = await google.maps.importLibrary("places");
+    /*
+     * -----------------------------------------
+     * 1. LOAD PLACES FIRST
+     * -----------------------------------------
+     * Address search must work independently from
+     * the Routes API.
+     */
+    try {
+        const { PlaceAutocompleteElement } =
+            await google.maps.importLibrary("places");
 
-            const {
-                Route
-            } = await google.maps.importLibrary("routes");
+        const placeAutocomplete =
+            new PlaceAutocompleteElement({
+                includedRegionCodes: ["au"]
+            });
 
+        placeAutocomplete.placeholder = "Search property address";
 
-            const autocompleteContainer =
-                document.getElementById(
-                    "propertyAddressAutocomplete"
-                );
+        autocompleteContainer.innerHTML = "";
+        autocompleteContainer.appendChild(placeAutocomplete);
 
-            if (!autocompleteContainer) {
-                return;
-            }
+        window.floPlaceAutocomplete = placeAutocomplete;
 
+        /*
+         * -----------------------------------------
+         * 2. ADDRESS SELECTED
+         * -----------------------------------------
+         */
+        placeAutocomplete.addEventListener(
+            "gmp-select",
+            async function (event) {
 
-            const placeAutocomplete =
-                new PlaceAutocompleteElement({
-
-                    includedRegionCodes: ["au"]
-
-                });
-
-
-            placeAutocomplete.placeholder =
-                "Search property address";
-
-
-            autocompleteContainer.appendChild(
-                placeAutocomplete
-            );
-
-
-            window.floPlaceAutocomplete =
-                placeAutocomplete;
-
-            window.floRoute =
-                Route;
-
-
-            placeAutocomplete.addEventListener(
-                "gmp-select",
-                async function (event) {
-
+                try {
                     const place =
                         event.placePrediction.toPlace();
-
 
                     await place.fetchFields({
                         fields: [
@@ -1856,93 +1847,149 @@
                         ]
                     });
 
-
                     if (
                         !place.formattedAddress ||
                         !place.location
                     ) {
+                        console.error(
+                            "FLO: Selected place has no address/location."
+                        );
                         return;
                     }
-
 
                     const address =
                         place.formattedAddress;
 
-
                     const latitude =
                         place.location.lat();
-
 
                     const longitude =
                         place.location.lng();
 
-
+                    /*
+                     * Hidden form fields
+                     */
                     const addressInput =
                         document.getElementById(
                             "propertyAddress"
                         );
-
 
                     const selectedPlaceInput =
                         document.getElementById(
                             "selectedPlaceId"
                         );
 
-
                     const latitudeInput =
                         document.getElementById(
                             "propertyLatitude"
                         );
-
 
                     const longitudeInput =
                         document.getElementById(
                             "propertyLongitude"
                         );
 
-
                     if (addressInput) {
-                        addressInput.value =
-                            address;
+                        addressInput.value = address;
                     }
-
 
                     if (selectedPlaceInput) {
                         selectedPlaceInput.value =
                             place.id || "";
                     }
 
-
                     if (latitudeInput) {
                         latitudeInput.value =
                             latitude;
                     }
-
 
                     if (longitudeInput) {
                         longitudeInput.value =
                             longitude;
                     }
 
+                    /*
+                     * -----------------------------------------
+                     * 3. WAIT FOR ROUTES API
+                     * -----------------------------------------
+                     */
+                    if (window.floRoutesReady) {
+                        const Route =
+                            await window.floRoutesReady;
 
-                    await calculateFLOTravelCharge(
-                        place.location
+                        if (Route) {
+                            await calculateFLOTravelCharge(
+                                place.location
+                            );
+                        } else {
+                            const notice =
+                                document.getElementById(
+                                    "travelNotice"
+                                );
+
+                            if (notice) {
+                                notice.textContent =
+                                    "Address selected. We couldn't calculate the travel distance right now.";
+                            }
+                        }
+                    }
+
+                } catch (error) {
+                    console.error(
+                        "FLO address selection error:",
+                        error
                     );
-
                 }
+            }
+        );
 
-            );
+        console.log(
+            "FLO: Google Places autocomplete loaded successfully."
+        );
 
-        } catch (error) {
+    } catch (error) {
 
-            console.error(
-                "FLO Google Maps error:",
-                error
-            );
+        console.error(
+            "FLO Google Places error:",
+            error
+        );
 
-        }
+        return;
+    }
 
-    };
+    /*
+     * -----------------------------------------
+     * 4. LOAD ROUTES SEPARATELY
+     * -----------------------------------------
+     *
+     * IMPORTANT:
+     * If Routes fails, address search STILL works.
+     */
+    window.floRoutesReady =
+        google.maps.importLibrary("routes")
+            .then(({ Route }) => {
+
+                window.floRoute = Route;
+
+                console.log(
+                    "FLO: Google Routes loaded successfully."
+                );
+
+                return Route;
+            })
+            .catch((error) => {
+
+                window.floRoute = null;
+
+                console.error(
+                    "FLO Google Routes error:",
+                    error
+                );
+
+                return null;
+            });
+};
+</script>
 
 
     async function calculateFLOTravelCharge(
