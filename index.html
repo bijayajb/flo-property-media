@@ -1794,24 +1794,26 @@
      ===================================================== -->
 
 <script>
-    window.initFLOGoogleMaps = async function () {<script>
 window.initFLOGoogleMaps = async function () {
+
     const autocompleteContainer =
         document.getElementById("propertyAddressAutocomplete");
 
     if (!autocompleteContainer) {
-        console.error("FLO: Property address autocomplete container not found.");
+        console.error(
+            "FLO: Property address autocomplete container not found."
+        );
         return;
     }
 
     /*
-     * -----------------------------------------
-     * 1. LOAD PLACES FIRST
-     * -----------------------------------------
-     * Address search must work independently from
-     * the Routes API.
+     * =====================================================
+     * GOOGLE PLACES
+     * =====================================================
      */
+
     try {
+
         const { PlaceAutocompleteElement } =
             await google.maps.importLibrary("places");
 
@@ -1820,23 +1822,35 @@ window.initFLOGoogleMaps = async function () {
                 includedRegionCodes: ["au"]
             });
 
-        placeAutocomplete.placeholder = "Search property address";
+        placeAutocomplete.placeholder =
+            "Search property address";
 
         autocompleteContainer.innerHTML = "";
-        autocompleteContainer.appendChild(placeAutocomplete);
 
-        window.floPlaceAutocomplete = placeAutocomplete;
+        autocompleteContainer.appendChild(
+            placeAutocomplete
+        );
+
+        window.floPlaceAutocomplete =
+            placeAutocomplete;
+
+        console.log(
+            "FLO: Google Places autocomplete loaded."
+        );
+
 
         /*
-         * -----------------------------------------
-         * 2. ADDRESS SELECTED
-         * -----------------------------------------
+         * =================================================
+         * ADDRESS SELECTED
+         * =================================================
          */
+
         placeAutocomplete.addEventListener(
             "gmp-select",
             async function (event) {
 
                 try {
+
                     const place =
                         event.placePrediction.toPlace();
 
@@ -1852,10 +1866,17 @@ window.initFLOGoogleMaps = async function () {
                         !place.location
                     ) {
                         console.error(
-                            "FLO: Selected place has no address/location."
+                            "FLO: Invalid place selected."
                         );
                         return;
                     }
+
+
+                    /*
+                     * -----------------------------------------
+                     * GET ADDRESS DETAILS
+                     * -----------------------------------------
+                     */
 
                     const address =
                         place.formattedAddress;
@@ -1866,9 +1887,13 @@ window.initFLOGoogleMaps = async function () {
                     const longitude =
                         place.location.lng();
 
+
                     /*
-                     * Hidden form fields
+                     * -----------------------------------------
+                     * SAVE TO HIDDEN FORM FIELDS
+                     * -----------------------------------------
                      */
+
                     const addressInput =
                         document.getElementById(
                             "propertyAddress"
@@ -1889,8 +1914,10 @@ window.initFLOGoogleMaps = async function () {
                             "propertyLongitude"
                         );
 
+
                     if (addressInput) {
-                        addressInput.value = address;
+                        addressInput.value =
+                            address;
                     }
 
                     if (selectedPlaceInput) {
@@ -1908,20 +1935,26 @@ window.initFLOGoogleMaps = async function () {
                             longitude;
                     }
 
+
                     /*
                      * -----------------------------------------
-                     * 3. WAIT FOR ROUTES API
+                     * CALCULATE TRAVEL DISTANCE
                      * -----------------------------------------
                      */
+
                     if (window.floRoutesReady) {
+
                         const Route =
                             await window.floRoutesReady;
 
                         if (Route) {
+
                             await calculateFLOTravelCharge(
                                 place.location
                             );
+
                         } else {
+
                             const notice =
                                 document.getElementById(
                                     "travelNotice"
@@ -1929,22 +1962,23 @@ window.initFLOGoogleMaps = async function () {
 
                             if (notice) {
                                 notice.textContent =
-                                    "Address selected. We couldn't calculate the travel distance right now.";
+                                    "We couldn't calculate the travel distance right now.";
                             }
+
                         }
+
                     }
 
                 } catch (error) {
+
                     console.error(
                         "FLO address selection error:",
                         error
                     );
-                }
-            }
-        );
 
-        console.log(
-            "FLO: Google Places autocomplete loaded successfully."
+                }
+
+            }
         );
 
     } catch (error) {
@@ -1954,32 +1988,36 @@ window.initFLOGoogleMaps = async function () {
             error
         );
 
-        return;
     }
 
+
     /*
-     * -----------------------------------------
-     * 4. LOAD ROUTES SEPARATELY
-     * -----------------------------------------
+     * =====================================================
+     * GOOGLE ROUTES
+     * =====================================================
      *
-     * IMPORTANT:
-     * If Routes fails, address search STILL works.
+     * Loaded separately so a Routes error does NOT
+     * break the address autocomplete.
      */
+
     window.floRoutesReady =
         google.maps.importLibrary("routes")
-            .then(({ Route }) => {
+            .then(function ({ Route }) {
 
-                window.floRoute = Route;
+                window.floRoute =
+                    Route;
 
                 console.log(
-                    "FLO: Google Routes loaded successfully."
+                    "FLO: Google Routes loaded."
                 );
 
                 return Route;
-            })
-            .catch((error) => {
 
-                window.floRoute = null;
+            })
+            .catch(function (error) {
+
+                window.floRoute =
+                    null;
 
                 console.error(
                     "FLO Google Routes error:",
@@ -1987,189 +2025,217 @@ window.initFLOGoogleMaps = async function () {
                 );
 
                 return null;
+
             });
+
 };
-</script>
 
 
-    async function calculateFLOTravelCharge(
-        destination
+/*
+ * =========================================================
+ * TRAVEL CHARGE CALCULATION
+ * =========================================================
+ */
+
+async function calculateFLOTravelCharge(
+    destination
+) {
+
+    const notice =
+        document.getElementById(
+            "travelNotice"
+        );
+
+    const chargeDisplay =
+        document.getElementById(
+            "travelChargeDisplay"
+        );
+
+    const chargeInput =
+        document.getElementById(
+            "travelCharge"
+        );
+
+    const distanceInput =
+        document.getElementById(
+            "travelDistanceKm"
+        );
+
+
+    if (
+        !notice ||
+        !chargeDisplay ||
+        !chargeInput ||
+        !distanceInput
     ) {
+        return;
+    }
 
-        const notice =
-            document.getElementById(
-                "travelNotice"
+
+    try {
+
+        notice.textContent =
+            "Calculating travel distance…";
+
+        notice.classList.remove(
+            "service-unavailable"
+        );
+
+
+        const Route =
+            window.floRoute;
+
+        if (!Route) {
+
+            throw new Error(
+                "Google Routes API is unavailable."
             );
 
-        const chargeDisplay =
-            document.getElementById(
-                "travelChargeDisplay"
-            );
+        }
 
-        const chargeInput =
-            document.getElementById(
-                "travelCharge"
-            );
 
-        const distanceInput =
-            document.getElementById(
-                "travelDistanceKm"
-            );
+        /*
+         * FLO STARTING POINT
+         *
+         * Dandenong North, VIC
+         */
+
+        const routeResult =
+            await Route.computeRoutes({
+
+                origin: {
+                    lat: -37.9368,
+                    lng: 145.2088
+                },
+
+                destination:
+                    destination,
+
+                travelMode:
+                    "DRIVING",
+
+                routingPreference:
+                    "TRAFFIC_UNAWARE",
+
+                fields: [
+                    "distanceMeters"
+                ]
+
+            });
 
 
         if (
-            !notice ||
-            !chargeDisplay ||
-            !chargeInput ||
-            !distanceInput
+            !routeResult.routes ||
+            !routeResult.routes.length
         ) {
-            return;
+
+            throw new Error(
+                "No driving route found."
+            );
+
         }
 
 
-        try {
+        const distanceMeters =
+            routeResult.routes[0]
+                .distanceMeters;
+
+
+        const distanceKm =
+            distanceMeters / 1000;
+
+
+        const roundedDistance =
+            Math.ceil(distanceKm);
+
+
+        distanceInput.value =
+            roundedDistance;
+
+
+        /*
+         * =================================================
+         * SERVICE AREA
+         * =================================================
+         */
+
+        if (distanceKm > 150) {
+
+            chargeInput.value =
+                "";
+
+            chargeDisplay.textContent =
+                "Unfortunately we do not service this area.";
 
             notice.textContent =
-                "Calculating travel distance…";
+                "Unfortunately we do not service this area.";
 
-
-            notice.classList.remove(
+            notice.classList.add(
                 "service-unavailable"
             );
 
-
-            const Route =
-                window.floRoute;
-
-
-            const routeResult =
-                await Route.computeRoutes({
-
-                    origin: {
-                        lat: -37.9368,
-                        lng: 145.2088
-                    },
-
-                    destination:
-                        destination,
-
-                    travelMode: "DRIVING",
-
-                    routingPreference:
-                        "TRAFFIC_UNAWARE",
-
-                    fields: [
-                        "distanceMeters"
-                    ]
-
-                });
-
-
-            if (
-                !routeResult.routes ||
-                !routeResult.routes.length
-            ) {
-                throw new Error(
-                    "No driving route found."
-                );
-            }
-
-
-            const distanceMeters =
-                routeResult.routes[0]
-                    .distanceMeters;
-
-
-            const distanceKm =
-                distanceMeters / 1000;
-
-
-            const roundedDistance =
-                Math.ceil(
-                    distanceKm
-                );
-
-
-            distanceInput.value =
-                roundedDistance;
-
-
-            /*
-             * FLO pricing:
-             *
-             * First 25 km = free
-             * Every km beyond 25 km = $1
-             * Maximum service distance = 150 km
-             */
-
-
-            if (distanceKm > 150) {
-
-                chargeInput.value =
-                    "";
-
-                chargeDisplay.textContent =
-                    "Unfortunately we do not service this area.";
-
-                notice.textContent =
-                    "Unfortunately we do not service this area.";
-
-                notice.classList.add(
-                    "service-unavailable"
-                );
-
-                return;
-
-            }
-
-
-            const travelCharge =
-                distanceKm > 25
-                    ? Math.ceil(
-                        distanceKm - 25
-                    )
-                    : 0;
-
-
-            chargeInput.value =
-                travelCharge;
-
-
-            if (travelCharge > 0) {
-
-                chargeDisplay.textContent =
-                    `Travel surcharge: $${travelCharge}`;
-
-                notice.textContent =
-                    `${roundedDistance} km driving distance from Dandenong North. Travel surcharge: $${travelCharge}.`;
-
-            } else {
-
-                chargeDisplay.textContent =
-                    "No travel surcharge";
-
-                notice.textContent =
-                    `${roundedDistance} km driving distance from Dandenong North. No travel surcharge.`;
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Travel calculation error:",
-                error
-            );
-
-
-            notice.textContent =
-                "We couldn't calculate the travel distance. Please select the property address again.";
+            return;
 
         }
 
+
+        /*
+         * =================================================
+         * TRAVEL CHARGE
+         *
+         * First 25 km = FREE
+         * Every km after 25 km = $1
+         * =================================================
+         */
+
+        const travelCharge =
+            distanceKm > 25
+                ? Math.ceil(
+                    distanceKm - 25
+                )
+                : 0;
+
+
+        chargeInput.value =
+            travelCharge;
+
+
+        if (travelCharge > 0) {
+
+            chargeDisplay.textContent =
+                `Travel surcharge: $${travelCharge}`;
+
+            notice.textContent =
+                `${roundedDistance} km driving distance from Dandenong North. Travel surcharge: $${travelCharge}.`;
+
+        } else {
+
+            chargeDisplay.textContent =
+                "No travel surcharge";
+
+            notice.textContent =
+                `${roundedDistance} km driving distance from Dandenong North. No travel surcharge.`;
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "FLO travel calculation error:",
+            error
+        );
+
+        notice.textContent =
+            "We couldn't calculate the travel distance. Please select the property address again.";
+
     }
 
+}
 </script>
 
+
+<!-- GOOGLE MAPS API -->
 
 <script
     async
