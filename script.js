@@ -515,51 +515,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =====================================================
-       ADDRESS SERVICE AREA NOTICE
-       ===================================================== */
-
-    const addressInput =
-        document.querySelector(
-            'input[name="property_address"]'
-        );
-
-    const travelNotice =
-        document.querySelector("#travelNotice");
-
-    if (
-        addressInput &&
-        travelNotice
-    ) {
-
-        addressInput.addEventListener(
-            "input",
-            function () {
-
-                const address =
-                    addressInput.value.trim();
-
-                if (!address) {
-
-                    travelNotice.classList.remove(
-                        "show"
-                    );
-
-                    return;
-
-                }
-
-                travelNotice.classList.add("show");
-
-                travelNotice.textContent =
-                    "Melbourne service area. Properties beyond 25 km may incur a $1 travel surcharge.";
-
-            }
-        );
-
-    }
-
-
-    /* =====================================================
        SUBTLE CARD GLOW
        ===================================================== */
 
